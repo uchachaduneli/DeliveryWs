@@ -1,7 +1,7 @@
-package ge.bestline.spboot;
+package ge.bestline.delivery.ws;
 
-import ge.bestline.spboot.entities.Role;
-import ge.bestline.spboot.repositories.RoleRepository;
+import ge.bestline.delivery.ws.entities.Role;
+import ge.bestline.delivery.ws.repositories.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

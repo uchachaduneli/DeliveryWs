@@ -1,6 +1,6 @@
-package ge.bestline.spboot.repositories;
+package ge.bestline.delivery.ws.repositories;
 
-import ge.bestline.spboot.entities.Role;
+import ge.bestline.delivery.ws.entities.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {

@@ -1,8 +1,8 @@
-package ge.bestline.spboot.controllers;
+package ge.bestline.delivery.ws.controllers;
 
-import ge.bestline.spboot.Exception.ResourceNotFoundException;
-import ge.bestline.spboot.entities.User;
-import ge.bestline.spboot.repositories.UserRepository;
+import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.entities.User;
+import ge.bestline.delivery.ws.repositories.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

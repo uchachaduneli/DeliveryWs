@@ -1,4 +1,4 @@
-package ge.bestline.spboot.Exception;
+package ge.bestline.delivery.ws.Exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

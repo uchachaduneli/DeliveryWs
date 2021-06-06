@@ -1,4 +1,4 @@
-package ge.bestline.spboot.entities;
+package ge.bestline.delivery.ws.entities;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

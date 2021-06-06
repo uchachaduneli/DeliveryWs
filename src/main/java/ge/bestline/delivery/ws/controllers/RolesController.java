@@ -1,9 +1,8 @@
-package ge.bestline.spboot.controllers;
+package ge.bestline.delivery.ws.controllers;
 
-import ge.bestline.spboot.Exception.ResourceNotFoundException;
-import ge.bestline.spboot.entities.Role;
-import ge.bestline.spboot.repositories.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import ge.bestline.delivery.ws.repositories.RoleRepository;
+import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.entities.Role;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
