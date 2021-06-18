@@ -16,11 +16,5 @@ public class User {
     private Integer id;
     private String name;
     private String email;
-    @ManyToMany(cascade = {CascadeType.DETACH})
-    @JoinTable(
-            name = "user_role",
-            joinColumns = {@JoinColumn(name = "user_id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id")}
-    )
-        private List<Role> roles = new ArrayList<>();
+    private String role;
 }

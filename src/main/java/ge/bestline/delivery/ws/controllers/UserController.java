@@ -50,7 +50,7 @@ public class UserController {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setRoles(request.getRoles());
+        user.setRole(request.getRole());
 
         User updatedUser = userRepository.save(user);
         return ResponseEntity.ok(updatedUser);

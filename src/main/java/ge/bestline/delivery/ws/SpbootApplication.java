@@ -32,10 +32,10 @@ public class SpbootApplication {
     @Bean
     CommandLineRunner init(RoleRepository roleRepository) {
         return args -> {
-            roleRepository.save(new Role(1, "Administrator"));
-            roleRepository.save(new Role(2, "Operator"));
-            roleRepository.save(new Role(3, "Manager"));
-            roleRepository.save(new Role(4, "Courier"));
+            roleRepository.save(new Role(1, "ADMIN"));
+            roleRepository.save(new Role(2, "OPERATOR"));
+            roleRepository.save(new Role(3, "MANAGER"));
+            roleRepository.save(new Role(4, "COURIER"));
         };
     }
 }
