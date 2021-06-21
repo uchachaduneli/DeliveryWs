@@ -3,8 +3,10 @@ package ge.bestline.delivery.ws.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @Entity
@@ -15,13 +17,29 @@ public class City {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column(unique = true)
+    private String code;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
     private Zone zone;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedTime;
+    @Column(nullable = false, updatable = false)
+    @CreationTimestamp
+    private Date createdTime;
+
+    public City(Integer id, String name, Zone zone) {
+        this.id = id;
+        this.name = name;
+        this.zone = zone;
+    }
 
     @PrePersist
-    public void prePersist() {
-        if (zone == null) {
-            zone = new Zone(1);
-        }
+    protected void onCreate() {
+        createdTime = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedTime = new Date();
     }
 }

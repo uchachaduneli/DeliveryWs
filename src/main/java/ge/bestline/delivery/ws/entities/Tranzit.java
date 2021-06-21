@@ -8,23 +8,33 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.util.Date;
 
+// Reisi
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Route {
+public class Tranzit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String name;
-    private String note;
+    @Column(unique = true)
+    private String number;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    private Car car;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    private Route route;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    private User driver;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    private Warehouse senderWarehouse;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    private Warehouse destWarehouse;
+    private java.sql.Date tranzitDate;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-    private City city;
 
     @PrePersist
     protected void onCreate() {

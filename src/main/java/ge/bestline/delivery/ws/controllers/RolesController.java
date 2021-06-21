@@ -1,8 +1,8 @@
 package ge.bestline.delivery.ws.controllers;
 
-import ge.bestline.delivery.ws.repositories.RoleRepository;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.Role;
+import ge.bestline.delivery.ws.repositories.RoleRepository;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,12 +17,12 @@ public class RolesController {
     }
 
     @GetMapping
-    public Iterable<Role> getAllRoles() {
+    public Iterable<Role> getAllRolles() {
         return roleRepository.findAll();
     }
 
     @GetMapping(path = "/{id}")
-    public Role getById(@PathVariable Integer id) {
+    public Role getRollesById(@PathVariable Integer id) {
         return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 

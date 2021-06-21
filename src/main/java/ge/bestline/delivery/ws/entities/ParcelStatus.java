@@ -12,19 +12,23 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Route {
+public class ParcelStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private String note;
+    private String code;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-    private City city;
+
+    public ParcelStatus(Integer id, String name, String code) {
+        this.id = id;
+        this.name = name;
+        this.code = code;
+    }
 
     @PrePersist
     protected void onCreate() {

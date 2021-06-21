@@ -12,19 +12,24 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Route {
+public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private String note;
+    @Column(unique = true)
+    private String number;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-    private City city;
+
+    public Car(Integer id, String name, String number) {
+        this.id = id;
+        this.name = name;
+        this.number = number;
+    }
 
     @PrePersist
     protected void onCreate() {

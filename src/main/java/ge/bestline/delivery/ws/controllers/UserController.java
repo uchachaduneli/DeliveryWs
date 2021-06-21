@@ -2,7 +2,9 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.User;
+import ge.bestline.delivery.ws.entities.UserStatus;
 import ge.bestline.delivery.ws.repositories.UserRepository;
+import ge.bestline.delivery.ws.repositories.UserStatusRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +16,18 @@ import java.util.Map;
 @RequestMapping(path = "/user")
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
-
     private final UserRepository userRepository;
+    private final UserStatusRepository userStatusRepository;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, UserStatusRepository userStatusRepository) {
         this.userRepository = userRepository;
+        this.userStatusRepository = userStatusRepository;
     }
+
+//    public UserController(UserRepository userRepository, UserStatusRepository userStatusRepository) {
+//        this.userRepository = userRepository;
+//        this.userStatusRepository = userStatusRepository;
+//    }
 //    @PostMapping(path = "/add")
 //    public String addNewUser(@RequestParam String name, @RequestParam String email) {
 //        User n = new User();
@@ -37,6 +45,11 @@ public class UserController {
     @GetMapping
     public Iterable<User> getAllUsers() {
         return userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    }
+
+    @GetMapping(path = "/statuses")
+    public Iterable<UserStatus> getUserStatuses() {
+        return userStatusRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     @GetMapping(path = "/{id}")

@@ -12,19 +12,25 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Route {
+public class ContactAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String name;
-    private String note;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    Contact contact;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    private City city;
+    private String postCode;
+    private String street;
+    private String appartmentDetails; // flat N, floor ..
+    private String contactPerson;
+    private String contactPersonPhone;
+    private String contactPersonEmail;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-    private City city;
 
     @PrePersist
     protected void onCreate() {
