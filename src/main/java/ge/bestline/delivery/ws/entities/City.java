@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,12 @@ public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @JsonIgnore
+    private Integer deleted;
     private String name;
     @Column(unique = true)
     private String code;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     private Zone zone;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
@@ -35,6 +38,7 @@ public class City {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 

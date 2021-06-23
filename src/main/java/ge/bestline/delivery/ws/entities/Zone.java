@@ -16,6 +16,7 @@ public class Zone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     private String name;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
@@ -32,6 +33,7 @@ public class Zone {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 

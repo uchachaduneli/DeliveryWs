@@ -17,17 +17,20 @@ public class Tranzit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     @Column(unique = true)
     private String number;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private Car car;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
-    private Route route;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private City routeFrom;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private City routeTo;
+    @ManyToOne(cascade = CascadeType.DETACH)
     private User driver;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private Warehouse senderWarehouse;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private Warehouse destWarehouse;
     private java.sql.Date tranzitDate;
     @Temporal(TemporalType.TIMESTAMP)
@@ -38,6 +41,7 @@ public class Tranzit {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 

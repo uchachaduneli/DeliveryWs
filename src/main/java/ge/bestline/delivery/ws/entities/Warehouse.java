@@ -16,6 +16,7 @@ public class Warehouse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     private String name;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     private City city;
@@ -33,6 +34,7 @@ public class Warehouse {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 

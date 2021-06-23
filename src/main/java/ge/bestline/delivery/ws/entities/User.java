@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Data
 @Entity
@@ -14,16 +15,18 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     private String name;
     private String lastName;
     private String phone;
     private String personalNumber;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @OneToOne(cascade = CascadeType.DETACH)
     private City city;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @OneToOne(cascade = CascadeType.DETACH)
     private Route route;
-    private String role;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToMany(cascade = CascadeType.DETACH)
+    private Set<Role> role;
+    @OneToOne(cascade = CascadeType.DETACH)
     private UserStatus status;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
@@ -33,6 +36,7 @@ public class User {
 
     @PrePersist
     public void prePersist() {
+        deleted = 2;
         createdTime = new Date();
         if (status == null) {
             status = new UserStatus(1);
@@ -42,5 +46,15 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedTime = new Date();
+    }
+
+    public User(String name, String lastName, String phone, String personalNumber, City city, Set<Role> role, UserStatus status) {
+        this.name = name;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.personalNumber = personalNumber;
+        this.city = city;
+        this.role = role;
+        this.status = status;
     }
 }

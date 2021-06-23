@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,8 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @JsonIgnore
+    private Integer deleted;
     private String name;
     @Column(unique = true)
     private String number;
@@ -33,6 +36,7 @@ public class Car {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 

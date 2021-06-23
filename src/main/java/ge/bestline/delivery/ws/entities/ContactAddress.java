@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,11 @@ public class ContactAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     Contact contact;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH, optional = false)
+    @OneToOne(cascade = CascadeType.DETACH)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private City city;
     private String postCode;
     private String street;
@@ -40,5 +43,16 @@ public class ContactAddress {
     @PreUpdate
     protected void onUpdate() {
         updatedTime = new Date();
+    }
+
+    public ContactAddress(Contact contact, City city, String postCode, String street, String appartmentDetails, String contactPerson, String contactPersonPhone, String contactPersonEmail) {
+        this.contact = contact;
+        this.city = city;
+        this.postCode = postCode;
+        this.street = street;
+        this.appartmentDetails = appartmentDetails;
+        this.contactPerson = contactPerson;
+        this.contactPersonPhone = contactPersonPhone;
+        this.contactPersonEmail = contactPersonEmail;
     }
 }

@@ -16,6 +16,7 @@ public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     private String name;
     private String note;
     @Temporal(TemporalType.TIMESTAMP)
@@ -28,6 +29,7 @@ public class Route {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 

@@ -16,6 +16,7 @@ public class Services {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     @Column(unique = true)
     private String name;
     @Temporal(TemporalType.TIMESTAMP)
@@ -31,6 +32,7 @@ public class Services {
 
     @PrePersist
     protected void onCreate() {
+        deleted = 2;
         createdTime = new Date();
     }
 
