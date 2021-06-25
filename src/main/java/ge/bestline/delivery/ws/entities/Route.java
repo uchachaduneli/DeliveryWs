@@ -24,7 +24,7 @@ public class Route {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private City city;
 
     @PrePersist

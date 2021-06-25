@@ -67,7 +67,7 @@ public class ContactAddressController {
         return repo.findAll();
     }
 
-    @GetMapping(path = "/{contactId}")
+    @GetMapping(path = "contact/{contactId}")
     public Iterable<ContactAddress> getByContactId(@PathVariable Integer contactId) {
         return repo.findByContact_Id(contactId);
     }

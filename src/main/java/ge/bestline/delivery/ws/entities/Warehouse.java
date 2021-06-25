@@ -18,7 +18,7 @@ public class Warehouse {
     private Integer id;
     private Integer deleted;
     private String name;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private City city;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;

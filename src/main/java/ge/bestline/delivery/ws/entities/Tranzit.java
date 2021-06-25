@@ -32,12 +32,13 @@ public class Tranzit {
     private Warehouse senderWarehouse;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Warehouse destWarehouse;
-    private java.sql.Date tranzitDate;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+    private java.sql.Date tranzitDate;
 
     @PrePersist
     protected void onCreate() {
