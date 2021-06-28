@@ -20,18 +20,18 @@ public class Car {
     @JsonIgnore
     private Integer deleted;
     private String name;
-    @Column(unique = true)
-    private String number;
+    @Column(unique = true, name = "number")
+    private String carNumber;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
 
-    public Car(Integer id, String name, String number) {
+    public Car(Integer id, String name, String carNumber) {
         this.id = id;
         this.name = name;
-        this.number = number;
+        this.carNumber = carNumber;
     }
 
     @PrePersist
