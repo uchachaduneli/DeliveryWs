@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.Car;
 import ge.bestline.delivery.ws.repositories.CarRepository;
+import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+@Log4j2
 @RestController
 @RequestMapping(path = "/car")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -35,13 +37,16 @@ public class CarController {
     @PostMapping
     @Transactional
     public Car addNew(@RequestBody Car obj) {
+        log.info("Adding New Car: " + obj.toString());
         return repo.save(obj);
     }
 
     @PostMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Car> updateById(@PathVariable Integer id, @RequestBody Car request) {
+        log.info("Updating Car");
         Car existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
         existing.setCarNumber(request.getCarNumber());
         Car updatedObj = repo.save(existing);
@@ -71,6 +76,7 @@ public class CarController {
     @Transactional
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
         Car existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        log.info("Deleting Car: " + existing.toString());
         existing.setDeleted(1);
         repo.save(existing);
         Map<String, Boolean> resp = new HashMap<>();

@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Services {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.Zone;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Log4j2
 @RestController
 @RequestMapping(path = "/zone")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -24,13 +26,16 @@ public class ZoneController {
     @PostMapping
     @Transactional
     public Zone addNew(@RequestBody Zone obj) {
+        log.info("Adding New Zone: " + obj.toString());
         return repo.save(obj);
     }
 
     @PostMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Zone> updateById(@PathVariable Integer id, @RequestBody Zone request) {
+        log.info("Updating Zone");
         Zone existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
         existing.setWeight(request.getWeight());
         existing.setWeightLabel(request.getWeightLabel());
@@ -42,6 +47,7 @@ public class ZoneController {
     @Transactional
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
         Zone existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        log.info("Deleting Zone: " + existing.toString());
         existing.setDeleted(1);
         repo.save(existing);
         Map<String, Boolean> resp = new HashMap<>();
@@ -56,6 +62,7 @@ public class ZoneController {
 
     @GetMapping(path = "/{id}")
     public Zone getZonesById(@PathVariable Integer id) {
+        log.info("Getting Zone With ID: " + id);
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 

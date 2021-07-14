@@ -5,6 +5,7 @@ import ge.bestline.delivery.ws.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
@@ -17,7 +18,7 @@ import static org.springframework.web.servlet.function.RequestPredicates.GET;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
 
 @SpringBootApplication
-public class SpbootApplication {
+public class SpbootApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
 

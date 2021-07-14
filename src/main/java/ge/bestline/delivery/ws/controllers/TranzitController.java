@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.Tranzit;
 import ge.bestline.delivery.ws.repositories.*;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Log4j2
 @RestController
 @RequestMapping(path = "/tranzit")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -33,13 +35,16 @@ public class TranzitController {
     @PostMapping
     @Transactional
     public Tranzit addNew(@RequestBody Tranzit obj) {
+        log.info("Adding New Tranzit: " + obj.toString());
         return repo.save(obj);
     }
 
     @PostMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Tranzit> updateById(@PathVariable Integer id, @RequestBody Tranzit request) {
+        log.info("Updating Tranzit");
         Tranzit existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Tranzit Using This ID : " + id));
+        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setNumber(request.getNumber());
         existing.setTranzitDate(request.getTranzitDate());
 
@@ -69,6 +74,7 @@ public class TranzitController {
     @Transactional
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
         Tranzit existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        log.info("Deleting Tranzit: " + existing.toString());
         existing.setDeleted(1);
         repo.save(existing);
         Map<String, Boolean> resp = new HashMap<>();
@@ -83,6 +89,7 @@ public class TranzitController {
 
     @GetMapping(path = "/{id}")
     public Tranzit getById(@PathVariable Integer id) {
+        log.info("Getting Tranzit With ID: " + id);
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 
