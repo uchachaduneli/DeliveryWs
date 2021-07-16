@@ -8,6 +8,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +60,7 @@ public class CarController {
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             Car searchParams) {
         Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount);
+        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
         Page<Car> pageAuths = null;
         pageAuths = repo.findAll(paging);
         resp.put("items", pageAuths.getContent());
