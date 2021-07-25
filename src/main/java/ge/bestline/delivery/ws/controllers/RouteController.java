@@ -70,4 +70,10 @@ public class RouteController {
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 
+    @GetMapping(path = "/byCityId/{id}")
+    public Iterable<Route> getRoutesByCityId(@PathVariable Integer id) {
+        log.info("Getting Route With City ID: " + id);
+        return repo.findByCity_Id(id);
+    }
+
 }
