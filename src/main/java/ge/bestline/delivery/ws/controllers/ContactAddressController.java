@@ -1,16 +1,20 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.dao.ContactAddressDao;
 import ge.bestline.delivery.ws.entities.ContactAddress;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.ContactAddressRepository;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -22,11 +26,14 @@ public class ContactAddressController {
     private final ContactAddressRepository repo;
     private final CityRepository cityRepository;
     private final ContactRepository contactRepository;
+    private final ContactAddressDao contactAddressDao;
 
-    public ContactAddressController(ContactAddressRepository repo, CityRepository cityRepository, ContactRepository contactRepository) {
+    public ContactAddressController(ContactAddressRepository repo, CityRepository cityRepository,
+                                    ContactRepository contactRepository, ContactAddressDao contactAddressDao) {
         this.repo = repo;
         this.cityRepository = cityRepository;
         this.contactRepository = contactRepository;
+        this.contactAddressDao = contactAddressDao;
     }
 
     @PostMapping
@@ -69,8 +76,9 @@ public class ContactAddressController {
     }
 
     @GetMapping
-    public Iterable<ContactAddress> getAll() {
-        return repo.findAll();
+    public ResponseEntity<Map<String, Object>> getAll(ContactAddress searchParams) {
+        log.info("Getting Contact Addresses with params: " + searchParams);
+        return new ResponseEntity<>(contactAddressDao.findAll(searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "contact/{contactId}")

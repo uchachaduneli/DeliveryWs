@@ -1,13 +1,14 @@
 package ge.bestline.delivery.ws.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.springframework.data.domain.DomainEvents;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -21,9 +22,9 @@ public class ContactAddress {
     private Integer id;
     @ManyToOne(cascade = CascadeType.DETACH)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotNull
     Contact contact;
-    @OneToOne(cascade = CascadeType.DETACH)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ManyToOne
     private City city;
     private String postCode;
     private String street;

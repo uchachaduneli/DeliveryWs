@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -35,6 +36,9 @@ public class User {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Transient
+    private String srchRoleName; // Not DB Field
 
     @PrePersist
     public void prePersist() {

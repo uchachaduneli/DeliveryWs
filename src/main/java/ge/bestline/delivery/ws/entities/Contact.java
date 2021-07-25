@@ -14,6 +14,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"identNumber", "user_id"})
+)
 public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +27,6 @@ public class Contact {
     private Integer type; // 1 personal / 2 juridical
     private Integer status; // 1 axali / 2 dzveli ?
     private Integer deReGe; // 1 ibegreba / 2 ar ibegreba ?
-    @Column(unique = true)
     private String identNumber;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     private User user;

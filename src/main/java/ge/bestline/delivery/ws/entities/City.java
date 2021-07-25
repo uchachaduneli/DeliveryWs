@@ -19,7 +19,6 @@ public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @JsonIgnore
     private Integer deleted;
     private String name;
     @Column(unique = true)

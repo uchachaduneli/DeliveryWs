@@ -1,12 +1,14 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.dao.UserDao;
 import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.entities.UserStatus;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.repositories.UserStatusRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,34 +22,23 @@ import java.util.Map;
 public class UserController {
     private final UserRepository userRepository;
     private final UserStatusRepository userStatusRepository;
+    private final UserDao userDao;
 
-    public UserController(UserRepository userRepository, UserStatusRepository userStatusRepository) {
+    public UserController(UserRepository userRepository, UserStatusRepository userStatusRepository, UserDao userDao) {
         this.userRepository = userRepository;
         this.userStatusRepository = userStatusRepository;
+        this.userDao = userDao;
     }
-
-//    public UserController(UserRepository userRepository, UserStatusRepository userStatusRepository) {
-//        this.userRepository = userRepository;
-//        this.userStatusRepository = userStatusRepository;
-//    }
-//    @PostMapping(path = "/add")
-//    public String addNewUser(@RequestParam String name, @RequestParam String email) {
-//        User n = new User();
-//        n.setName(name);
-//        n.setEmail(email);
-//        userRepository.save(n);
-//        return "Data Saved";
-//    }
 
     @PostMapping
     public User addNewUser(@RequestBody User user) {
         log.info("Adding New User: " + user.toString());
         return userRepository.save(user);
     }
-
     @GetMapping
-    public Iterable<User> getAllUsers() {
-        return userRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public ResponseEntity<Map<String, Object>> getAll(User searchParams) {
+        log.info("Getting Contact Addresses with params: " + searchParams);
+        return new ResponseEntity<>(userDao.findAll(searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/statuses")

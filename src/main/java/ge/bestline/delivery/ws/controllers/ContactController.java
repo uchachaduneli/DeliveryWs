@@ -1,13 +1,21 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +32,11 @@ public class ContactController {
     public ContactController(ContactRepository repo, UserRepository userRepository) {
         this.repo = repo;
         this.userRepository = userRepository;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+        return new ResponseEntity<>("თქვენ უკვე გყავთ მითითებული საიდენტიფიკაციო ნომრით კონტაქტი", HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping
@@ -64,8 +77,17 @@ public class ContactController {
     }
 
     @GetMapping
-    public Iterable<Contact> getAll() {
-        return repo.findAll();
+    public ResponseEntity<Map<String, Object>> getAll(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int rowCount,
+            Contact searchParams) {
+        Map<String, Object> resp = new HashMap<>();
+        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
+        Page<Contact> pageAuths = null;
+        pageAuths = repo.findAll(paging);
+        resp.put("items", pageAuths.getContent());
+        resp.put("total_count", pageAuths.getTotalElements());
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
