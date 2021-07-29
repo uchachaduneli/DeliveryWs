@@ -7,10 +7,12 @@ import ge.bestline.delivery.ws.entities.UserStatus;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.repositories.UserStatusRepository;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,14 +32,20 @@ public class UserController {
         this.userDao = userDao;
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+        return new ResponseEntity<>("მითითებული პირადი ნომრით მომხმარებელი უკვე არსებობს", HttpStatus.BAD_REQUEST);
+    }
+
     @PostMapping
     public User addNewUser(@RequestBody User user) {
         log.info("Adding New User: " + user.toString());
         return userRepository.save(user);
     }
+
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(User searchParams) {
-        log.info("Getting Contact Addresses with params: " + searchParams);
+        log.info("Getting Users with params: " + searchParams);
         return new ResponseEntity<>(userDao.findAll(searchParams), HttpStatus.OK);
     }
 

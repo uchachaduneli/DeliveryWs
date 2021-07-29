@@ -14,6 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "city_id"}))
 public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

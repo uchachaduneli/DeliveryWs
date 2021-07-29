@@ -1,13 +1,21 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.Route;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.RouteRepository;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +32,11 @@ public class RouteController {
     public RouteController(RouteRepository repo, CityRepository cityRepository) {
         this.repo = repo;
         this.cityRepository = cityRepository;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+        return new ResponseEntity<>("მითითებული ქალაქში მსგავსი მარშრუტი უკვე არსებობს", HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping
@@ -60,8 +73,23 @@ public class RouteController {
     }
 
     @GetMapping
-    public Iterable<Route> getAllRoutes() {
-        return repo.findAll();
+    public ResponseEntity<Map<String, Object>> getAll(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int rowCount,
+            Route searchParams) {
+        Map<String, Object> resp = new HashMap<>();
+        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
+        Page<Route> pageAuths = null;
+        if (searchParams.getCity() != null) {
+            pageAuths = repo.findByCity_Id(searchParams.getCity().getId(), paging);
+        } else if (searchParams.getName() != null) {
+            pageAuths = repo.findByNameContainingIgnoreCase(searchParams.getName(), paging);
+        } else {
+            pageAuths = repo.findAll(paging);
+        }
+        resp.put("items", pageAuths.getContent());
+        resp.put("total_count", pageAuths.getTotalElements());
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")

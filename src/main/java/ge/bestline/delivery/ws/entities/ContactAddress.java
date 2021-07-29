@@ -1,11 +1,11 @@
 package ge.bestline.delivery.ws.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.springframework.data.domain.DomainEvents;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

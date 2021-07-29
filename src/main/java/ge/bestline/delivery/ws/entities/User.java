@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Set;
 
@@ -22,6 +23,7 @@ public class User {
     private String name;
     private String lastName;
     private String phone;
+    @Column(unique = true)
     private String personalNumber;
     @OneToOne(cascade = CascadeType.DETACH)
     private City city;

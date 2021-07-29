@@ -5,6 +5,8 @@ import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.Zone;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +30,11 @@ public class ZoneController {
 
     public ZoneController(ZoneRepository repo) {
         this.repo = repo;
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+        return new ResponseEntity<>("მსგავსი ზონა უკვე არსებობს", HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping

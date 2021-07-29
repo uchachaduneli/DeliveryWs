@@ -14,6 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "weight"}))
 public class Zone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
