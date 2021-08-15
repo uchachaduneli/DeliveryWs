@@ -2,7 +2,6 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.Tranzit;
-import ge.bestline.delivery.ws.entities.Warehouse;
 import ge.bestline.delivery.ws.repositories.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -20,7 +19,6 @@ import java.util.Map;
 @Log4j2
 @RestController
 @RequestMapping(path = "/tranzit")
-@CrossOrigin(origins = "http://localhost:4200")
 public class TranzitController {
 
     private final TranzitRepository repo;

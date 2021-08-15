@@ -36,6 +36,16 @@ public class Contact {
     @CreationTimestamp
     private Date createdTime;
 
+    public Contact(String name, String email, Integer type, Integer status, Integer deReGe, String identNumber, User user) {
+        this.name = name;
+        this.email = email;
+        this.type = type;
+        this.status = status;
+        this.deReGe = deReGe;
+        this.identNumber = identNumber;
+        this.user = user;
+    }
+
     @PrePersist
     protected void onCreate() {
         deleted = 2;
@@ -45,15 +55,5 @@ public class Contact {
     @PreUpdate
     protected void onUpdate() {
         updatedTime = new Date();
-    }
-
-    public Contact(String name, String email, Integer type, Integer status, Integer deReGe, String identNumber, User user) {
-        this.name = name;
-        this.email = email;
-        this.type = type;
-        this.status = status;
-        this.deReGe = deReGe;
-        this.identNumber = identNumber;
-        this.user = user;
     }
 }

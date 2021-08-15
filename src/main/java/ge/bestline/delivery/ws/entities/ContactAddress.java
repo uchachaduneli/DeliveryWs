@@ -17,13 +17,13 @@ import java.util.Date;
 @AllArgsConstructor
 @ToString
 public class ContactAddress {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
     @ManyToOne(cascade = CascadeType.DETACH)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull
     Contact contact;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     @ManyToOne
     private City city;
     private String postCode;
@@ -38,16 +38,6 @@ public class ContactAddress {
     @CreationTimestamp
     private Date createdTime;
 
-    @PrePersist
-    protected void onCreate() {
-        createdTime = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedTime = new Date();
-    }
-
     public ContactAddress(Contact contact, City city, String postCode, String street, String appartmentDetails, String contactPerson, String contactPersonPhone, String contactPersonEmail) {
         this.contact = contact;
         this.city = city;
@@ -57,5 +47,15 @@ public class ContactAddress {
         this.contactPerson = contactPerson;
         this.contactPersonPhone = contactPersonPhone;
         this.contactPersonEmail = contactPersonEmail;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdTime = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedTime = new Date();
     }
 }

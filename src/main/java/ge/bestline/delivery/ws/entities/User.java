@@ -7,7 +7,6 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Set;
 
@@ -22,6 +21,8 @@ public class User {
     private Integer deleted;
     private String name;
     private String lastName;
+    private String userName;
+    private String password;
     private String phone;
     @Column(unique = true)
     private String personalNumber;
@@ -42,6 +43,16 @@ public class User {
     @Transient
     private String srchRoleName; // Not DB Field
 
+    public User(String name, String lastName, String phone, String personalNumber, City city, Set<Role> role, UserStatus status) {
+        this.name = name;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.personalNumber = personalNumber;
+        this.city = city;
+        this.role = role;
+        this.status = status;
+    }
+
     @PrePersist
     public void prePersist() {
         deleted = 2;
@@ -54,15 +65,5 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedTime = new Date();
-    }
-
-    public User(String name, String lastName, String phone, String personalNumber, City city, Set<Role> role, UserStatus status) {
-        this.name = name;
-        this.lastName = lastName;
-        this.phone = phone;
-        this.personalNumber = personalNumber;
-        this.city = city;
-        this.role = role;
-        this.status = status;
     }
 }

@@ -7,20 +7,17 @@ import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.ContactAddressRepository;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Log4j2
 @RestController
 @RequestMapping(path = "/contactAddress")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ContactAddressController {
 
     private final ContactAddressRepository repo;

@@ -1,8 +1,6 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
-import ge.bestline.delivery.ws.entities.Route;
-import ge.bestline.delivery.ws.entities.Services;
 import ge.bestline.delivery.ws.entities.Warehouse;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.WarehouseRepository;
@@ -22,7 +20,6 @@ import java.util.Map;
 @Log4j2
 @RestController
 @RequestMapping(path = "/warehouse")
-@CrossOrigin(origins = "http://localhost:4200")
 public class WarehouseController {
 
     private final WarehouseRepository repo;

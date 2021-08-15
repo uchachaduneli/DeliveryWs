@@ -21,7 +21,6 @@ import java.util.Map;
 @Log4j2
 @RestController
 @RequestMapping(path = "/car")
-@CrossOrigin(origins = "http://localhost:4200")
 public class CarController {
 
     private final CarRepository repo;

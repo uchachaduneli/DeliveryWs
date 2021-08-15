@@ -20,7 +20,6 @@ import java.util.Map;
 @Log4j2
 @RestController
 @RequestMapping(path = "/user")
-@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
     private final UserRepository userRepository;
     private final UserStatusRepository userStatusRepository;
@@ -44,9 +43,11 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAll(User searchParams) {
+    public ResponseEntity<Map<String, Object>> getAll(@RequestParam(required = false, defaultValue = "0") int page,
+                                                      @RequestParam(required = false, defaultValue = "10") int rowCount,
+                                                      User searchParams) {
         log.info("Getting Users with params: " + searchParams);
-        return new ResponseEntity<>(userDao.findAll(searchParams), HttpStatus.OK);
+        return new ResponseEntity<>(userDao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/statuses")
@@ -67,9 +68,14 @@ public class UserController {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Old Values: " + user.toString() + "    New Values: " + request.toString());
         user.setName(request.getName());
-//        user.setEmail(request.getEmail());
+        user.setUserName(request.getUserName());
         user.setRole(request.getRole());
-
+        user.setLastName(request.getLastName());
+        user.setCity(request.getCity());
+        user.setRoute(request.getRoute());
+        user.setPersonalNumber(request.getPersonalNumber());
+        user.setPhone(request.getPhone());
+        user.setRole(request.getRole());
         User updatedUser = userRepository.save(user);
         return ResponseEntity.ok(updatedUser);
     }

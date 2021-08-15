@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
-import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
@@ -23,7 +22,6 @@ import java.util.Map;
 @Log4j2
 @RestController
 @RequestMapping(path = "/contact")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ContactController {
 
     private final ContactRepository repo;

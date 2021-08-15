@@ -1,13 +1,10 @@
 package ge.bestline.delivery.ws.dao;
 
-import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.ContactAddress;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

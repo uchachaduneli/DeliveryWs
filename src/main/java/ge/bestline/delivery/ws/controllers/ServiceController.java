@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
-import ge.bestline.delivery.ws.entities.Route;
 import ge.bestline.delivery.ws.entities.Services;
 import ge.bestline.delivery.ws.repositories.ServicesRepository;
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +19,6 @@ import java.util.Map;
 @Log4j2
 @RestController
 @RequestMapping(path = "/service")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ServiceController {
 
     private final ServicesRepository repo;
