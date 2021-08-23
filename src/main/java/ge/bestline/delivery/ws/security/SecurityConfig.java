@@ -24,7 +24,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
     private static final String LOGIN_ENDPOINT = "/jwt/token";
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
     public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
