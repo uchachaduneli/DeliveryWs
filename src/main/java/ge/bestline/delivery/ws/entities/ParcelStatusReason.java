@@ -14,28 +14,27 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ParcelStatus {
+public class ParcelStatusReason {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private String code;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private ParcelStatus status;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    private Integer deleted;
 
-    public ParcelStatus(Integer id, String name, String code) {
+    public ParcelStatusReason(Integer id, ParcelStatus status, String name) {
         this.id = id;
         this.name = name;
-        this.code = code;
+        this.status = status;
     }
 
     @PrePersist
     protected void onCreate() {
-        deleted = 2;
         createdTime = new Date();
     }
 
