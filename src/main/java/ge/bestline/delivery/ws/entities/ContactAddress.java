@@ -32,25 +32,16 @@ public class ContactAddress {
     private String contactPerson;
     private String contactPersonPhone;
     private String contactPersonEmail;
+    private Integer isPayAddress; //1 ki 2 ara
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
 
-    public ContactAddress(Contact contact, City city, String postCode, String street, String appartmentDetails, String contactPerson, String contactPersonPhone, String contactPersonEmail) {
-        this.contact = contact;
-        this.city = city;
-        this.postCode = postCode;
-        this.street = street;
-        this.appartmentDetails = appartmentDetails;
-        this.contactPerson = contactPerson;
-        this.contactPersonPhone = contactPersonPhone;
-        this.contactPersonEmail = contactPersonEmail;
-    }
-
     @PrePersist
     protected void onCreate() {
+        isPayAddress = 2;
         createdTime = new Date();
     }
 

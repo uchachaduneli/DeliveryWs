@@ -53,6 +53,7 @@ public class ContactAddressController {
         existing.setContactPersonPhone(request.getContactPersonPhone());
         existing.setPostCode(request.getPostCode());
         existing.setStreet(request.getStreet());
+        existing.setIsPayAddress(request.getIsPayAddress());
         existing.setContact(contactRepository.findById(request.getContact().getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Contact Using This ID : " + request.getContact().getId())));
         existing.setCity(cityRepository.findById(request.getCity().getId()).orElseThrow(() ->

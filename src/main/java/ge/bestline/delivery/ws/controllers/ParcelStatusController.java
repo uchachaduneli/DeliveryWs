@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -83,10 +84,21 @@ public class ParcelStatusController {
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
+    @PostMapping("/statusReason")
+    @Transactional
+    public ParcelStatusReason addNew(@RequestBody ParcelStatusReason obj) {
+        log.info("Adding New Parcel Status Status: " + obj.toString());
+        return statusReasonRepo.save(obj);
+    }
+
     @GetMapping(path = "/statusReason/{parcelStatusId}")
-    public Iterable<ParcelStatusReason> getByParcelStatusId(@PathVariable Integer parcelStatusId) {
+    public ResponseEntity<Map<String, Object>> getByParcelStatusId(@PathVariable Integer parcelStatusId) {
         log.info("Getting Parcel Statuse Reason With Parcel Status ID: " + parcelStatusId);
-        return statusReasonRepo.findByStatus_Id(parcelStatusId);
+        Map<String, Object> resp = new HashMap<>();
+        List<ParcelStatusReason> list = statusReasonRepo.findByStatus_Id(parcelStatusId);
+        resp.put("items", list);
+        resp.put("total_count", list.size());
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @PutMapping(path = "/statusReason/{id}")

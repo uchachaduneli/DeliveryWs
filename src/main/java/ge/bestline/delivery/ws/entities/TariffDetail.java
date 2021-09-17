@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -14,23 +15,23 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
-public class Zone {
+public class TariffDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @NotNull
+    private Tariff tariff;
     private Integer deleted;
-    private String name;
+    private Double weight;
+    private Double price;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Zone zone;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-
-    public Zone(Integer id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     @PrePersist
     protected void onCreate() {

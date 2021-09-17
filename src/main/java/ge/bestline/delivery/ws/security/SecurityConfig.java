@@ -2,7 +2,6 @@ package ge.bestline.delivery.ws.security;
 
 import ge.bestline.delivery.ws.security.jwt.JwtConfigurer;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,14 +1,11 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.dao.ZoneDao;
 import ge.bestline.delivery.ws.entities.Zone;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +21,11 @@ import java.util.Map;
 public class ZoneController {
 
     private final ZoneRepository repo;
+    private final ZoneDao dao;
 
-    public ZoneController(ZoneRepository repo) {
+    public ZoneController(ZoneRepository repo, ZoneDao dao) {
         this.repo = repo;
+        this.dao = dao;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -48,8 +47,6 @@ public class ZoneController {
         Zone existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
-        existing.setWeight(request.getWeight());
-        existing.setWeightLabel(request.getWeightLabel());
         Zone updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }
@@ -71,13 +68,7 @@ public class ZoneController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             Zone searchParams) {
-        Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
-        Page<Zone> pageAuths = null;
-        pageAuths = repo.findAll(paging);
-        resp.put("items", pageAuths.getContent());
-        resp.put("total_count", pageAuths.getTotalElements());
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+        return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
