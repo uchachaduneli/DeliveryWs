@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,27 +15,21 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ParcelStatus {
+public class DocType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private Integer deleted;
     private String name;
-    private String code;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    private Integer deleted;
 
-    public ParcelStatus(Integer id) {
-        this.id = id;
-    }
-
-    public ParcelStatus(Integer id, String name, String code) {
+    public DocType(Integer id, String name) {
         this.id = id;
         this.name = name;
-        this.code = code;
     }
 
     @PrePersist

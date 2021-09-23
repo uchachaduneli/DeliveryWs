@@ -26,13 +26,13 @@ public class User {
     private String phone;
     @Column(unique = true)
     private String personalNumber;
-    @OneToOne(cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private City city;
-    @OneToOne(cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private Route route;
     @ManyToMany(cascade = CascadeType.DETACH)
     private Set<Role> role;
-    @OneToOne(cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = CascadeType.DETACH)
     private UserStatus status;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;

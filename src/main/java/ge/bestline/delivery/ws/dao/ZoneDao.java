@@ -1,6 +1,5 @@
 package ge.bestline.delivery.ws.dao;
 
-import ge.bestline.delivery.ws.entities.ContactAddress;
 import ge.bestline.delivery.ws.entities.Zone;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.dao.ContactDao;
 import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
@@ -25,10 +26,12 @@ import java.util.Map;
 public class ContactController {
 
     private final ContactRepository repo;
+    private final ContactDao dao;
     private final UserRepository userRepository;
 
-    public ContactController(ContactRepository repo, UserRepository userRepository) {
+    public ContactController(ContactRepository repo, ContactDao dao, UserRepository userRepository) {
         this.repo = repo;
+        this.dao = dao;
         this.userRepository = userRepository;
     }
 
@@ -80,13 +83,7 @@ public class ContactController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             Contact searchParams) {
-        Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
-        Page<Contact> pageAuths = null;
-        pageAuths = repo.findAll(paging);
-        resp.put("items", pageAuths.getContent());
-        resp.put("total_count", pageAuths.getTotalElements());
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+        return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")

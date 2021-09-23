@@ -74,9 +74,12 @@ public class ContactAddressController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAll(ContactAddress searchParams) {
+    public ResponseEntity<Map<String, Object>> getAll(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int rowCount,
+            ContactAddress searchParams) {
         log.info("Getting Contact Addresses with params: " + searchParams);
-        return new ResponseEntity<>(contactAddressDao.findAll(searchParams), HttpStatus.OK);
+        return new ResponseEntity<>(contactAddressDao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "contact/{contactId}")
