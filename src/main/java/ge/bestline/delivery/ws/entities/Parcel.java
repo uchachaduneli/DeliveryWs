@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -21,14 +23,32 @@ public class Parcel {
     private Integer id;
     @JsonIgnore
     private Integer deleted;
+
+    private String senderName;
+    private String senderIdentNumber;
+    private String senderContactPerson;
+    private String senderAddress;
     @ManyToOne(cascade = CascadeType.DETACH)
-    private Contact sender;
+    private City senderCity;
+
+    private String receiverName;
+    private String receiverIdentNumber;
+    private String receiverContactPerson;
+    private String receiverAddress;
     @ManyToOne(cascade = CascadeType.DETACH)
-    private Contact receiver;
+    private City receiverCity;
+
+    private Integer payerSide; // 1 sender  2 receiver   3 third side
+    private String payerName;
+    private String payerIdentNumber;
+    private String payerAddress;
+    private String payerContactPerson;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private City payerCity;
+
     @ManyToOne(cascade = CascadeType.DETACH)
     private ParcelStatus status;
-    @ManyToOne(cascade = CascadeType.DETACH)
-    private Contact payer;
+
     private String comment;
     private Integer deliveredConfirmation; //1 yes 2 no
     private Integer count;
@@ -42,7 +62,13 @@ public class Parcel {
     private Services parcelType;
     private Integer packageType;// 1 amanati, 2 paketi
     @ManyToOne(cascade = CascadeType.DETACH)
-    private DocType sticker;// 1 amanati, 2 paketi
+    private DocType sticker;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Route route;
+    @ManyToOne(cascade = CascadeType.DETACH, optional = true)
+    private User courier;
+    @ManyToOne(cascade = CascadeType.DETACH, optional = true)
+    private User author;
     private String content;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;

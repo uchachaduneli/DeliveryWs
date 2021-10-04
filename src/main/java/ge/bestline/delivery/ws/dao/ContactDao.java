@@ -1,7 +1,7 @@
 package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.Contact;
-import ge.bestline.delivery.ws.entities.ContactAddress;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -27,7 +27,7 @@ public class ContactDao {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
         }
 
-        if (srchRequest.getName() != null) {
+        if (!StringUtils.isBlank(srchRequest.getName())) {
             q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
         }
 
@@ -55,7 +55,7 @@ public class ContactDao {
             q.append(" and e.hasContract ='").append(srchRequest.getHasContract()).append("'");
         }
 
-        if (srchRequest.getIdentNumber() != null) {
+        if (!StringUtils.isBlank(srchRequest.getIdentNumber())) {
             q.append(" and e.identNumber ='").append(srchRequest.getIdentNumber()).append("'");
         }
 

@@ -2,8 +2,12 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ParcelDao;
+import ge.bestline.delivery.ws.entities.Packages;
 import ge.bestline.delivery.ws.entities.Parcel;
+import ge.bestline.delivery.ws.entities.VolumeWeightIndex;
+import ge.bestline.delivery.ws.repositories.PackagesRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
+import ge.bestline.delivery.ws.repositories.VolumeWeightIndexRepository;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -12,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -21,10 +27,14 @@ import java.util.Map;
 public class ParcelController {
 
     private final ParcelRepository repo;
+    private final VolumeWeightIndexRepository volumeWeightIndexRepository;
+    private final PackagesRepository packagesRepo;
     private final ParcelDao dao;
 
-    public ParcelController(ParcelRepository repo, ParcelDao dao) {
+    public ParcelController(ParcelRepository repo, VolumeWeightIndexRepository volumeWeightIndexRepository, PackagesRepository packagesRepo, ParcelDao dao) {
         this.repo = repo;
+        this.volumeWeightIndexRepository = volumeWeightIndexRepository;
+        this.packagesRepo = packagesRepo;
         this.dao = dao;
     }
 
@@ -77,4 +87,58 @@ public class ParcelController {
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 
+    @GetMapping(path = "/package/{id}")
+    public ResponseEntity<List<Packages>> getPackagesByParcelId(@PathVariable Integer id) {
+        log.info("Getting Packages By Parcel ID: " + id);
+        return ResponseEntity.ok(packagesRepo.findByParcelId(id));
+    }
+
+    @PostMapping("/package")
+    @Transactional
+    public ResponseEntity<List<Packages>> addNewPackage(@RequestBody List<Packages> list) {
+        log.info("Adding New Packages: " + list.toString());
+        List<Packages> res = new ArrayList<>();
+        for (Packages p : list) {
+            res.add(packagesRepo.save(p));
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    @PutMapping(path = "/package")
+    @Transactional
+    public ResponseEntity<List<Packages>> updatePackageById(@RequestBody List<Packages> list) {
+        log.info("Updating Packages " + list.toString());
+        List<Packages> res = new ArrayList<>();
+        for (Packages p : list) {
+            Packages existing = packagesRepo.findById(p.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Package Using This ID : " + p.getId()));
+            existing.setLength(p.getLength());
+            existing.setWidth(p.getWidth());
+            existing.setHeight(p.getHeight());
+            existing.setVolumeWeight(p.getVolumeWeight());
+            existing.setPlombNumber(p.getPlombNumber());
+            existing.setBoxNumber(p.getBoxNumber());
+            res.add(packagesRepo.save(existing));
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping(path = "/volumeWeightIndex")
+    @Transactional
+    public ResponseEntity<VolumeWeightIndex> updateVolumeWeightIndex(@RequestBody VolumeWeightIndex request) {
+        log.info("Updating volumeWeight Index");
+        VolumeWeightIndex existing = volumeWeightIndexRepository
+                .findById(request.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
+        log.info("Old Values: " + existing.toString() + "  New Values: " + request.toString());
+        existing.setAmount(request.getAmount());
+        VolumeWeightIndex updatedObj = volumeWeightIndexRepository.save(existing);
+        return ResponseEntity.ok(updatedObj);
+    }
+
+    @GetMapping(path = "/volumeWeightIndex")
+    public ResponseEntity<VolumeWeightIndex> getPackagesByParcelId() {
+        log.info("Getting volumeWeightIndex ");
+        List<VolumeWeightIndex> tmp = volumeWeightIndexRepository.findAll();
+        return ResponseEntity.ok(tmp.isEmpty() ? null : tmp.get(0));
+    }
 }

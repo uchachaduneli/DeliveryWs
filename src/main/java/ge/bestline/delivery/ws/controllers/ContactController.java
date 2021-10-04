@@ -60,6 +60,7 @@ public class ContactController {
         existing.setStatus(request.getStatus());
         existing.setType(request.getType());
         existing.setHasContract(request.getHasContract());
+        existing.setTariff(request.getTariff());
         existing.setUser(userRepository.findById(request.getUser().getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find User Using This ID : " + request.getUser().getId())));
         Contact updatedObj = repo.save(existing);

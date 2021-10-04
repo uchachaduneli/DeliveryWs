@@ -31,6 +31,8 @@ public class Contact {
     private String identNumber;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     private User user;
+    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
+    private Tariff tariff;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
