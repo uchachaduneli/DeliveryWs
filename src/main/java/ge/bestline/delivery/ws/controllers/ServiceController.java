@@ -41,6 +41,7 @@ public class ServiceController {
         Services existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
+        existing.setEngName(request.getEngName());
         Services updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

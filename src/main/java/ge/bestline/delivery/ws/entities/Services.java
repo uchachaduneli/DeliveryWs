@@ -21,6 +21,8 @@ public class Services {
     private Integer deleted;
     @Column(unique = true)
     private String name;
+    @Column(unique = true)
+    private String engName;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)

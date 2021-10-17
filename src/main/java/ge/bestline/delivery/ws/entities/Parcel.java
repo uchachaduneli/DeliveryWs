@@ -28,6 +28,7 @@ public class Parcel {
     private String senderIdentNumber;
     private String senderContactPerson;
     private String senderAddress;
+    private String senderPhone;
     @ManyToOne(cascade = CascadeType.DETACH)
     private City senderCity;
 
@@ -35,6 +36,7 @@ public class Parcel {
     private String receiverIdentNumber;
     private String receiverContactPerson;
     private String receiverAddress;
+    private String receiverPhone;
     @ManyToOne(cascade = CascadeType.DETACH)
     private City receiverCity;
 
@@ -42,6 +44,7 @@ public class Parcel {
     private String payerName;
     private String payerIdentNumber;
     private String payerAddress;
+    private String payerPhone;
     private String payerContactPerson;
     @ManyToOne(cascade = CascadeType.DETACH)
     private City payerCity;
