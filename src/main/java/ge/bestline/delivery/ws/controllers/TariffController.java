@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,17 +92,39 @@ public class TariffController {
         return repoDetails.save(obj);
     }
 
-    @PostMapping(path = "/details/{id}")
+    @PostMapping("/detailsList")
     @Transactional
-    public ResponseEntity<TariffDetail> updateById(@PathVariable Integer id, @RequestBody TariffDetail request) {
-        TariffDetail existing = repoDetails.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find TariffDetail Using This ID : " + id));
-        existing.setZone(repoZone.findById(request.getZone().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Zone Using This ID : " + id)));
-        existing.setTariff(repo.findById(request.getTariff().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Tariff using this ID: " + id)));
-        existing.setPrice(request.getPrice());
-        existing.setWeight(request.getWeight());
-        TariffDetail updatedObj = repoDetails.save(existing);
-        return ResponseEntity.ok(updatedObj);
+    public ResponseEntity<ArrayList<TariffDetail>> addNewTariffDetailsList(@RequestBody ArrayList<TariffDetail> list) {
+        log.info("Adding tariff Details data: " + list.toString());
+        ArrayList<TariffDetail> res = new ArrayList<>();
+        for (TariffDetail det : list) {
+            res.add(repoDetails.save(det));
+        }
+        return ResponseEntity.ok(res);
     }
+
+    @PutMapping("/detailsList")
+    @Transactional
+    public ResponseEntity<ArrayList<TariffDetail>> updateTariffDetailsList(@RequestBody ArrayList<TariffDetail> list) {
+        log.info("updating tariff Details data: " + list.toString());
+        ArrayList<TariffDetail> res = new ArrayList<>();
+        for (TariffDetail det : list) {
+            res.add(repoDetails.save(det));
+        }
+        return ResponseEntity.ok(res);
+    }
+
+//    @PostMapping(path = "/details/{id}")
+//    @Transactional
+//    public ResponseEntity<TariffDetail> updateById(@PathVariable Integer id, @RequestBody TariffDetail request) {
+//        TariffDetail existing = repoDetails.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find TariffDetail Using This ID : " + id));
+//        existing.setZone(repoZone.findById(request.getZone().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Zone Using This ID : " + id)));
+//        existing.setTariff(repo.findById(request.getTariff().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Tariff using this ID: " + id)));
+//        existing.setPrice(request.getPrice());
+//        existing.setWeight(request.getWeight());
+//        TariffDetail updatedObj = repoDetails.save(existing);
+//        return ResponseEntity.ok(updatedObj);
+//    }
 
     @DeleteMapping("/details/{id}")
     @Transactional
