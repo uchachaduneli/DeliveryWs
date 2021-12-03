@@ -62,10 +62,10 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping(path = "/{id}")
-    public ResponseEntity<User> updateById(@PathVariable Integer id, @RequestBody User request) {
+    @PutMapping
+    public ResponseEntity<User> updateById( @RequestBody User request) {
         log.info("Updating User");
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        User user = userRepository.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
         log.info("Old Values: " + user.toString() + "    New Values: " + request.toString());
         user.setName(request.getName());
         user.setUserName(request.getUserName());
@@ -76,6 +76,7 @@ public class UserController {
         user.setPersonalNumber(request.getPersonalNumber());
         user.setPhone(request.getPhone());
         user.setRole(request.getRole());
+        user.setWarehouse(request.getWarehouse());
         User updatedUser = userRepository.save(user);
         return ResponseEntity.ok(updatedUser);
     }

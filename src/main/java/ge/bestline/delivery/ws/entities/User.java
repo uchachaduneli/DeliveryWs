@@ -29,6 +29,8 @@ public class User {
     @ManyToOne(cascade = CascadeType.DETACH)
     private City city;
     @ManyToOne(cascade = CascadeType.DETACH)
+    private Warehouse warehouse;
+    @ManyToOne(cascade = CascadeType.DETACH)
     private Route route;
     @ManyToMany(cascade = CascadeType.DETACH)
     private Set<Role> role;

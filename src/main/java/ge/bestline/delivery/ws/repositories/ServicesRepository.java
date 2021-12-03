@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ServicesRepository extends JpaRepository<Services, Integer> {
     Page<Services> findByName(String name, Pageable paging);
+
+    Page<Services> findById(Integer id, Pageable paging);
 }

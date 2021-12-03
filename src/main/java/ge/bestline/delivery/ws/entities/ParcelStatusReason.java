@@ -27,6 +27,10 @@ public class ParcelStatusReason {
     @CreationTimestamp
     private Date createdTime;
 
+    public ParcelStatusReason(Integer id) {
+        this.id = id;
+    }
+
     public ParcelStatusReason(Integer id, ParcelStatus status, String name) {
         this.id = id;
         this.name = name;

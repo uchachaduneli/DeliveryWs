@@ -24,6 +24,7 @@ public class Parcel {
     @JsonIgnore
     private Integer deleted;
 
+    private Integer senderId;
     private String senderName;
     private String senderIdentNumber;
     private String senderContactPerson;
@@ -50,7 +51,7 @@ public class Parcel {
     private City payerCity;
 
     @ManyToOne(cascade = CascadeType.DETACH)
-    private ParcelStatus status;
+    private ParcelStatusReason status;
 
     private String comment;
     private Integer deliveredConfirmation; //1 yes 2 no
@@ -62,7 +63,7 @@ public class Parcel {
     private Integer deliveryType;// 1 mitana misamartze, 2 mikitxva filialshi
     private Integer paymentType;// 1 invoice, 2 cash, 3 card
     @ManyToOne(cascade = CascadeType.DETACH)
-    private Services parcelType;
+    private Services service;
     private Integer packageType;// 1 amanati, 2 paketi
     @ManyToOne(cascade = CascadeType.DETACH)
     private DocType sticker;
@@ -72,6 +73,7 @@ public class Parcel {
     private User courier;
     @ManyToOne(cascade = CascadeType.DETACH, optional = true)
     private User author;
+    private Double tariff;
     private String content;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
@@ -83,7 +85,7 @@ public class Parcel {
     protected void onCreate() {
         deleted = 2;
         if (status == null) {
-            status = new ParcelStatus(1);
+            status = new ParcelStatusReason(1);
         }
         createdTime = new Date();
     }

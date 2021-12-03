@@ -14,35 +14,29 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Warehouse {
+public class ParcelStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer deleted;
     private String name;
-    private String abbreviature;
-    @ManyToOne(cascade = CascadeType.DETACH)
-    private City city;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedTime;
+    private String reason;
+    private String code;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Parcel parcel;
 
-    public Warehouse(Integer id, String name, City city) {
-        this.id = id;
+    public ParcelStatusHistory(Parcel parcel, String name, String code, String reason) {
+        this.parcel = parcel;
+        this.reason = reason;
         this.name = name;
-        this.city = city;
+        this.code = code;
     }
 
     @PrePersist
     protected void onCreate() {
-        deleted = 2;
         createdTime = new Date();
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedTime = new Date();
-    }
 }

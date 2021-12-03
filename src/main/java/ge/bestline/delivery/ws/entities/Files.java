@@ -1,5 +1,7 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,25 +16,32 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Warehouse {
+public class Files {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @JsonIgnore
     private Integer deleted;
     private String name;
-    private String abbreviature;
+    @Transient
+    private String url;
     @ManyToOne(cascade = CascadeType.DETACH)
-    private City city;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Parcel parcel;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
 
-    public Warehouse(Integer id, String name, City city) {
-        this.id = id;
+    public Files(String name, Parcel parcel) {
         this.name = name;
-        this.city = city;
+        this.parcel = parcel;
+    }
+
+    public Files(String name, String url) {
+        this.name = name;
+        this.url = url;
     }
 
     @PrePersist

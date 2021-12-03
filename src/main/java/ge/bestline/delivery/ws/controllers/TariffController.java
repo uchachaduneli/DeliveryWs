@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.Tariff;
 import ge.bestline.delivery.ws.entities.TariffDetail;
+import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.TariffDetailsRepository;
 import ge.bestline.delivery.ws.repositories.TariffRepository;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -28,11 +30,14 @@ public class TariffController {
     private final TariffRepository repo;
     private final TariffDetailsRepository repoDetails;
     private final ZoneRepository repoZone;
+    private final CityRepository cityRepo;
 
-    public TariffController(TariffRepository repo, TariffDetailsRepository repoDetails, ZoneRepository repoZone) {
+    public TariffController(TariffRepository repo, TariffDetailsRepository repoDetails,
+                            ZoneRepository repoZone, CityRepository cityRepo) {
         this.repo = repo;
         this.repoDetails = repoDetails;
         this.repoZone = repoZone;
+        this.cityRepo = cityRepo;
     }
 
     @PostMapping
@@ -114,17 +119,28 @@ public class TariffController {
         return ResponseEntity.ok(res);
     }
 
-//    @PostMapping(path = "/details/{id}")
-//    @Transactional
-//    public ResponseEntity<TariffDetail> updateById(@PathVariable Integer id, @RequestBody TariffDetail request) {
-//        TariffDetail existing = repoDetails.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find TariffDetail Using This ID : " + id));
-//        existing.setZone(repoZone.findById(request.getZone().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Zone Using This ID : " + id)));
-//        existing.setTariff(repo.findById(request.getTariff().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Tariff using this ID: " + id)));
-//        existing.setPrice(request.getPrice());
-//        existing.setWeight(request.getWeight());
-//        TariffDetail updatedObj = repoDetails.save(existing);
-//        return ResponseEntity.ok(updatedObj);
-//    }
+    @GetMapping(path = "/calculatePrice/{tariffId}/{zoneId}/{weight}")
+    @Transactional
+    public ResponseEntity<Double> calculatePrice(
+            @PathVariable Integer tariffId,
+            @PathVariable Integer zoneId,
+            @PathVariable Double weight) {
+        // try to find price with exact weight
+        List<TariffDetail> details = repoDetails.findByTariffIdAndZoneIdAndWeight(tariffId, zoneId, weight);
+        if (details.isEmpty()) {
+            //  price with exact weight not fount trying to find first price with greater weight
+            details = repoDetails.findByTariffIdAndZoneIdAndWeightGreaterThanOrderByWeightAsc(tariffId, zoneId, weight);
+            if (details.isEmpty()) {
+                log.error("Can't get Price from TariffDetails Using This IDes {tariffId}/{zoneId}/{weight} : "
+                        + tariffId + "/" + zoneId + "/" + weight);
+                throw new ResourceNotFoundException("Can't get Price from TariffDetails Using This IDes {tariffId}/{zoneId}/{weight} : "
+                        + tariffId + "/" + zoneId + "/" + weight);
+            }
+            return ResponseEntity.ok(details.get(0).getPrice());
+        } else {
+            return ResponseEntity.ok(details.get(0).getPrice());
+        }
+    }
 
     @DeleteMapping("/details/{id}")
     @Transactional

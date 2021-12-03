@@ -101,6 +101,16 @@ public class ParcelStatusController {
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
+    @GetMapping(path = "/statusReason")
+    public ResponseEntity<Map<String, Object>> getStatusReasons() {
+        log.info("Getting All Parcel Statuse Reasons");
+        Map<String, Object> resp = new HashMap<>();
+        List<ParcelStatusReason> list = statusReasonRepo.findAll();
+        resp.put("items", list);
+        resp.put("total_count", list.size());
+        return new ResponseEntity<>(resp, HttpStatus.OK);
+    }
+
     @PutMapping(path = "/statusReason/{id}")
     @Transactional
     public ResponseEntity<ParcelStatusReason> updateParcelStatusReasonById(@PathVariable Integer id, @RequestBody ParcelStatusReason request) {

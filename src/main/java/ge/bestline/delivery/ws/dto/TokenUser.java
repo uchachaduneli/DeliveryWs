@@ -10,12 +10,16 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class TokenUser {
+    private Integer id;
+    private Integer warehouseId;
     private String name;
     private String lastName;
     private String userName;
     private Set<Role> role;
 
     public TokenUser(User u) {
+        this.id = u.getId();
+        this.warehouseId = u.getWarehouse() != null ? u.getWarehouse().getId() : null;
         this.name = u.getName();
         this.lastName = u.getLastName();
         this.userName = u.getUserName();

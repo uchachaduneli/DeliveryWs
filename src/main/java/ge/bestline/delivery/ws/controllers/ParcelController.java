@@ -2,12 +2,8 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ParcelDao;
-import ge.bestline.delivery.ws.entities.Packages;
-import ge.bestline.delivery.ws.entities.Parcel;
-import ge.bestline.delivery.ws.entities.VolumeWeightIndex;
-import ge.bestline.delivery.ws.repositories.PackagesRepository;
-import ge.bestline.delivery.ws.repositories.ParcelRepository;
-import ge.bestline.delivery.ws.repositories.VolumeWeightIndexRepository;
+import ge.bestline.delivery.ws.entities.*;
+import ge.bestline.delivery.ws.repositories.*;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -30,12 +26,16 @@ public class ParcelController {
     private final VolumeWeightIndexRepository volumeWeightIndexRepository;
     private final PackagesRepository packagesRepo;
     private final ParcelDao dao;
+    private final ParselStatusHistoryRepo statusHistoryRepo;
+    private final ParcelStatusReasonRepository statusReasonRepo;
 
-    public ParcelController(ParcelRepository repo, VolumeWeightIndexRepository volumeWeightIndexRepository, PackagesRepository packagesRepo, ParcelDao dao) {
+    public ParcelController(ParcelRepository repo, VolumeWeightIndexRepository volumeWeightIndexRepository, PackagesRepository packagesRepo, ParcelDao dao, ParselStatusHistoryRepo statusHistoryRepo, ParcelStatusReasonRepository statusReasonRepo) {
         this.repo = repo;
         this.volumeWeightIndexRepository = volumeWeightIndexRepository;
         this.packagesRepo = packagesRepo;
         this.dao = dao;
+        this.statusHistoryRepo = statusHistoryRepo;
+        this.statusReasonRepo = statusReasonRepo;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -47,16 +47,37 @@ public class ParcelController {
     @Transactional
     public Parcel addNew(@RequestBody Parcel obj) {
         log.info("Adding New Parcel: " + obj.toString());
-        return repo.save(obj);
+        Parcel parcel = repo.save(obj);
+        ParcelStatusReason psr = statusReasonRepo.findById(1).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parces Status History"));
+        statusHistoryRepo.save(new ParcelStatusHistory(
+                parcel,
+                psr.getStatus().getName(),
+                psr.getStatus().getCode(),
+                psr.getName()));
+        return parcel;
     }
 
-    @PostMapping(path = "/{id}")
+    @GetMapping(path = "/statusHistory/{id}")
+    public ResponseEntity<List<ParcelStatusHistory>> getParcelStatusHistoryByParcelId(@PathVariable Integer id) {
+        log.info("Getting ParcelStatusHistory By Parcel ID: " + id);
+        return ResponseEntity.ok(statusHistoryRepo.findByParcelId(id));
+    }
+
+    @PutMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Parcel> updateById(@PathVariable Integer id, @RequestBody Parcel request) {
         log.info("Updating Parcel");
         Parcel existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
-//        existing.setName(request.getName());
+        if (request.getStatus().getId() != existing.getStatus().getId()) {
+            statusHistoryRepo.save(new ParcelStatusHistory(existing
+                    , existing.getStatus().getStatus().getName()
+                    , existing.getStatus().getStatus().getCode()
+                    , existing.getStatus().getName()
+            ));
+            existing.setStatus(request.getStatus());
+        }
         Parcel updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

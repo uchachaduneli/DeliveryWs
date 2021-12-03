@@ -36,11 +36,12 @@ public class WarehouseController {
         return repo.save(obj);
     }
 
-    @PostMapping(path = "/{id}")
+    @PutMapping
     @Transactional
-    public ResponseEntity<Warehouse> updateById(@PathVariable Integer id, @RequestBody Warehouse request) {
-        Warehouse existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Warehouse Using This ID : " + id));
+    public ResponseEntity<Warehouse> updateById(@RequestBody Warehouse request) {
+        Warehouse existing = repo.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Warehouse Using This ID : " + request.getId()));
         existing.setName(request.getName());
+        existing.setAbbreviature(request.getAbbreviature());
         existing.setCity(cityRepository.findById(request.getCity().getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find City Using This ID : " + request.getCity().getId())));
         Warehouse updatedObj = repo.save(existing);
