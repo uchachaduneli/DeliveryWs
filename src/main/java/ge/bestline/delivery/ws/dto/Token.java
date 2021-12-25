@@ -12,8 +12,6 @@ public class Token {
     public LocalDateTime created;
     public TokenUser user;
     public String token;
-    @Value("${jwt.token.expired}")
-    public String expiredInSecs;
 
     public Token(LocalDateTime created, TokenUser user, String token) {
         this.created = created;

@@ -28,15 +28,18 @@ public class Files {
     @ManyToOne(cascade = CascadeType.DETACH)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Parcel parcel;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private User author;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
 
-    public Files(String name, Parcel parcel) {
+    public Files(String name, Parcel parcel, User author) {
         this.name = name;
         this.parcel = parcel;
+        this.author = author;
     }
 
     public Files(String name, String url) {

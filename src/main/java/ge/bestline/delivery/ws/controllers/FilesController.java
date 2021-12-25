@@ -4,8 +4,10 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dto.ResponseMessage;
 import ge.bestline.delivery.ws.entities.Files;
 import ge.bestline.delivery.ws.entities.Parcel;
+import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.repositories.FilesRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
+import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.services.FilesStorageService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
@@ -29,25 +31,29 @@ public class FilesController {
     private final FilesStorageService storageService;
     private final FilesRepository filesRepo;
     private final ParcelRepository parcelRepo;
+    private final UserRepository userRepository;
 
-    public FilesController(FilesStorageService storageService, FilesRepository filesRepo, ParcelRepository parcelRepo) {
+    public FilesController(FilesStorageService storageService, FilesRepository filesRepo, ParcelRepository parcelRepo, UserRepository userRepository) {
         this.storageService = storageService;
         this.filesRepo = filesRepo;
         this.parcelRepo = parcelRepo;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/upload")
     @Transactional
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,
-                                                      @RequestParam(value = "parcelId", required = false) Integer parcelId) {
+                                                      @RequestParam(value = "parcelId", required = false) Integer parcelId,
+                                                      @RequestParam(value = "authorId", required = true) Integer authorId) {
         log.info("uploading file");
+        User author = userRepository.findById(authorId).orElseThrow(() -> new ResourceNotFoundException("Can't find User Using This ID : " + authorId));
         String message;
         try {
             Parcel parcel;
             String uploadedFileName = storageService.save(file, parcelId);
             if (parcelId != null) {
                 parcel = parcelRepo.findById(parcelId).orElseThrow(() -> new ResourceNotFoundException("Can't find Parcel Using This ID=" + parcelId));
-                filesRepo.save(new Files(uploadedFileName, parcel));
+                filesRepo.save(new Files(uploadedFileName, parcel, author));
             } else {
                 log.warn("uploading file without ParcelID");
             }

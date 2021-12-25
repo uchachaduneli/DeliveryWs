@@ -38,9 +38,10 @@ public class MessageController {
     @Transactional
     public Message addNew(@RequestBody MessageDTO obj) {
         log.info("Adding New Message: " + obj.toString());
-        Message msg = new Message(obj.getSubject(), obj.getComment(), obj.getTo());
+        Message msg = new Message(obj.getSubject(), obj.getMsg(), obj.getTo(), obj.getAuthor(), obj.getParcel());
         msg = repo.save(msg);
         for (MessageCC p : obj.getCc()) {
+            p.setMessage(msg);
             ccRepo.save(p);
         }
         return msg;

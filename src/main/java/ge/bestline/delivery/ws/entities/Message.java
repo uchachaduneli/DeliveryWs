@@ -24,12 +24,12 @@ public class Message {
     @JsonIgnore
     private Integer deleted;
     private String subject;
-    private String comment;
+    private String msg;
     @ManyToOne(cascade = CascadeType.DETACH)
     @NotNull
     private Warehouse to;
     @ManyToOne(cascade = CascadeType.DETACH)
-    private User from;
+    private User author;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne(cascade = CascadeType.DETACH)
     @NotNull
@@ -40,10 +40,12 @@ public class Message {
     @CreationTimestamp
     private Date createdTime;
 
-    public Message(String subject, String comment, Warehouse to) {
+    public Message(String subject, String msg, Warehouse to, User author, Parcel parcel) {
         this.subject = subject;
-        this.comment = comment;
+        this.msg = msg;
         this.to = to;
+        this.author = author;
+        this.parcel = parcel;
     }
 
     @PrePersist
