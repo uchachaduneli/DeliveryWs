@@ -9,6 +9,7 @@ import ge.bestline.delivery.ws.repositories.FilesRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.services.FilesStorageService;
+import ge.bestline.delivery.ws.services.FilesStorageServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;

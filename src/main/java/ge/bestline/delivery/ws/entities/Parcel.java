@@ -9,8 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
@@ -23,6 +21,9 @@ public class Parcel {
     private Integer id;
     @JsonIgnore
     private Integer deleted;
+    @Column(unique = true)
+    private String barCode;
+    private boolean preGenerated;
 
     private Integer senderId;
     private String senderName;

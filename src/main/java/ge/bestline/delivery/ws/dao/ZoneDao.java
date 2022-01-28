@@ -20,7 +20,7 @@ public class ZoneDao {
     public Map<String, Object> findAll(int page, int rowCount, Zone srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append("Select e From ").append(Zone.class.getSimpleName()).append(" e Where 1=1 ");
+        q.append(" From ").append(Zone.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
@@ -34,10 +34,10 @@ public class ZoneDao {
             q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
         }
 
-        TypedQuery<Zone> query = em.createQuery(q.toString(), Zone.class);
+        TypedQuery<Zone> query = em.createQuery("Select e" + q.toString(), Zone.class);
         List<Zone> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
         response.put("items", res);
-        response.put("total_count", res.size());
+        response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;
     }
 }

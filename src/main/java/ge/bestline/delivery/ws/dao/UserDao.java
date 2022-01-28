@@ -20,7 +20,7 @@ public class UserDao {
     public Map<String, Object> findAll(int page, int rowCount, User srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append("SELECT DISTINCT e From ").append(User.class.getSimpleName()).append(" e JOIN e.role r Where 1=1 ");
+        q.append(" From ").append(User.class.getSimpleName()).append(" e JOIN e.role r Where 1=1 ");
 
         if (srchRequest.getCity() != null && srchRequest.getCity().getId() != null) {
             q.append(" and e.city.id ='").append(srchRequest.getCity().getId()).append("'");
@@ -57,10 +57,10 @@ public class UserDao {
             q.append(" and e.password='").append(srchRequest.getPassword()).append("'");
         }
 
-        TypedQuery<User> query = em.createQuery(q.toString(), User.class);
+        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e "+q.toString(), User.class);
         List<User> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
         response.put("items", res);
-        response.put("total_count", res.size());
+        response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;
     }
 

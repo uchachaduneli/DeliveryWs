@@ -10,9 +10,6 @@
         <module name="DeliveryWs" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="DeliveryWs" target="11" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

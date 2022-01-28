@@ -1,28 +1,33 @@
 package ge.bestline.delivery.ws.services;
 
+import ge.bestline.delivery.ws.entities.City;
+import ge.bestline.delivery.ws.entities.ExcelTmpParcel;
+import lombok.extern.log4j.Log4j2;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.PostConstruct;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
-
+@Log4j2
 @Service
 public class FilesStorageServiceImpl implements FilesStorageService {
-
     @Value("${uploadsPath}")
     private String uploadsPath;
-
 
     @PostConstruct
     public void init() {
@@ -35,7 +40,6 @@ public class FilesStorageServiceImpl implements FilesStorageService {
         }
     }
 
-    @Override
     public String save(MultipartFile file, Integer parcelId) {
         try {
             String newFileName = parcelId != null ?
@@ -48,7 +52,6 @@ public class FilesStorageServiceImpl implements FilesStorageService {
         }
     }
 
-    @Override
     public Resource load(String filename) {
         try {
             Path file = Paths.get(uploadsPath).resolve(filename);
@@ -64,17 +67,86 @@ public class FilesStorageServiceImpl implements FilesStorageService {
         }
     }
 
-    @Override
     public boolean delete(String fileName) throws IOException {
         return Files.deleteIfExists(Path.of(uploadsPath + "//" + fileName));
     }
 
-    @Override
     public Stream<Path> loadAll() {
         try {
             return Files.walk(Paths.get(uploadsPath), 1).filter(path -> !path.equals(Paths.get(uploadsPath))).map(Paths.get(uploadsPath)::relativize);
         } catch (IOException e) {
             throw new RuntimeException("Could not load the files!");
+        }
+    }
+
+    public List<ExcelTmpParcel> convertExcelToParcelList(MultipartFile file) {
+        int rowNum = 0;
+        int colIndx = 0;
+        ExcelTmpParcel obj = null;
+        try {
+            List<ExcelTmpParcel> res = new ArrayList<>();
+            FileInputStream inputStream = (FileInputStream) file.getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet firstSheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+
+
+            for (Row row : firstSheet) {
+                if (row.getRowNum() > 0) {
+                    rowNum = row.getRowNum();
+                    obj = new ExcelTmpParcel();
+                    obj.setRowIndex(rowNum);
+
+                    System.out.println(rowNum);
+
+                    for (Cell cell : row) {
+                        colIndx = cell.getColumnIndex() + 1;
+
+                        System.out.println(colIndx + " " + formatter.formatCellValue(cell));
+                        switch (cell.getColumnIndex()) {
+                            case 0:
+                                obj.setReceiverName(formatter.formatCellValue(cell));
+                                break;
+                            case 1:
+                                obj.setReceiverIdentNumber(formatter.formatCellValue(cell));
+                                break;
+                            case 2:
+                                obj.setReceiverContactPerson(formatter.formatCellValue(cell));
+                                break;
+                            case 3:
+                                obj.setReceiverAddress(formatter.formatCellValue(cell));
+                                break;
+                            case 4:
+                                obj.setReceiverPhone(formatter.formatCellValue(cell));
+                                break;
+                            case 5:
+                                City city = new City();
+                                city.setId(Integer.valueOf(formatter.formatCellValue(cell)));
+                                obj.setReceiverCity(city);
+                                break;
+                            case 6:
+                                obj.setComment(formatter.formatCellValue(cell));
+                                break;
+                            case 7:
+                                obj.setCount(Integer.valueOf(formatter.formatCellValue(cell)));
+                                break;
+                            case 8:
+                                obj.setWeight(Double.valueOf(formatter.formatCellValue(cell)));
+                                break;
+                            case 9:
+                                obj.setContent(formatter.formatCellValue(cell));
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    res.add(obj);
+                }
+            }
+            return res;
+        } catch (Exception e) {
+            log.error("Error Occured While Parsing Excel file: " + file.getOriginalFilename(), e);
+            throw new RuntimeException("Error Occured While Parsing Excel file At Row: " + rowNum + "  and Column: " + colIndx);
         }
     }
 }

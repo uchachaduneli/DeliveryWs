@@ -21,7 +21,7 @@ public class ContactDao {
     public Map<String, Object> findAll(int page, int rowCount, Contact srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append("Select e From ").append(Contact.class.getSimpleName()).append(" e Where 1=1 ");
+        q.append(" From ").append(Contact.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
@@ -59,10 +59,10 @@ public class ContactDao {
             q.append(" and e.identNumber ='").append(srchRequest.getIdentNumber()).append("'");
         }
 
-        TypedQuery<Contact> query = em.createQuery(q.toString(), Contact.class);
+        TypedQuery<Contact> query = em.createQuery("SELECT e " + q.toString(), Contact.class);
         List<Contact> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
         response.put("items", res);
-        response.put("total_count", res.size());
+        response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;
     }
 }
