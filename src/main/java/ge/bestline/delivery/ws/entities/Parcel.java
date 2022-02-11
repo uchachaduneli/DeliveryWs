@@ -95,4 +95,31 @@ public class Parcel {
     protected void onUpdate() {
         updatedTime = new Date();
     }
+
+    public Parcel(ExcelTmpParcel obj, ContactAddress sender) {
+        if (sender != null) {
+            this.senderId = sender.getContact().getId();
+            this.senderAddress = sender.getStreet() + " " + sender.getAppartmentDetails();
+            this.senderCity = sender.getCity();
+            this.senderName = sender.getContact().getName();
+            this.senderPhone = sender.getContactPersonPhone();
+            this.senderContactPerson = sender.getContactPerson();
+            this.senderIdentNumber = sender.getContact().getIdentNumber();
+        }
+        this.barCode = obj.getBarCode();
+        this.receiverName = obj.getReceiverName();
+        this.receiverIdentNumber = obj.getReceiverIdentNumber();
+        this.receiverContactPerson = obj.getReceiverContactPerson();
+        this.receiverAddress = obj.getReceiverAddress();
+        this.receiverPhone = obj.getReceiverPhone();
+        this.receiverCity = obj.getReceiverCity();
+        this.comment = obj.getComment();
+        this.count = obj.getCount();
+        this.weight = obj.getWeight();
+        this.totalPrice = obj.getTotalPrice();
+        this.sticker = obj.getStiker();
+        this.route = obj.getRoute();
+        this.author = obj.getAuthor();
+        this.content = obj.getContent();
+    }
 }

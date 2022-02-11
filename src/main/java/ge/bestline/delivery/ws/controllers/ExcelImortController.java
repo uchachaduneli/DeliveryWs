@@ -14,10 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
@@ -34,6 +32,7 @@ public class ExcelImortController {
     private final ExcelTmpParcelDao dao;
     private final CityRepository cityRepo;
     private final ExcelTmpParcelRepository repo;
+    private final ContactAddressRepository contactAddressRepo;
 
     public ExcelImortController(FilesStorageService storageService,
                                 UserRepository userRepo,
@@ -42,7 +41,8 @@ public class ExcelImortController {
                                 RouteRepository routeRepo,
                                 DocTypeRepository docTypeRepo,
                                 ExcelTmpParcelDao dao,
-                                CityRepository cityRepo, ExcelTmpParcelRepository repo) {
+                                CityRepository cityRepo, ExcelTmpParcelRepository repo,
+                                ContactAddressRepository contactAddressRepo) {
         this.storageService = storageService;
         this.userRepo = userRepo;
         this.paracelRepo = paracelRepo;
@@ -53,10 +53,35 @@ public class ExcelImortController {
         this.dao = dao;
         this.cityRepo = cityRepo;
         this.repo = repo;
+        this.contactAddressRepo = contactAddressRepo;
+    }
+
+    @PostMapping("/move-to-main")
+    public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "authorId", required = true) Integer authorId) {
+        List<ExcelTmpParcel> usersImportedParcels = repo.findByAuthorId(authorId);
+        List<Parcel> res = new ArrayList<>();
+        for (ExcelTmpParcel obj : usersImportedParcels) {
+            ContactAddress conAdrs = null;
+            try {
+                conAdrs = contactAddressRepo.findByIsPayAddress(1);
+                if (conAdrs == null) {
+                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
+                }
+            } catch (RuntimeException e) {
+                log.warn(e.getMessage());
+                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
+            } catch (Exception e) {
+                log.error(e);
+            }
+            res.add(new Parcel(obj, conAdrs));
+        }
+        res = paracelRepo.saveAll(res);
+        String barcodes = res.stream().map(Parcel::getBarCode).collect(Collectors.joining(","));
+        log.info("Excel Imported Rows With These BarCodes Has Been Moved To Parcels Main Table :" + barcodes);
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @PostMapping("/import")
-//    @Transactional
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,
                                                       @RequestParam(value = "senderId", required = false) Integer senderId,
                                                       @RequestParam(value = "routeId", required = false) Integer routeId,
