@@ -82,6 +82,10 @@ public class Parcel {
     @CreationTimestamp
     private Date createdTime;
 
+    @Transient
+    @JsonIgnore
+    private final Services STANDART_SERVICE = new Services(1, "");
+
     @PrePersist
     protected void onCreate() {
         deleted = 2;
@@ -105,7 +109,16 @@ public class Parcel {
             this.senderPhone = sender.getContactPersonPhone();
             this.senderContactPerson = sender.getContactPerson();
             this.senderIdentNumber = sender.getContact().getIdentNumber();
+            // set sender as payer
+            this.payerSide = 1;
+            this.payerAddress = this.senderAddress;
+            this.payerCity = this.senderCity;
+            this.payerName = this.senderName;
+            this.payerPhone = this.senderPhone;
+            this.payerContactPerson = this.senderContactPerson;
+            this.payerIdentNumber = this.senderIdentNumber;
         }
+        this.setService(STANDART_SERVICE);
         this.barCode = obj.getBarCode();
         this.receiverName = obj.getReceiverName();
         this.receiverIdentNumber = obj.getReceiverIdentNumber();

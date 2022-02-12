@@ -8,10 +8,12 @@ import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import ge.bestline.delivery.ws.services.FilesStorageService;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -24,7 +26,7 @@ public class ExcelImortController {
 
     private final FilesStorageService storageService;
     private final UserRepository userRepo;
-    private final ParcelRepository paracelRepo;
+    private final ParcelRepository parcelRepo;
     private final BarCodeService barCodeService;
     private final ContactRepository contactRepo;
     private final RouteRepository routeRepo;
@@ -36,7 +38,7 @@ public class ExcelImortController {
 
     public ExcelImortController(FilesStorageService storageService,
                                 UserRepository userRepo,
-                                ParcelRepository paracelRepo,
+                                ParcelRepository parcelRepo,
                                 BarCodeService barCodeService, ContactRepository contactRepo,
                                 RouteRepository routeRepo,
                                 DocTypeRepository docTypeRepo,
@@ -45,7 +47,7 @@ public class ExcelImortController {
                                 ContactAddressRepository contactAddressRepo) {
         this.storageService = storageService;
         this.userRepo = userRepo;
-        this.paracelRepo = paracelRepo;
+        this.parcelRepo = parcelRepo;
         this.barCodeService = barCodeService;
         this.contactRepo = contactRepo;
         this.routeRepo = routeRepo;
@@ -54,6 +56,11 @@ public class ExcelImortController {
         this.cityRepo = cityRepo;
         this.repo = repo;
         this.contactAddressRepo = contactAddressRepo;
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
+        return new ResponseEntity<>("ჩანაწერი მსგავსი ბარკოდით უკვე არსებობს", HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/move-to-main")
@@ -75,7 +82,8 @@ public class ExcelImortController {
             }
             res.add(new Parcel(obj, conAdrs));
         }
-        res = paracelRepo.saveAll(res);
+        res = parcelRepo.saveAll(res);
+        repo.deleteAll(usersImportedParcels);
         String barcodes = res.stream().map(Parcel::getBarCode).collect(Collectors.joining(","));
         log.info("Excel Imported Rows With These BarCodes Has Been Moved To Parcels Main Table :" + barcodes);
         return new ResponseEntity<>(res, HttpStatus.OK);
