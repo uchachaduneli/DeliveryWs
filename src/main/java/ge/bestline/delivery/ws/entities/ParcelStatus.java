@@ -22,6 +22,8 @@ public class ParcelStatus {
     private String code;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
+    private String category;
+    private String parcelStatusOnChekpoint;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;

@@ -19,8 +19,11 @@ public class ParcelStatusReason {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
+    private String code;
     @ManyToOne(cascade = CascadeType.DETACH)
     private ParcelStatus status;
+    private String category;
+    private String parcelStatusOnChekpoint;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)

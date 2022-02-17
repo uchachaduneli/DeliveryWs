@@ -4,18 +4,24 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
+import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Log4j2
 @RestController
@@ -23,12 +29,29 @@ import java.util.Map;
 public class CityController {
 
     private final CityRepository cityRepository;
-
     private final ZoneRepository zoneRepository;
+    private final ExcelHelper excelHelper;
 
-    public CityController(CityRepository cityRepository, ZoneRepository zoneRepository) {
+    public CityController(CityRepository cityRepository,
+                          ZoneRepository zoneRepository,
+                          ExcelHelper excelHelper) {
         this.cityRepository = cityRepository;
         this.zoneRepository = zoneRepository;
+        this.excelHelper = excelHelper;
+    }
+
+    @GetMapping("/excel")
+    public ResponseEntity<Resource> downloadExcell(City searchParams) {
+        log.info("Excel Generation & Download Started ");
+        try {
+            InputStreamResource file = new InputStreamResource(excelHelper.citiesToExcelFile(cityRepository.findAll()));
+            log.info("Excel Generation Finished, Returning The File");
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cities.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+        } catch (Exception ex) {
+            log.error("Error Occurred During Excel Generation", ex);
+            return new ResponseEntity<Resource>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping

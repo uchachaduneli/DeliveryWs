@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.Contact;
+import ge.bestline.delivery.ws.entities.ContactAddress;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +22,9 @@ public class ContactDao {
     public Map<String, Object> findAll(int page, int rowCount, Contact srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(Contact.class.getSimpleName()).append(" e Where 1=1 ");
+        q.append(" From ").append(Contact.class.getSimpleName()).append(" e LEFT JOIN ")
+                .append(ContactAddress.class.getSimpleName())
+                .append(" c on e.mainAddress.id=c.id Where 1=1 ");
 
         if (srchRequest.getId() != null) {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");

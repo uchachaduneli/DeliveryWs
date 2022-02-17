@@ -33,6 +33,7 @@ public class Parcel {
     private String senderPhone;
     @ManyToOne(cascade = CascadeType.DETACH)
     private City senderCity;
+    private Integer sendSmsToSender;
 
     private String receiverName;
     private String receiverIdentNumber;
@@ -41,6 +42,7 @@ public class Parcel {
     private String receiverPhone;
     @ManyToOne(cascade = CascadeType.DETACH)
     private City receiverCity;
+    private Integer sendSmsToReceiver;
 
     private Integer payerSide; // 1 sender  2 receiver   3 third side
     private String payerName;

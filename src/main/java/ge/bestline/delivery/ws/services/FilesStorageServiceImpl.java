@@ -96,9 +96,6 @@ public class FilesStorageServiceImpl implements FilesStorageService {
                     rowNum = row.getRowNum();
                     obj = new ExcelTmpParcel();
                     obj.setRowIndex(rowNum);
-
-                    System.out.println(rowNum);
-
                     for (Cell cell : row) {
                         colIndx = cell.getColumnIndex() + 1;
 

@@ -49,7 +49,7 @@ public class ParcelController {
         log.info("Adding New Parcel: " + obj.toString());
         Parcel parcel = repo.save(obj);
         ParcelStatusReason psr = statusReasonRepo.findById(1).orElseThrow(() ->
-                new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parces Status History"));
+                new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parcels Status History"));
         statusHistoryRepo.save(new ParcelStatusHistory(
                 parcel,
                 psr.getStatus().getName(),
@@ -78,6 +78,10 @@ public class ParcelController {
             ));
             existing.setStatus(request.getStatus());
         }
+        existing.setSendSmsToSender(request.getSendSmsToSender());
+        existing.setSendSmsToReceiver(request.getSendSmsToReceiver());
+        existing.setReceiverPhone(request.getReceiverPhone());
+        existing.setSenderPhone(request.getSenderPhone());
         Parcel updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

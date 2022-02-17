@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -38,6 +41,9 @@ public class Contact {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
+    @NotFound(action = NotFoundAction.IGNORE)
+    private ContactAddress mainAddress;
 
     public Contact(String name, String email, Integer type, Integer status, Integer deReGe, String identNumber, User user) {
         this.name = name;

@@ -5,13 +5,14 @@ import ge.bestline.delivery.ws.dao.ContactDao;
 import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
+import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -28,16 +29,32 @@ public class ContactController {
     private final ContactRepository repo;
     private final ContactDao dao;
     private final UserRepository userRepository;
+    private final ExcelHelper excelHelper;
 
-    public ContactController(ContactRepository repo, ContactDao dao, UserRepository userRepository) {
+    public ContactController(ContactRepository repo, ContactDao dao, UserRepository userRepository, ExcelHelper excelHelper) {
         this.repo = repo;
         this.dao = dao;
         this.userRepository = userRepository;
+        this.excelHelper = excelHelper;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
         return new ResponseEntity<>("თქვენ უკვე გყავთ მითითებული საიდენტიფიკაციო ნომრით კონტაქტი", HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/excel")
+    public ResponseEntity<Resource> downloadExcell(Contact searchParams) {
+        log.info("Excel Generation & Download Started ");
+        try {
+            InputStreamResource file = new InputStreamResource(excelHelper.contactsToExcelFile(repo.findAll()));
+            log.info("Excel Generation Finished, Returning The File");
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=contacts.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+        } catch (Exception ex) {
+            log.error("Error Occurred During Excel Generation", ex);
+            return new ResponseEntity<Resource>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping

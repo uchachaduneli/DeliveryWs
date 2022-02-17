@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ContactAddressDao;
+import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.ContactAddress;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.ContactAddressRepository;
@@ -59,6 +60,12 @@ public class ContactAddressController {
         existing.setCity(cityRepository.findById(request.getCity().getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find City Using This ID : " + request.getCity().getId())));
         ContactAddress updatedObj = repo.save(existing);
+        if (existing.getIsPayAddress() == 1) {// if this is main address for contact set it to
+            contactAddressDao.resetIsPayAddressField();
+            Contact c = existing.getContact();
+            c.setMainAddress(updatedObj);
+            contactRepository.save(c);
+        }
         return ResponseEntity.ok(updatedObj);
     }
 

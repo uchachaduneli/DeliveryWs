@@ -51,4 +51,8 @@ public class ContactAddressDao {
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;
     }
+
+    public int resetIsPayAddressField() {
+        return em.createQuery("update " + ContactAddress.class.getSimpleName() + " set isPayAddress ='2'").executeUpdate();
+    }
 }

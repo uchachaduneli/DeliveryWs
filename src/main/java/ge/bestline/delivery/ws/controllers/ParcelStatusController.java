@@ -1,22 +1,29 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.dto.ParcelStatusWithReasonsDTO;
 import ge.bestline.delivery.ws.entities.ParcelStatus;
 import ge.bestline.delivery.ws.entities.ParcelStatusReason;
 import ge.bestline.delivery.ws.repositories.ParcelStatusReasonRepository;
 import ge.bestline.delivery.ws.repositories.ParcelStatusRepository;
+import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +35,38 @@ public class ParcelStatusController {
 
     private final ParcelStatusRepository repo;
     private final ParcelStatusReasonRepository statusReasonRepo;
+    private final ExcelHelper excelHelper;
 
-    public ParcelStatusController(ParcelStatusRepository repo, ParcelStatusReasonRepository statusReasonRepo) {
+    public ParcelStatusController(ParcelStatusRepository repo,
+                                  ParcelStatusReasonRepository statusReasonRepo,
+                                  ExcelHelper excelHelper) {
         this.repo = repo;
         this.statusReasonRepo = statusReasonRepo;
+        this.excelHelper = excelHelper;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
         return new ResponseEntity<>("მსგავსი სტატუსი უკვე არსებობს", HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/excel")
+    public ResponseEntity<Resource> downloadExcell(ParcelStatus searchParams) {
+        log.info("Excel Generation & Download Started ");
+        try {
+            List<ParcelStatusWithReasonsDTO> excelList = new ArrayList<>();
+            List<ParcelStatus> statuses = repo.findAll();// filter with searchParam
+            statuses.forEach(status -> {
+                excelList.add(new ParcelStatusWithReasonsDTO(status, statusReasonRepo.findByStatus_Id(status.getId())));
+            });
+            InputStreamResource file = new InputStreamResource(excelHelper.parcelStatusesWithReasonsToExcelFile(excelList));
+            log.info("Excel Generation Finished, Returning The File");
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=checkpoints.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+        } catch (Exception ex) {
+            log.error("Error Occurred During Excel Generation", ex);
+            return new ResponseEntity<Resource>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping
