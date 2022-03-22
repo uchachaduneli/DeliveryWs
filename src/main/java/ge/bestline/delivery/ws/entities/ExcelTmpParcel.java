@@ -31,7 +31,16 @@ public class ExcelTmpParcel {
     private Long tmpIdForPerExcel;
 
     @ManyToOne(cascade = CascadeType.DETACH)
+    private Services service;
+
+    @ManyToOne(cascade = CascadeType.DETACH)
     private Contact sender;
+    // es sami veli sheidzleba shecvlili movides reqvestshi magitoa sender- is garet
+    private String senderContactPerson;
+    private String senderAddress;
+    private String senderPhone;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private City senderCity;
 
     private String receiverName;
     private String receiverIdentNumber;
@@ -48,8 +57,6 @@ public class ExcelTmpParcel {
     private Double weight;
     private Double totalPrice;
 
-    @ManyToOne(cascade = CascadeType.DETACH)
-    private DocType stiker;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Route route;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)

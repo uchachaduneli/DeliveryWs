@@ -7,9 +7,14 @@ import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import ge.bestline.delivery.ws.services.FilesStorageService;
+import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +40,8 @@ public class ExcelImortController {
     private final CityRepository cityRepo;
     private final ExcelTmpParcelRepository repo;
     private final ContactAddressRepository contactAddressRepo;
+    private final ServicesRepository servicesRepository;
+    private final ExcelHelper excelHelper;
 
     public ExcelImortController(FilesStorageService storageService,
                                 UserRepository userRepo,
@@ -44,7 +51,8 @@ public class ExcelImortController {
                                 DocTypeRepository docTypeRepo,
                                 ExcelTmpParcelDao dao,
                                 CityRepository cityRepo, ExcelTmpParcelRepository repo,
-                                ContactAddressRepository contactAddressRepo) {
+                                ContactAddressRepository contactAddressRepo,
+                                ServicesRepository servicesRepository, ExcelHelper excelHelper) {
         this.storageService = storageService;
         this.userRepo = userRepo;
         this.parcelRepo = parcelRepo;
@@ -56,6 +64,8 @@ public class ExcelImortController {
         this.cityRepo = cityRepo;
         this.repo = repo;
         this.contactAddressRepo = contactAddressRepo;
+        this.servicesRepository = servicesRepository;
+        this.excelHelper = excelHelper;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -93,15 +103,20 @@ public class ExcelImortController {
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,
                                                       @RequestParam(value = "senderId", required = false) Integer senderId,
                                                       @RequestParam(value = "routeId", required = false) Integer routeId,
-                                                      @RequestParam(value = "stikerId", required = false) Integer stikerId,
-                                                      @RequestParam(value = "authorId", required = true) Integer authorId) {
+                                                      @RequestParam(value = "authorId", required = true) Integer authorId,
+                                                      @RequestParam(value = "cityId", required = true) Integer fromCityId,
+                                                      @RequestParam(value = "address", required = true) String address,
+                                                      @RequestParam(value = "contactPerson", required = true) String contactPerson,
+                                                      @RequestParam(value = "contactPhone", required = true) String contactPhone,
+                                                      @RequestParam(value = "serviceId", required = true) Integer serviceId) {
         log.info("Started Importing Excel Into Tmp Table");
         String message;
         try {
             Contact senderContact = contactRepo.findById(senderId).orElseThrow(() -> new ResourceNotFoundException("Can't find Sender Contact Using This ID=" + senderId));
             Route route = routeRepo.findById(routeId).orElseThrow(() -> new ResourceNotFoundException("Can't find Route Using This ID=" + routeId));
-            DocType stiker = docTypeRepo.findById(stikerId).orElseThrow(() -> new ResourceNotFoundException("Can't find Stiker Using This ID=" + stikerId));
             User author = userRepo.findById(authorId).orElseThrow(() -> new ResourceNotFoundException("Can't find User Using This ID : " + authorId));
+            City senderCity = cityRepo.findById(fromCityId).orElseThrow(() -> new ResourceNotFoundException("Can't find From City Using This ID : " + fromCityId));
+            Services service = servicesRepository.findById(serviceId).orElseThrow(() -> new ResourceNotFoundException("Can't find Service Using This ID : " + serviceId));
             List<ExcelTmpParcel> parsedRowsList = storageService.convertExcelToParcelList(file);
             Date uploadDate = new Date();
             Long perImportJoningId = uploadDate.getTime();// joining id for per excell file's rows
@@ -113,8 +128,12 @@ public class ExcelImortController {
                 tmpObj.setCreatedTime(uploadDate);
                 tmpObj.setSender(senderContact);
                 tmpObj.setRoute(route);
-                tmpObj.setStiker(stiker);
+                tmpObj.setSenderCity(senderCity);
+                tmpObj.setSenderAddress(address);
+                tmpObj.setSenderContactPerson(contactPerson);
+                tmpObj.setSenderPhone(contactPhone);
                 tmpObj.setTmpIdForPerExcel(perImportJoningId);
+                tmpObj.setService(service);
                 tmpObj.setReceiverCity(cityRepo.findById(tmpObj.getReceiverCity().getId()).orElseThrow(() ->
                         new RuntimeException("Can't find City using this id" + tmpObj.getReceiverCity().getId() + " At Row " + tmpObj.getRowIndex())));
                 repo.save(tmpObj);
@@ -154,6 +173,20 @@ public class ExcelImortController {
         Map<String, Boolean> resp = new HashMap<>();
         resp.put("deleted", Boolean.TRUE);
         return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/excel")
+    public ResponseEntity<Resource> downloadExcell(Integer userId) {
+        log.info("Excel Generation & Download Started ");
+        try {
+            InputStreamResource file = new InputStreamResource(excelHelper.importedExcelRowsToExcelFile(repo.findByAuthorId(userId)));
+            log.info("Excel Generation Finished, Returning The File");
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=importedParcels.xlsx")
+                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel")).body(file);
+        } catch (Exception ex) {
+            log.error("Error Occurred During Excel Generation", ex);
+            return new ResponseEntity<Resource>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

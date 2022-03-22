@@ -1,5 +1,7 @@
 package ge.bestline.delivery.ws.dao;
 
+import ge.bestline.delivery.ws.entities.City;
+import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.ContactAddress;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +22,9 @@ public class ContactAddressDao {
     public Map<String, Object> findAll(int page, int rowCount, ContactAddress srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(ContactAddress.class.getSimpleName()).append(" e Where 1=1 ");
+        q.append(" From ").append(ContactAddress.class.getSimpleName()).append(" e" +
+                " left join " + Contact.class.getSimpleName() + " c on e.contact.id=c.id " +
+                " left join " + City.class.getSimpleName() + " s on e.city.id=s.id  Where 1=1 ");
         if (srchRequest.getContact() != null && srchRequest.getContact().getId() != null) {
             q.append(" and e.contact.id ='").append(srchRequest.getContact().getId()).append("'");
         }

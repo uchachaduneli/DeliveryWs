@@ -46,9 +46,10 @@ public class UserDao {
             q.append(" and e.route.id ='").append(srchRequest.getRoute().getId()).append("'");
         }
 
-        if (srchRequest.getSrchRoleName() != null) {
-            q.append(" and r.name='").append(srchRequest.getSrchRoleName()).append("'");
+        if (srchRequest.getSrchRoleName() != null && !srchRequest.getSrchRoleName().isEmpty()) {
+            q.append(" and r.name in :rolesInList");
         }
+
         if (srchRequest.getUserName() != null) {
             q.append(" and e.userName='").append(srchRequest.getUserName()).append("'");
         }
@@ -57,10 +58,14 @@ public class UserDao {
             q.append(" and e.password='").append(srchRequest.getPassword()).append("'");
         }
 
-        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e "+q.toString(), User.class);
-        List<User> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
-        response.put("items", res);
-        response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
+        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e " + q.toString(), User.class);
+        TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
+        if (srchRequest.getSrchRoleName() != null && !srchRequest.getSrchRoleName().isEmpty()) {
+            query.setParameter("rolesInList", srchRequest.getSrchRoleName());
+            cntQr.setParameter("rolesInList", srchRequest.getSrchRoleName());
+        }
+        response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
+        response.put("total_count", cntQr.getSingleResult());
         return response;
     }
 

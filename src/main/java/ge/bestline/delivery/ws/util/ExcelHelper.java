@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.util;
 import ge.bestline.delivery.ws.dto.ParcelStatusWithReasonsDTO;
 import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.Contact;
+import ge.bestline.delivery.ws.entities.ExcelTmpParcel;
 import ge.bestline.delivery.ws.entities.ParcelStatusReason;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.*;
@@ -30,15 +31,69 @@ public class ExcelHelper {
             new String("NAME,IDENT #,ADDRESS,TARIFF").split(",", -1)));
     private final List<String> parcelStatusFieldsToExport = new ArrayList<String>(Arrays.asList(
             new String("ინდექსი,კოდი,სახელი,ჩანაწერის თარიღი,კატეგორია,გზავნილის სტატუსი ჩექპოინტზე").split(",", -1)));
-//    private final List<String> statusReasonsFieldsToExport = new ArrayList<String>(Arrays.asList(
+    //    private final List<String> statusReasonsFieldsToExport = new ArrayList<String>(Arrays.asList(
 //            new String("ინდექსი,კოდი,სახელი,ჩანაწერის თარიღი,კატეგორია,გზავნილის სტატუსი ჩექპოინტზე").split(",", -1)));
+    private final List<String> importedExcelFieldsToExport = new ArrayList<String>(Arrays.asList(
+            new String("ბარკოდი,სერვისი,გამგზავნი,გამგზ. მისამართი,გამგზავნის საკონტ. პირი,გამგზავნის ტელ." +
+                    ",გამგზავნის ქალაქი,მიმღები,მიმღების მისამართი,მიმღ. საკონტ. პირი," +
+                    "მიმღების ტელ.,მიმღების ქალაქი,მარშრუტი,შიგთავსი,შენიშვნა,რაოდენობა," +
+                    "წონა,მთლიანი ღირებულება,შეიმპორტების თარიღი").split(",", -1)));
 
     private void createHeaderRow(List<String> headersArrList, Sheet sheet, CellStyle headerCellStyle, int rowIndex, int startColIndx) {
         Row row = sheet.createRow(rowIndex);
-        for (int ind = 0; ind < parcelStatusFieldsToExport.size(); ind++) {
+        for (int ind = 0; ind < headersArrList.size(); ind++) {
             Cell cell = row.createCell(ind + startColIndx);
-            cell.setCellValue(parcelStatusFieldsToExport.get(ind));
+            cell.setCellValue(headersArrList.get(ind));
             cell.setCellStyle(headerCellStyle);
+        }
+    }
+
+    public ByteArrayInputStream importedExcelRowsToExcelFile(List<ExcelTmpParcel> objectslist) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Sheet1");
+            CellStyle headerCellStyle = workbook.createCellStyle();
+            headerCellStyle.setFillForegroundColor(IndexedColors.AQUA.getIndex());
+            headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            final int[] i = {0};
+            objectslist.forEach(obj -> {
+                createHeaderRow(importedExcelFieldsToExport, sheet, headerCellStyle, i[0], 0);
+                i[0] += 1;
+                Row dataRow = sheet.createRow(i[0]);
+                dataRow.createCell(0).setCellValue(ifNull(obj.getBarCode()));
+                dataRow.createCell(1).setCellValue(ifNull(obj.getService().getName()));
+                dataRow.createCell(2).setCellValue(ifNull(obj.getSender().getName()) + " "
+                        + ifNull(obj.getSender().getIdentNumber()));
+                dataRow.createCell(3).setCellValue(ifNull(obj.getSenderAddress()));
+                dataRow.createCell(4).setCellValue(ifNull(obj.getSenderContactPerson()));
+                dataRow.createCell(5).setCellValue(ifNull(obj.getSenderPhone()));
+                dataRow.createCell(6).setCellValue(ifNull(obj.getSenderCity().getName()));
+                dataRow.createCell(7).setCellValue(ifNull(obj.getReceiverName()) + " "
+                        + ifNull(obj.getReceiverIdentNumber()));
+                dataRow.createCell(8).setCellValue(ifNull(obj.getReceiverAddress()));
+                dataRow.createCell(9).setCellValue(ifNull(obj.getReceiverContactPerson()));
+                dataRow.createCell(10).setCellValue(ifNull(obj.getReceiverPhone()));
+                dataRow.createCell(11).setCellValue(ifNull(obj.getReceiverCity().getName()));
+                dataRow.createCell(12).setCellValue(ifNull(obj.getRoute().getName()));
+                dataRow.createCell(13).setCellValue(ifNull(obj.getContent()));
+                dataRow.createCell(14).setCellValue(ifNull(obj.getComment()));
+                dataRow.createCell(15).setCellValue(ifNull(obj.getCount()));
+                dataRow.createCell(16).setCellValue(ifNull(obj.getWeight()));
+                dataRow.createCell(17).setCellValue(ifNull(obj.getTotalPrice()));
+                dataRow.createCell(18).setCellValue(dateFormatter.format(obj.getCreatedTime()));
+            });
+
+            // Making size of column auto resize to fit with data
+            for (int j = 0; j <= importedExcelFieldsToExport.size(); j++) {
+                sheet.autoSizeColumn(j);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        } catch (IOException ex) {
+            log.error("Excell Generation Process Failed ", ex);
+            return null;
         }
     }
 

@@ -22,9 +22,13 @@ public class ParcelDao {
         StringBuilder q = new StringBuilder();
         q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where 1=1 ");
 
-//        if (srchRequest.getId() != null) {
-//            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
-//        }
+        if (srchRequest.getStatus() != null) {
+            q.append(" and e.status.id ='").append(srchRequest.getStatus().getId()).append("'");
+        }
+
+        if (srchRequest.getCourier() != null) {
+            q.append(" and e.courier.id ='").append(srchRequest.getCourier().getId()).append("'");
+        }
 //
 //        if (srchRequest.getDeleted() != null) {
 //            q.append(" and e.deleted ='").append(srchRequest.getDeleted()).append("'");
@@ -34,10 +38,10 @@ public class ParcelDao {
 //            q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
 //        }
 
-        TypedQuery<Parcel> query = em.createQuery("Select e " + q.toString(), Parcel.class);
-        List<Parcel> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
-        response.put("items", res);
-        response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
+        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString(), Parcel.class);
+        TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
+        response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
+        response.put("total_count", cntQr.getSingleResult());
         return response;
     }
 }

@@ -7,7 +7,6 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -44,16 +43,6 @@ public class Contact {
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private ContactAddress mainAddress;
-
-    public Contact(String name, String email, Integer type, Integer status, Integer deReGe, String identNumber, User user) {
-        this.name = name;
-        this.email = email;
-        this.type = type;
-        this.status = status;
-        this.deReGe = deReGe;
-        this.identNumber = identNumber;
-        this.user = user;
-    }
 
     @PrePersist
     protected void onCreate() {

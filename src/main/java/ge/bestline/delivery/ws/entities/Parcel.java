@@ -6,9 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -32,6 +36,7 @@ public class Parcel {
     private String senderAddress;
     private String senderPhone;
     @ManyToOne(cascade = CascadeType.DETACH)
+    @NotFound(action = NotFoundAction.IGNORE)
     private City senderCity;
     private Integer sendSmsToSender;
 
@@ -41,6 +46,7 @@ public class Parcel {
     private String receiverAddress;
     private String receiverPhone;
     @ManyToOne(cascade = CascadeType.DETACH)
+    @NotFound(action = NotFoundAction.IGNORE)
     private City receiverCity;
     private Integer sendSmsToReceiver;
 
@@ -51,6 +57,7 @@ public class Parcel {
     private String payerPhone;
     private String payerContactPerson;
     @ManyToOne(cascade = CascadeType.DETACH)
+    @NotFound(action = NotFoundAction.IGNORE)
     private City payerCity;
 
     @ManyToOne(cascade = CascadeType.DETACH)
@@ -66,15 +73,19 @@ public class Parcel {
     private Integer deliveryType;// 1 mitana misamartze, 2 mikitxva filialshi
     private Integer paymentType;// 1 invoice, 2 cash, 3 card
     @ManyToOne(cascade = CascadeType.DETACH)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Services service;
     private Integer packageType;// 1 amanati, 2 paketi
     @ManyToOne(cascade = CascadeType.DETACH)
-    private DocType sticker;
-    @ManyToOne(cascade = CascadeType.DETACH)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Route route;
-    @ManyToOne(cascade = CascadeType.DETACH, optional = true)
+    @ManyToOne(cascade = CascadeType.PERSIST, optional = true)
+    @JoinColumn(name = "courier_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private User courier;
     @ManyToOne(cascade = CascadeType.DETACH, optional = true)
+    @JoinColumn(name = "author_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private User author;
     private Double tariff;
     private String content;
@@ -83,10 +94,6 @@ public class Parcel {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-
-    @Transient
-    @JsonIgnore
-    private final Services STANDART_SERVICE = new Services(1, "");
 
     @PrePersist
     protected void onCreate() {
@@ -105,22 +112,24 @@ public class Parcel {
     public Parcel(ExcelTmpParcel obj, ContactAddress sender) {
         if (sender != null) {
             this.senderId = sender.getContact().getId();
-            this.senderAddress = sender.getStreet() + " " + sender.getAppartmentDetails();
-            this.senderCity = sender.getCity();
             this.senderName = sender.getContact().getName();
-            this.senderPhone = sender.getContactPersonPhone();
-            this.senderContactPerson = sender.getContactPerson();
             this.senderIdentNumber = sender.getContact().getIdentNumber();
             // set sender as payer
             this.payerSide = 1;
-            this.payerAddress = this.senderAddress;
-            this.payerCity = this.senderCity;
             this.payerName = this.senderName;
-            this.payerPhone = this.senderPhone;
-            this.payerContactPerson = this.senderContactPerson;
             this.payerIdentNumber = this.senderIdentNumber;
         }
-        this.setService(STANDART_SERVICE);
+        this.senderCity = obj.getSenderCity();
+        this.senderPhone = obj.getSenderPhone();
+        this.senderContactPerson = obj.getSenderContactPerson();
+        this.senderAddress = obj.getSenderAddress();
+
+        this.payerCity = this.senderCity;
+        this.payerPhone = this.senderPhone;
+        this.payerContactPerson = this.senderContactPerson;
+        this.payerAddress = this.senderAddress;
+
+        this.setService(obj.getService());
         this.barCode = obj.getBarCode();
         this.receiverName = obj.getReceiverName();
         this.receiverIdentNumber = obj.getReceiverIdentNumber();
@@ -132,7 +141,6 @@ public class Parcel {
         this.count = obj.getCount();
         this.weight = obj.getWeight();
         this.totalPrice = obj.getTotalPrice();
-        this.sticker = obj.getStiker();
         this.route = obj.getRoute();
         this.author = obj.getAuthor();
         this.content = obj.getContent();

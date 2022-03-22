@@ -64,7 +64,7 @@ public class ContactController {
         return repo.save(obj);
     }
 
-    @PostMapping(path = "/{id}")
+    @PutMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Contact> updateById(@PathVariable Integer id, @RequestBody Contact request) {
         log.info("Updating Contact");

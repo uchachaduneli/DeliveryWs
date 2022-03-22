@@ -32,9 +32,6 @@ public class ExcelTmpParcelDao {
         if (srchRequest.getSender() != null) {
             q.append(" and e.sender.id ='").append(srchRequest.getSender().getId()).append("'");
         }
-        if (srchRequest.getStiker() != null) {
-            q.append(" and e.stiker.id ='").append(srchRequest.getStiker().getId()).append("'");
-        }
         if (srchRequest.getRoute() != null) {
             q.append(" and e.route.id ='").append(srchRequest.getRoute().getId()).append("'");
         }

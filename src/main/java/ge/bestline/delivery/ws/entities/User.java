@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -43,7 +44,7 @@ public class User {
     private Date createdTime;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Transient
-    private String srchRoleName; // Not DB Field
+    private List<String> srchRoleName; // Not DB Field
 
     public User(String name, String lastName, String phone, String personalNumber, City city, Set<Role> role, UserStatus status) {
         this.name = name;
