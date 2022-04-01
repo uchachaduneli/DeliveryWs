@@ -20,8 +20,6 @@ public class DeliveryDetail {
     private Integer id;
     @Column(unique = true)
     private String detailBarCode;
-    @Column(unique = true, name = "number")
-    private String carNumber;
     @OneToOne(cascade = CascadeType.DETACH)
     private Parcel parcel;
     @ManyToOne(cascade = CascadeType.DETACH)
