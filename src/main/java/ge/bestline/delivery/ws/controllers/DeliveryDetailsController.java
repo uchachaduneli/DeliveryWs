@@ -2,17 +2,16 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.DeliveryDetailDao;
-import ge.bestline.delivery.ws.entities.Contact;
-import ge.bestline.delivery.ws.entities.ContactAddress;
 import ge.bestline.delivery.ws.entities.DeliveryDetail;
+import ge.bestline.delivery.ws.entities.Parcel;
 import ge.bestline.delivery.ws.repositories.*;
+import ge.bestline.delivery.ws.services.BarCodeService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Log4j2
@@ -21,29 +20,40 @@ import java.util.Map;
 public class DeliveryDetailsController {
 
     private final DeliveryDetailRepository repo;
-    private final UserRepository userRepository;
-    private final ContactRepository contactRepository;
+    private final BarCodeService barCodeService;
     private final DeliveryDetailDao dao;
+    private final RouteRepository routeRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final UserRepository userRepository;
+    private final DeliveryDetailsRepository deliveryDetailsRepository;
 
     public DeliveryDetailsController(DeliveryDetailRepository repo,
+                                     BarCodeService barCodeService,
+                                     RouteRepository routeRepository,
                                      UserRepository userRepository,
-                                     ContactRepository contactRepository,
-                                     DeliveryDetailDao dao) {
+                                     WarehouseRepository warehouseRepository,
+                                     DeliveryDetailDao dao,
+                                     DeliveryDetailsRepository deliveryDetailsRepository) {
         this.repo = repo;
+        this.barCodeService = barCodeService;
+        this.routeRepository = routeRepository;
+        this.warehouseRepository = warehouseRepository;
         this.userRepository = userRepository;
-        this.contactRepository = contactRepository;
         this.dao = dao;
+        this.deliveryDetailsRepository = deliveryDetailsRepository;
     }
 
-    @PostMapping(path = "/{id}")
+    @PostMapping
     @Transactional
-    public ResponseEntity<DeliveryDetail> updateById(@PathVariable Integer id, @RequestBody DeliveryDetail request) {
-        log.info("Updating DeliveryDetail");
-        DeliveryDetail existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
-        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
-
-        DeliveryDetail updatedObj = repo.save(existing);
-        return ResponseEntity.ok(updatedObj);
+    public DeliveryDetail addNew(@RequestBody DeliveryDetail obj) {
+        log.info("Adding New DeliveryDetail: " + obj.toString());
+        routeRepository.findById(obj.getRoute().getId()).orElseThrow(
+                () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
+        userRepository.findById(obj.getUser().getId()).orElseThrow(
+                () -> new ResourceNotFoundException("Can't find User Using This ID : " + obj.getUser().getId()));
+        warehouseRepository.findById(obj.getWarehouse().getId()).orElseThrow(
+                () -> new ResourceNotFoundException("Can't find Warehouse Using This ID : " + obj.getWarehouse().getId()));
+        return repo.save(obj);
     }
 
     @GetMapping
@@ -53,5 +63,22 @@ public class DeliveryDetailsController {
             DeliveryDetail searchParams) {
         log.info("Getting DeliveryDetails with params: " + searchParams);
         return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
+    }
+
+    @GetMapping("barcode")
+    public ResponseEntity<String> getBarCodeForNewDetails() {
+        log.info("Geting Barcode For new Delivery Details Started");
+        String barcode = barCodeService.getBarcodes(1).get(0);
+        if (deliveryDetailsRepository.findByDetailBarCode(barcode).isPresent()) {
+            // try to generate one more time to find not existing one in delivery details table
+            barcode = barCodeService.getBarcodes(1).get(0);
+        }
+        return new ResponseEntity<>(barcode, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/{id}")
+    public DeliveryDetail getById(@PathVariable Integer id) {
+        log.info("Getting DeliveryDetail With ID: " + id);
+        return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 }

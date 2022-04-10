@@ -12,7 +12,7 @@ import java.util.Random;
 @Log4j2
 @Service
 public class BarCodeService {
-    ParcelRepository repo;
+    private final ParcelRepository repo;
 
     public BarCodeService(ParcelRepository repo) {
         this.repo = repo;

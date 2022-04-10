@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.DeliveryDetail;
+import ge.bestline.delivery.ws.entities.User;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -20,10 +21,10 @@ public class DeliveryDetailDao {
     public Map<String, Object> findAll(int page, int rowCount, DeliveryDetail srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(DeliveryDetail.class.getSimpleName()).append(" e"
+        q.append(" From ").append(DeliveryDetail.class.getSimpleName()).append(" e Where 1=1 ");
 //                " left join " + User.class.getSimpleName() + " u on e.user.id=u.id " +
 //                " left join " + Parcel.class.getSimpleName() + " s on e.parcel.id=e.id  "
-                + "Where 1=1 ");
+//                + "
 
 //        if (srchRequest.getContact() != null && srchRequest.getContact().getId() != null) {
 //            q.append(" and e.contact.id ='").append(srchRequest.getContact().getId()).append("'");
@@ -49,7 +50,7 @@ public class DeliveryDetailDao {
 //            q.append(" and e.city.id ='").append(srchRequest.getCity().getId()).append("'");
 //        }
 
-        TypedQuery<DeliveryDetail> query = em.createQuery("Select e " + q.toString(), DeliveryDetail.class);
+        TypedQuery<DeliveryDetail> query = em.createQuery("Select e " + q.toString() + " order by e.id desc", DeliveryDetail.class);
         List<DeliveryDetail> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());

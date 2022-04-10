@@ -20,7 +20,6 @@ public class City {
     private Integer id;
     private Integer deleted;
     private String name;
-    @Column(unique = true)
     private String code;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     private Zone zone;

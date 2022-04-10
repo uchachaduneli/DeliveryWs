@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ParcelDao;
+import ge.bestline.delivery.ws.dto.DeliveryDetailParcelDTO;
 import ge.bestline.delivery.ws.dto.ParcelWithPackagesDTO;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
@@ -86,6 +87,13 @@ public class ParcelController {
         return ResponseEntity.ok(statusHistoryRepo.findByParcelId(id));
     }
 
+    @GetMapping(path = "/byBarCode/{barCode}")
+    public ResponseEntity<Parcel> getParcelByBarCode(@PathVariable String barCode) {
+        log.info("Getting Parcel By BarCode : " + barCode);
+        Parcel parcel = repo.findByBarCode(barCode).orElseThrow(() -> new ResourceNotFoundException("Can't find Parcel Using This BarCode : " + barCode));
+        return ResponseEntity.ok(parcel);
+    }
+
     @PutMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Parcel> updateById(@PathVariable Integer id, @RequestBody Parcel request) {
@@ -108,6 +116,28 @@ public class ParcelController {
         existing.setSenderPhone(request.getSenderPhone());
         existing.setRoute(route);
         existing.setCourier(courier);
+        Parcel updatedObj = repo.save(existing);
+        return ResponseEntity.ok(updatedObj);
+    }
+
+    @PutMapping(path = "/deliveryDetailParcel")
+    @Transactional
+    public ResponseEntity<Parcel> updateFromDeliveryDetail(@RequestBody DeliveryDetailParcelDTO request) {
+        log.info("Updating Parcel");
+        Parcel existing = repo.findById(request.getId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
+        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
+        if (request.getStatus().getId() != existing.getStatus().getId()) {
+            statusHistoryRepo.save(new ParcelStatusHistory(existing
+                    , existing.getStatus().getStatus().getName()
+                    , existing.getStatus().getStatus().getCode()
+                    , existing.getStatus().getName()
+            ));
+            existing.setStatus(request.getStatus());
+        }
+        existing.setReceiverName(request.getReceiverName());
+        existing.setReceiverIdentNumber(request.getReceiverIdentNumber());
+        existing.setDeliveryTime(request.getDeliveryTime());
         Parcel updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

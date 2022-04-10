@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Log4j2
 @RestController
@@ -63,7 +65,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<User> updateById( @RequestBody User request) {
+    public ResponseEntity<User> updateById(@RequestBody User request) {
         log.info("Updating User");
         User user = userRepository.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
         log.info("Old Values: " + user.toString() + "    New Values: " + request.toString());
@@ -92,4 +94,8 @@ public class UserController {
         return ResponseEntity.ok(resp);
     }
 
+    @GetMapping("/byRoles")
+    public ResponseEntity<List<User>> getUsersHavingRoles(@RequestParam Set<String> roles) {
+        return new ResponseEntity<>(userRepository.findAllByRoleNameIn(roles), HttpStatus.OK);
+    }
 }

@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -20,8 +21,13 @@ public class DeliveryDetail {
     private Integer id;
     @Column(unique = true)
     private String detailBarCode;
-    @OneToOne(cascade = CascadeType.DETACH)
-    private Parcel parcel;
+    private String name;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Route route;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Warehouse warehouse;
+    @ManyToMany(cascade = CascadeType.DETACH)
+    private List<Parcel> parcels;
     @ManyToOne(cascade = CascadeType.DETACH)
     private User user;
     @Temporal(TemporalType.TIMESTAMP)

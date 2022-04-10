@@ -89,6 +89,7 @@ public class Parcel {
     private User author;
     private Double tariff;
     private String content;
+    private Date deliveryTime;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
