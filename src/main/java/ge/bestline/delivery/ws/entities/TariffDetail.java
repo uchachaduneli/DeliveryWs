@@ -26,7 +26,11 @@ public class TariffDetail {
     private Double weight;
     private Double price;
     @ManyToOne(cascade = CascadeType.DETACH)
+    @NotNull
     private Zone zone;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @NotNull
+    private Services service;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)

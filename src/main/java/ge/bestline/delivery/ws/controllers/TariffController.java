@@ -85,10 +85,10 @@ public class TariffController {
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Tariff Using This ID"));
     }
 
-    @GetMapping(path = "/details/{id}")
-    public Iterable<TariffDetail> getTariffDetailsByTariffId(@PathVariable Integer id) {
-        log.info("Getting Tariff Details With tariff ID: " + id);
-        return repoDetails.findByTariff_Id(id);
+    @GetMapping(path = "/details/{id}/service/{serviceId}")
+    public Iterable<TariffDetail> getTariffDetailsByTariffId(@PathVariable Integer id, @PathVariable Integer serviceId) {
+        log.info("Getting Tariff Details With tariff ID: " + id + " And Service ID: " + serviceId);
+        return repoDetails.findByDeletedAndTariff_IdAndService_Id(2, id, serviceId, Sort.by("weight").ascending().and(Sort.by("zone.id").ascending()));
     }
 
     @PostMapping("/details")
@@ -114,22 +114,24 @@ public class TariffController {
         log.info("updating tariff Details data: " + list.toString());
         ArrayList<TariffDetail> res = new ArrayList<>();
         for (TariffDetail det : list) {
+            det.setDeleted(2);
             res.add(repoDetails.save(det));
         }
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping(path = "/calculatePrice/{tariffId}/{zoneId}/{weight}")
+    @GetMapping(path = "/calculatePrice/{serviceId}/{tariffId}/{zoneId}/{weight}")
     @Transactional
     public ResponseEntity<Double> calculatePrice(
+            @PathVariable Integer serviceId,
             @PathVariable Integer tariffId,
             @PathVariable Integer zoneId,
             @PathVariable Double weight) {
         // try to find price with exact weight
-        List<TariffDetail> details = repoDetails.findByTariffIdAndZoneIdAndWeight(tariffId, zoneId, weight);
+        List<TariffDetail> details = repoDetails.findByDeletedAndService_IdAndTariff_IdAndZone_IdAndWeight(2, serviceId, tariffId, zoneId, weight);
         if (details.isEmpty()) {
             //  price with exact weight not fount trying to find first price with greater weight
-            details = repoDetails.findByTariffIdAndZoneIdAndWeightGreaterThanOrderByWeightAsc(tariffId, zoneId, weight);
+            details = repoDetails.findByDeletedAndService_IdAndTariff_IdAndZone_IdAndWeightGreaterThanOrderByWeightAsc(2, serviceId, tariffId, zoneId, weight);
             if (details.isEmpty()) {
                 log.error("Can't get Price from TariffDetails Using This IDes {tariffId}/{zoneId}/{weight} : "
                         + tariffId + "/" + zoneId + "/" + weight);
@@ -142,14 +144,20 @@ public class TariffController {
         }
     }
 
-    @DeleteMapping("/details/{id}")
+    @DeleteMapping("/details")
     @Transactional
-    public ResponseEntity<Map<String, Boolean>> deleteDetail(@PathVariable Integer id) {
-        TariffDetail existing = repoDetails.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find TariffDetail Using This ID : " + id));
-        existing.setDeleted(1);
-        repoDetails.save(existing);
+    public ResponseEntity<Map<String, Boolean>> deleteDetail(@RequestParam List<Integer> ides) {
         Map<String, Boolean> resp = new HashMap<>();
-        resp.put("deleted", Boolean.TRUE);
+        for (Integer id : ides) {
+            try {
+                TariffDetail existing = repoDetails.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find TariffDetail Using This ID : " + id));
+                existing.setDeleted(1);
+                repoDetails.save(existing);
+                resp.put("deleted", Boolean.TRUE);
+            } catch (ResourceNotFoundException e) {
+                log.warn(e);
+            }
+        }
         return ResponseEntity.ok(resp);
     }
 

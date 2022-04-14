@@ -64,7 +64,7 @@ public class ServiceController {
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             Services searchParams) {
         Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
+        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").ascending());
         Page<Services> pageAuths = null;
         if (searchParams.getName() != null) {
             pageAuths = repo.findByName(searchParams.getName(), paging);
