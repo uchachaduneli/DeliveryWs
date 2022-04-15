@@ -177,8 +177,9 @@ public class ExcelHelper {
                 Row dataRow = sheet.createRow(i[0]);
                 dataRow.createCell(0).setCellValue(ifNull(obj.getName()));
                 dataRow.createCell(1).setCellValue(ifNull(obj.getIdentNumber()));
-                dataRow.createCell(2).setCellValue(ifNull(obj.getMainAddress().getStreet())
-                        + " " + ifNull(obj.getMainAddress().getAppartmentDetails()));
+//                dataRow.createCell(2).setCellValue(ifNull(obj.getMainAddress().getStreet())
+//                        + " " + ifNull(obj.getMainAddress().getAppartmentDetails()));
+                dataRow.createCell(2).setCellValue("-");
                 dataRow.createCell(3).setCellValue(ifNull(obj.getTariff().getName()));
             });
 

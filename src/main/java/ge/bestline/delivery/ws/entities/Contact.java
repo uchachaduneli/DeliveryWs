@@ -40,9 +40,9 @@ public class Contact {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
-    @NotFound(action = NotFoundAction.IGNORE)
-    private ContactAddress mainAddress;
+//    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
+//    @NotFound(action = NotFoundAction.IGNORE)
+//    private ContactAddress mainAddress;
 
     @PrePersist
     protected void onCreate() {

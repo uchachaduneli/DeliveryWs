@@ -64,11 +64,12 @@ public class ContactController {
         return repo.save(obj);
     }
 
-    @PutMapping(path = "/{id}")
+    @PutMapping
     @Transactional
-    public ResponseEntity<Contact> updateById(@PathVariable Integer id, @RequestBody Contact request) {
+    public ResponseEntity<Contact> updateById(@RequestBody Contact request) {
         log.info("Updating Contact");
-        Contact existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        Contact existing = repo.findById(request.getId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
         existing.setEmail(request.getEmail());

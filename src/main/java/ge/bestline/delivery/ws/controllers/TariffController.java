@@ -133,10 +133,10 @@ public class TariffController {
             //  price with exact weight not fount trying to find first price with greater weight
             details = repoDetails.findByDeletedAndService_IdAndTariff_IdAndZone_IdAndWeightGreaterThanOrderByWeightAsc(2, serviceId, tariffId, zoneId, weight);
             if (details.isEmpty()) {
-                log.error("Can't get Price from TariffDetails Using This IDes {tariffId}/{zoneId}/{weight} : "
-                        + tariffId + "/" + zoneId + "/" + weight);
-                throw new ResourceNotFoundException("Can't get Price from TariffDetails Using This IDes {tariffId}/{zoneId}/{weight} : "
-                        + tariffId + "/" + zoneId + "/" + weight);
+//                log.error("Can't get Price from TariffDetails Using This IDes {serviceId}/{tariffId}/{zoneId}/{weight} : "
+//                        + serviceId + tariffId + "/" + zoneId + "/" + weight);
+                throw new ResourceNotFoundException("Can't get Price from TariffDetails Using This IDes {serviceId}/{tariffId}/{zoneId}/{weight} : "
+                        + serviceId + tariffId + "/" + zoneId + "/" + weight);
             }
             return ResponseEntity.ok(details.get(0).getPrice());
         } else {

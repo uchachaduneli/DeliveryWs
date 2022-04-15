@@ -22,9 +22,11 @@ public class ContactDao {
     public Map<String, Object> findAll(int page, int rowCount, Contact srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(Contact.class.getSimpleName()).append(" e LEFT JOIN ")
-                .append(ContactAddress.class.getSimpleName())
-                .append(" c on e.mainAddress.id=c.id Where 1=1 ");
+        q.append(" From ").append(Contact.class.getSimpleName())
+                .append(" e  Where 1=1 ");
+//                .append(" Where 1=1  e LEFT JOIN ")
+//                .append(ContactAddress.class.getSimpleName())
+//                .append(" c on e.mainAddress.id=c.id Where 1=1 ");
 
         if (srchRequest.getId() != null) {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
