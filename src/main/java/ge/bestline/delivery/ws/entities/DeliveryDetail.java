@@ -21,7 +21,6 @@ public class DeliveryDetail {
     private Integer id;
     @Column(unique = true)
     private String detailBarCode;
-    private String name;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Route route;
     @ManyToOne(cascade = CascadeType.DETACH)

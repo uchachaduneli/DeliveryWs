@@ -93,7 +93,7 @@ public class CityController {
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             City searchParams) {
         Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
+        Pageable paging = PageRequest.of(page, rowCount, Sort.by("name").ascending());
         Page<City> pageAuths = null;
         pageAuths = cityRepository.findAll(paging);
         resp.put("items", pageAuths.getContent());

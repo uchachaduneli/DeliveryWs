@@ -40,6 +40,7 @@ public class Parcel {
     private City senderCity;
     private Integer sendSmsToSender;
 
+    private Integer receiverId;
     private String receiverName;
     private String receiverIdentNumber;
     private String receiverContactPerson;
@@ -50,6 +51,7 @@ public class Parcel {
     private City receiverCity;
     private Integer sendSmsToReceiver;
 
+    private Integer payerId;
     private Integer payerSide; // 1 sender  2 receiver   3 third side
     private String payerName;
     private String payerIdentNumber;
@@ -112,7 +114,7 @@ public class Parcel {
 
     public Parcel(ExcelTmpParcel obj, ContactAddress sender) {
         if (sender != null) {
-            this.senderId = sender.getContact().getId();
+            this.payerId = sender.getContact().getId();
             this.senderName = sender.getContact().getName();
             this.senderIdentNumber = sender.getContact().getIdentNumber();
             // set sender as payer

@@ -23,7 +23,6 @@ public class Services {
     private String name;
     @Column(unique = true)
     private String engName;
-    private Double price;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
