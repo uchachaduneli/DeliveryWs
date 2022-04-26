@@ -20,17 +20,12 @@ public class Zone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer deleted;
-    private String name;
+    private Integer name;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-
-    public Zone(Integer id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     @PrePersist
     protected void onCreate() {

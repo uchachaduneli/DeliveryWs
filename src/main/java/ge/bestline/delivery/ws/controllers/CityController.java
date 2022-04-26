@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Log4j2
 @RestController
@@ -104,6 +103,16 @@ public class CityController {
     @GetMapping(path = "/{id}")
     public City getCitiesById(@PathVariable Integer id) {
         return cityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
+    }
+
+    @GetMapping(path = "/longestDestZone/{cityOneId}/{cityTwoId}")
+    public ResponseEntity<City> getCitiesById(@PathVariable Integer cityOneId, @PathVariable Integer cityTwoId) {
+        City city1 = cityRepository.findByIdAndDeleted(cityOneId, 2).orElseThrow(() -> new ResourceNotFoundException("Can't find City Record Using This ID " + cityOneId));
+        City city2 = cityRepository.findByIdAndDeleted(cityTwoId, 2).orElseThrow(() -> new ResourceNotFoundException("Can't find City Record Using This ID " + cityTwoId));
+        if (city1.getZone().getName() == city2.getZone().getName()) {
+            return ResponseEntity.ok(cityRepository.findTopByZone_NameAndDeleted(1, 2));
+        }
+        return ResponseEntity.ok(city2.getZone().getName() > city1.getZone().getName() ? city2 : city1);
     }
 
 }
