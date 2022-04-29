@@ -59,6 +59,16 @@ public class ParcelController {
         return new ResponseEntity<>("მსგავსი ამანათი უკვე არსებობს", HttpStatus.BAD_REQUEST);
     }
 
+    @PostMapping(path = "/prePrint/{count}")
+    @Transactional
+    public ResponseEntity<List<Parcel>> preGeneration(@PathVariable Integer count) {
+        List<Parcel> res = new ArrayList<>();
+        for(String barcode : barCodeService.getBarcodes(count)){
+            res.add(repo.save(new Parcel(barcode)));
+        }
+        return ResponseEntity.ok(res);
+    }
+
     @PostMapping
     @Transactional
     public Parcel addNew(@RequestBody Parcel obj) {

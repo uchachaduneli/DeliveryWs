@@ -25,9 +25,10 @@ public class Parcel {
     private Integer id;
     @JsonIgnore
     private Integer deleted;
+    // 1 - pre inserted with empty values, will be filled after some time
+    private Integer prePrinted;
     @Column(unique = true)
     private String barCode;
-    private boolean preGenerated;
 
     private Integer senderId;
     private String senderName;
@@ -97,6 +98,11 @@ public class Parcel {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+
+    public Parcel(String barCode) {
+        this.barCode = barCode;
+        this.prePrinted = 1;
+    }
 
     @PrePersist
     protected void onCreate() {
