@@ -38,7 +38,7 @@ public class ParcelDao {
 //            q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
 //        }
 
-        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString(), Parcel.class);
+        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() +" order by e.prePrinted asc", Parcel.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());

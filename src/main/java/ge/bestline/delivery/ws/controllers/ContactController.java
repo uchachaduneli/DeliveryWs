@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,8 @@ public class ContactController {
     private final UserRepository userRepository;
     private final ExcelHelper excelHelper;
 
-    public ContactController(ContactRepository repo, ContactDao dao, UserRepository userRepository, ExcelHelper excelHelper) {
+    public ContactController(ContactRepository repo, ContactDao dao,
+                             UserRepository userRepository, ExcelHelper excelHelper) {
         this.repo = repo;
         this.dao = dao;
         this.userRepository = userRepository;
@@ -61,6 +63,9 @@ public class ContactController {
     @Transactional
     public Contact addNew(@RequestBody Contact obj) {
         log.info("Adding New Contact: " + obj.toString());
+        if (obj.getIdentNumber() != null && repo.findByIdentNumber(obj.getIdentNumber()) != null) {
+            throw new ConstraintViolationException("Already Exists", new SQLException(), "identNumber");
+        }
         return repo.save(obj);
     }
 
@@ -70,6 +75,10 @@ public class ContactController {
         log.info("Updating Contact");
         Contact existing = repo.findById(request.getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
+        Contact foundedByIdent = repo.findByIdentNumber(request.getIdentNumber());
+        if (foundedByIdent != null && existing.getId() != foundedByIdent.getId()) {
+            throw new ConstraintViolationException("Already Exists", new SQLException(), "identNumber");
+        }
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
         existing.setEmail(request.getEmail());

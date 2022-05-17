@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.DeliveryDetailDao;
+import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.DeliveryDetail;
 import ge.bestline.delivery.ws.entities.Parcel;
 import ge.bestline.delivery.ws.repositories.*;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Log4j2
@@ -80,5 +82,16 @@ public class DeliveryDetailsController {
     public DeliveryDetail getById(@PathVariable Integer id) {
         log.info("Getting DeliveryDetail With ID: " + id);
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Integer id) {
+        DeliveryDetail existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
+        log.info("Deleting DeliveryDetail: " + existing.toString());
+        repo.delete(existing);
+        Map<String, Boolean> resp = new HashMap<>();
+        resp.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(resp);
     }
 }

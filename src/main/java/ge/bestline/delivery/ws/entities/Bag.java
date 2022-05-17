@@ -5,33 +5,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Contact {
+public class Bag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer deleted;
-    private String name;
-    private String email;
-    private Integer type; // 1 personal / 2 juridical
-    private Integer status; // 1 axali / 2 dzveli ?
-    private Integer deReGe; // 1 ibegreba / 2 ar ibegreba ?
-    private Integer hasContract; // 1 ara / 2 ki
-    private String identNumber;
+    @Column(unique = true)
+    private String barCode;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
-    private User user;
+    private Warehouse from;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
-    private Tariff tariff;
+    private Warehouse to;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private ParcelStatusReason status;
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<Parcel> parcels;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
@@ -40,8 +37,6 @@ public class Contact {
 
     @PrePersist
     protected void onCreate() {
-        deleted = 2;
-        hasContract = 1;
         createdTime = new Date();
     }
 
