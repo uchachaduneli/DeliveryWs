@@ -66,18 +66,7 @@ public class BagController {
         return ResponseEntity.ok(updatedObj);
     }
 
-    @PutMapping("/multipleStatusUpdate/{statusId}")
-    @Transactional
-    public ResponseEntity<List<Bag>> updateMultiplesStatusByBarCode(@PathVariable Integer statusId, @RequestBody List<String> barCodes) {
-        log.info("Update Multiple Bags Status By BarCode");
-        ParcelStatusReason status = statusReasonRepo.findById(statusId).orElseThrow(() -> new ResourceNotFoundException("Can't find Status Using This ID : " + statusId));
-        List<Bag> res = new ArrayList<>();
-        for (Bag p : repo.findByBarCodeIn(barCodes)) {
-            p.setStatus(status);
-            res.add(repo.save(p));
-        }
-        return ResponseEntity.ok(res);
-    }
+
 
     @DeleteMapping("/{id}")
     @Transactional

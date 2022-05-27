@@ -63,7 +63,7 @@ public class ParcelController {
     @Transactional
     public ResponseEntity<List<Parcel>> preGeneration(@PathVariable Integer count) {
         List<Parcel> res = new ArrayList<>();
-        for(String barcode : barCodeService.getBarcodes(count)){
+        for (String barcode : barCodeService.getBarcodes(count)) {
             res.add(repo.save(new Parcel(barcode)));
         }
         return ResponseEntity.ok(res);
@@ -130,24 +130,49 @@ public class ParcelController {
         return ResponseEntity.ok(updatedObj);
     }
 
+    @PutMapping("/multipleStatusUpdate/{statusId}/{note}")
+    @Transactional
+    public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@PathVariable Integer statusId, @PathVariable String note,
+                                                                       @RequestBody List<String> barCodes) {
+        log.info("Update Multiple Parcels Status By BarCode");
+        ParcelStatusReason status = statusReasonRepo.findById(statusId).orElseThrow(() -> new ResourceNotFoundException("Can't find Status Using This ID : " + statusId));
+        List<Parcel> res = new ArrayList<>();
+        for (Parcel p : repo.findByBarCodeIn(barCodes)) {
+            if (p.getStatus().getId() != status.getId()) {
+                statusHistoryRepo.save(new ParcelStatusHistory(p
+                        , status.getStatus().getName()
+                        , status.getStatus().getCode()
+                        , note
+                ));
+            }
+            p.setStatus(status);
+            p.setStatusNote(note);
+            res.add(repo.save(p));
+        }
+        return ResponseEntity.ok(res);
+    }
+
     @PutMapping(path = "/deliveryDetailParcel")
     @Transactional
     public ResponseEntity<Parcel> updateFromDeliveryDetail(@RequestBody DeliveryDetailParcelDTO request) {
-        log.info("Updating Parcel");
+        log.info(" updateFromDeliveryDetail started");
+        ParcelStatusReason status = statusReasonRepo.findById(request.getStatus().getId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatus().getId()));
         Parcel existing = repo.findById(request.getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
-        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
+        log.info("updateFromDeliveryDetail Old Values: " + existing.toString() + "    New Values: " + request.toString());
         if (request.getStatus().getId() != existing.getStatus().getId()) {
             statusHistoryRepo.save(new ParcelStatusHistory(existing
-                    , existing.getStatus().getStatus().getName()
-                    , existing.getStatus().getStatus().getCode()
-                    , existing.getStatus().getName()
+                    , status.getStatus().getName()
+                    , status.getStatus().getCode()
+                    , existing.getStatusNote()
             ));
-            existing.setStatus(request.getStatus());
+            existing.setStatus(status);
         }
         existing.setReceiverName(request.getReceiverName());
         existing.setReceiverIdentNumber(request.getReceiverIdentNumber());
         existing.setDeliveryTime(request.getDeliveryTime());
+        existing.setStatusNote(request.getStatusNote());
         Parcel updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

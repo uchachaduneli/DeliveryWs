@@ -18,6 +18,7 @@ public class DeliveryDetailParcelDTO {
 //    @JsonFormat(shape = JsonFormat.Shape.STRING, locale = "ka_GE", timezone = "Asia/Tbilisi", pattern = "yyyy-MM-dd@HH:mm")
     private Date deliveryTime;
     private String receiverName;
+    private String statusNote;
     private String receiverIdentNumber;
     private ParcelStatusReason status;
     private Integer id;

@@ -69,7 +69,7 @@ public class DeliveryDetailsController {
 
     @GetMapping("barcode")
     public ResponseEntity<String> getBarCodeForNewDetails() {
-        log.info("Geting Barcode For new Delivery Details Started");
+        log.info("Getting Barcode For new Delivery Details Started");
         String barcode = barCodeService.getBarcodes(1).get(0);
         if (deliveryDetailsRepository.findByDetailBarCode(barcode).isPresent()) {
             // try to generate one more time to find not existing one in delivery details table
