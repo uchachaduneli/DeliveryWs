@@ -48,14 +48,14 @@ public class JwtTokenProvider {
         claims.put("roles", user.getRole().stream().map((r) -> r.getName()).collect(Collectors.toList()));
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
-        return Jwts.builder().setClaims(claims).setIssuedAt(now).setExpiration(validity).signWith(SignatureAlgorithm.HS256, secret).compact();
+        return Jwts.builder().setClaims(claims)
+                .setIssuedAt(now).setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secret).compact();
     }
 
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = getUserDetailsFromToken(token);
-
         log.info("Authentication - UserDetails: {} token {}", userDetails, token);
-
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
@@ -68,11 +68,6 @@ public class JwtTokenProvider {
         for (String role : roles) {
             authorities.add(new SimpleGrantedAuthority(role));
         }
-
-//        List<String> privileges = (ArrayList) body.get("privileges");
-//        for (String privilege : privileges) {
-//            authorities.add(new SimpleGrantedAuthority(privilege));
-//        }
 
         return new org.springframework.security.core.userdetails.User(body.getSubject(), "", authorities);
     }
@@ -95,12 +90,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
-
-            if (claims.getBody().getExpiration().before(new Date())) {
-                return false;
-            }
-
+            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtAuthenticationException("JWT token is expired or invalid");

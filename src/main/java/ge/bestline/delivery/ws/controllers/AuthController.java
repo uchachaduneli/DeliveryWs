@@ -36,13 +36,13 @@ public class AuthController {
             User user = userDao.findByUserNameAndPassword(credentials.getUsername(), credentials.getPassword());
             if (user != null) {
                 TokenUser tokenUser = new TokenUser(user);
-                return ResponseEntity.ok(new Token(LocalDateTime.now(), tokenUser, this.jwtTokenProvider.createToken(tokenUser)));
+                return ResponseEntity.ok(new Token(tokenUser, this.jwtTokenProvider.createToken(tokenUser)));
             } else {
                 log.error("Authorization Failed, User Not Found With Defined Credentials");
                 return new ResponseEntity<>((HttpStatus.UNAUTHORIZED));
             }
         } catch (Exception e) {
-            log.error("Authorization Failed,  User Not Found for user " + credentials.getUsername());
+            log.error("Authorization Failed for user: " + credentials.getUsername(), e);
             return new ResponseEntity<>((HttpStatus.UNAUTHORIZED));
         }
     }

@@ -9,12 +9,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 public class Token {
-    public LocalDateTime created;
     public TokenUser user;
     public String token;
 
-    public Token(LocalDateTime created, TokenUser user, String token) {
-        this.created = created;
+    public Token(TokenUser user, String token) {
         this.user = user;
         this.token = token;
     }
