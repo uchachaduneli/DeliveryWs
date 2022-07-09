@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 // Reisi
 @Data
@@ -25,6 +26,8 @@ public class Tranzit {
     @ManyToOne(cascade = CascadeType.DETACH)
     private Car car;
     @ManyToOne(cascade = CascadeType.DETACH)
+    private ParcelStatusReason status;
+    @ManyToOne(cascade = CascadeType.DETACH)
     private City routeFrom;
     @ManyToOne(cascade = CascadeType.DETACH)
     private City routeTo;
@@ -34,6 +37,8 @@ public class Tranzit {
     private Warehouse senderWarehouse;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Warehouse destWarehouse;
+    @ManyToMany(cascade = CascadeType.DETACH)
+    private List<Bag> bags;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;

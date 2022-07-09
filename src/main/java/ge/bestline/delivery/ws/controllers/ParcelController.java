@@ -4,6 +4,7 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ParcelDao;
 import ge.bestline.delivery.ws.dto.DeliveryDetailParcelDTO;
 import ge.bestline.delivery.ws.dto.ParcelWithPackagesDTO;
+import ge.bestline.delivery.ws.dto.StatusManagerReqDTO;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.services.BarCodeService;
@@ -130,23 +131,25 @@ public class ParcelController {
         return ResponseEntity.ok(updatedObj);
     }
 
-    @PutMapping("/multipleStatusUpdate/{statusId}/{note}")
+    @PutMapping("/multipleStatusUpdate")
     @Transactional
-    public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@PathVariable Integer statusId, @PathVariable String note,
-                                                                       @RequestBody List<String> barCodes) {
+    public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@RequestBody StatusManagerReqDTO request) {
         log.info("Update Multiple Parcels Status By BarCode");
-        ParcelStatusReason status = statusReasonRepo.findById(statusId).orElseThrow(() -> new ResourceNotFoundException("Can't find Status Using This ID : " + statusId));
+        ParcelStatusReason status = statusReasonRepo.findById(request.getStatusId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatusId()));
         List<Parcel> res = new ArrayList<>();
-        for (Parcel p : repo.findByBarCodeIn(barCodes)) {
+        for (Parcel p : repo.findByBarCodeIn(request.getBarCodes())) {
             if (p.getStatus().getId() != status.getId()) {
                 statusHistoryRepo.save(new ParcelStatusHistory(p
-                        , status.getStatus().getName()
-                        , status.getStatus().getCode()
-                        , note
+                        , status.getName()
+                        , status.getCode()
+                        , request.getNote()
+                        , request.getStatusDateTime()
                 ));
             }
             p.setStatus(status);
-            p.setStatusNote(note);
+            p.setStatusNote(request.getNote());
+            p.setStatusDateTime(request.getStatusDateTime());
             res.add(repo.save(p));
         }
         return ResponseEntity.ok(res);

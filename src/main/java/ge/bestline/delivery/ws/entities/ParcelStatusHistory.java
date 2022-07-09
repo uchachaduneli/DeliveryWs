@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Data
@@ -21,6 +22,7 @@ public class ParcelStatusHistory {
     private String name;
     private String reason;
     private String code;
+    private Timestamp statusDateTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
@@ -32,6 +34,14 @@ public class ParcelStatusHistory {
         this.reason = reason;
         this.name = name;
         this.code = code;
+    }
+
+    public ParcelStatusHistory(Parcel parcel, String name, String code, String reason, Timestamp statusDateTime) {
+        this.parcel = parcel;
+        this.reason = reason;
+        this.name = name;
+        this.code = code;
+        this.statusDateTime = statusDateTime;
     }
 
     @PrePersist

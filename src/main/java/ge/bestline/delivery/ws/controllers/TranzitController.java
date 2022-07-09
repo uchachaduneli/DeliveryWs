@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.entities.ParcelStatusReason;
 import ge.bestline.delivery.ws.entities.Tranzit;
 import ge.bestline.delivery.ws.repositories.*;
 import lombok.extern.log4j.Log4j2;
@@ -26,14 +27,20 @@ public class TranzitController {
     private final CityRepository cityRepository;
     private final UserRepository userRepository;
     private final WarehouseRepository warehouseRepository;
+    private final ParcelStatusReasonRepository statusRepo;
 
-    public TranzitController(TranzitRepository repo, CarRepository carRepository, CityRepository cityRepository,
-                             UserRepository userRepository, WarehouseRepository warehouseRepository) {
+    public TranzitController(TranzitRepository repo,
+                             CarRepository carRepository,
+                             CityRepository cityRepository,
+                             UserRepository userRepository,
+                             WarehouseRepository warehouseRepository,
+                             ParcelStatusReasonRepository statusRepo) {
         this.repo = repo;
         this.carRepository = carRepository;
         this.cityRepository = cityRepository;
         this.userRepository = userRepository;
         this.warehouseRepository = warehouseRepository;
+        this.statusRepo = statusRepo;
     }
 
     @PostMapping
@@ -43,7 +50,7 @@ public class TranzitController {
         return repo.save(obj);
     }
 
-    @PostMapping(path = "/{id}")
+    @PutMapping(path = "/{id}")
     @Transactional
     public ResponseEntity<Tranzit> updateById(@PathVariable Integer id, @RequestBody Tranzit request) {
         log.info("Updating Tranzit");
@@ -70,6 +77,25 @@ public class TranzitController {
         existing.setRouteTo(cityRepository.findById(request.getRouteTo().getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find RouteTo City Using This ID : " + request.getRouteTo().getId())));
 
+        Tranzit updatedObj = repo.save(existing);
+        return ResponseEntity.ok(updatedObj);
+    }
+
+    @PutMapping(path = "/status")
+    @Transactional
+    public ResponseEntity<Tranzit> updateStatusWithChildBagsAndParcels(@RequestBody Tranzit request) {
+        log.info("Updating Tranzit");
+        Tranzit existing = repo.findById(request.getId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find Tranzit Using This ID : " + request.getId()));
+        log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
+        ParcelStatusReason status = statusRepo.findById(request.getStatus().getId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't Find Status to Set Tranzit ID= " + request.getStatus().getId()));
+        if (existing.getStatus() == null) {
+            existing.setStatus(status);
+        } else if (existing.getStatus().getId() != status.getId()) {
+            existing.setStatus(status);
+//            update inner bags & parcels statuses
+        }
         Tranzit updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

@@ -66,6 +66,7 @@ public class Parcel {
     @ManyToOne(cascade = CascadeType.DETACH)
     private ParcelStatusReason status;
     private String statusNote; // insert/update operations ar made from deliveryDetails Page
+    private java.sql.Timestamp statusDateTime; //xelit sheyavt statusebismenejeris feijze
 
     private String comment;
     private Integer deliveredConfirmation; //1 yes 2 no
