@@ -112,7 +112,7 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
-<!--             asd       <exclude>**/application.properties</exclude>-->
+<!--                    <exclude>**/application.properties</exclude>-->
                 </excludes>
             </resource>
         </resources>
