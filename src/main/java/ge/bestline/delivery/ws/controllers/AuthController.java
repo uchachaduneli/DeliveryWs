@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-
 @Log4j2
 @RestController
 @RequestMapping(value = "/auth")
@@ -36,7 +34,7 @@ public class AuthController {
             User user = userDao.findByUserNameAndPassword(credentials.getUsername(), credentials.getPassword());
             if (user != null) {
                 TokenUser tokenUser = new TokenUser(user);
-                return ResponseEntity.ok(new Token(tokenUser, this.jwtTokenProvider.createToken(tokenUser)));
+                return ResponseEntity.ok(new Token(this.jwtTokenProvider.createToken(tokenUser), tokenUser));
             } else {
                 log.error("Authorization Failed, User Not Found With Defined Credentials");
                 return new ResponseEntity<>((HttpStatus.UNAUTHORIZED));

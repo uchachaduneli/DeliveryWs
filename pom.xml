@@ -139,6 +139,13 @@
             <artifactId>spring-boot-starter-web-services</artifactId>
             <version>1.4.0.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.12.2</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -148,7 +155,7 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
-<!--                    <exclude>**/application.properties</exclude>-->
+                    <exclude>**/application.properties</exclude>
                 </excludes>
             </resource>
         </resources>

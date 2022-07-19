@@ -12,9 +12,9 @@ public class Token {
     public TokenUser user;
     public String token;
 
-    public Token(TokenUser user, String token) {
-        this.user = user;
+    public Token(String token, TokenUser user) {
         this.token = token;
+        this.user = user;
     }
 }
 
