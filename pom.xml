@@ -155,7 +155,7 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
-                    <exclude>**/application.properties</exclude>
+<!--                    <exclude>**/application.properties</exclude>-->
                 </excludes>
             </resource>
         </resources>

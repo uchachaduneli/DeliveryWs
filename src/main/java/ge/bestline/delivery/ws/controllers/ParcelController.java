@@ -2,11 +2,10 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ParcelDao;
-import ge.bestline.delivery.ws.dto.DeliveryDetailParcelDTO;
-import ge.bestline.delivery.ws.dto.ParcelWithPackagesDTO;
-import ge.bestline.delivery.ws.dto.StatusManagerReqDTO;
+import ge.bestline.delivery.ws.dto.*;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
+import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +35,7 @@ public class ParcelController {
     private final UserRepository userRepository;
     private final RouteRepository routeRepository;
     private final BarCodeService barCodeService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public ParcelController(ParcelRepository repo,
                             VolumeWeightIndexRepository volumeWeightIndexRepository,
@@ -43,7 +44,7 @@ public class ParcelController {
                             ParcelStatusReasonRepository statusReasonRepo,
                             UserRepository userRepository,
                             RouteRepository routeRepository,
-                            BarCodeService barCodeService) {
+                            BarCodeService barCodeService, JwtTokenProvider jwtTokenProvider) {
         this.repo = repo;
         this.volumeWeightIndexRepository = volumeWeightIndexRepository;
         this.packagesRepo = packagesRepo;
@@ -53,6 +54,7 @@ public class ParcelController {
         this.userRepository = userRepository;
         this.routeRepository = routeRepository;
         this.barCodeService = barCodeService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -72,15 +74,22 @@ public class ParcelController {
 
     @PostMapping
     @Transactional
-    public Parcel addNew(@RequestBody Parcel obj) {
+    public Parcel addNew(@RequestBody Parcel obj,
+                         HttpServletRequest req) {
         log.info("Adding New Parcel: " + obj.toString());
-        User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
-                () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
-        Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
-                () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
-        obj.setCourier(courier);
-        obj.setRoute(route);
+        if (obj.getRoute() != null) {
+            User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
+            Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
+            obj.setCourier(courier);
+            obj.setRoute(route);
+        }
         obj.setBarCode(barCodeService.getBarcodes(1).get(0));
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
+            obj.setAuthor(new User(requester.getId()));
+        }
         Parcel parcel = repo.save(obj);
         ParcelStatusReason psr = statusReasonRepo.findById(1).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parcels Status History"));
@@ -196,7 +205,12 @@ public class ParcelController {
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            Parcel searchParams) {
+            Parcel searchParams,
+            HttpServletRequest req) {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
+            searchParams.setAuthor(new User(requester.getId()));
+        }
         return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 

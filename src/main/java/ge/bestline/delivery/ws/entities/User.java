@@ -20,8 +20,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer deleted;
+    private Integer parentUserId;
     private String name;
     private String lastName;
+    @Column(unique = true)
     private String userName;
     private String password;
     private String phone;
@@ -54,6 +56,10 @@ public class User {
         this.city = city;
         this.role = role;
         this.status = status;
+    }
+
+    public User(Integer id) {
+        this.id = id;
     }
 
     @PrePersist

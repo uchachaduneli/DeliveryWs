@@ -20,7 +20,7 @@ public class UserDao {
     public Map<String, Object> findAll(int page, int rowCount, User srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(User.class.getSimpleName()).append(" e JOIN e.role r Where 1=1 ");
+        q.append(" From ").append(User.class.getSimpleName()).append(" e JOIN e.role r Where e.deleted=2 ");
 
         if (srchRequest.getCity() != null && srchRequest.getCity().getId() != null) {
             q.append(" and e.city.id ='").append(srchRequest.getCity().getId()).append("'");
@@ -28,6 +28,12 @@ public class UserDao {
 
         if (srchRequest.getName() != null) {
             q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
+        }
+
+        if (srchRequest.getParentUserId() != null) {
+            q.append(" and ( e.id ='").append(srchRequest.getParentUserId())
+                    .append("' or e.parentUserId='")
+                    .append(srchRequest.getParentUserId()).append("') ");
         }
 
         if (srchRequest.getLastName() != null) {
@@ -58,7 +64,7 @@ public class UserDao {
             q.append(" and e.password='").append(srchRequest.getPassword()).append("'");
         }
 
-        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e " + q.toString(), User.class);
+        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e " + q.toString() +" order by e.id desc", User.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         if (srchRequest.getSrchRoleName() != null && !srchRequest.getSrchRoleName().isEmpty()) {
             query.setParameter("rolesInList", srchRequest.getSrchRoleName());

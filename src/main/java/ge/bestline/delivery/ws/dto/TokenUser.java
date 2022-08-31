@@ -4,11 +4,13 @@ import ge.bestline.delivery.ws.entities.Role;
 import ge.bestline.delivery.ws.entities.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
+@ToString
 public class TokenUser {
     private Integer id;
     private Integer warehouseId;
@@ -24,5 +26,10 @@ public class TokenUser {
         this.lastName = u.getLastName();
         this.userName = u.getUserName();
         this.role = u.getRole();
+    }
+
+    public TokenUser(String userName, Set<Role> role) {
+        this.userName = userName;
+        this.role = role;
     }
 }

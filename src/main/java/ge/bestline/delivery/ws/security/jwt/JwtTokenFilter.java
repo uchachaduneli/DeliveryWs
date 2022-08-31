@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.security.jwt;
 
 import ge.bestline.delivery.ws.Exception.RestResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -14,6 +15,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Log4j2
 public class JwtTokenFilter extends OncePerRequestFilter {
     private JwtTokenProvider jwtTokenProvider;
 
@@ -22,6 +24,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     HttpServletResponse res,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
+            String ipAddress = req.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null) {
+                ipAddress = req.getRemoteAddr();
+            }
+            log.info("Requester IP: " + ipAddress);
             String token = jwtTokenProvider.resolveToken((HttpServletRequest) req);
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 SecurityContextHolder.getContext().setAuthentication(jwtTokenProvider.getAuthentication(token));

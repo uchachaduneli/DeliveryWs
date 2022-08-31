@@ -1,7 +1,11 @@
 package ge.bestline.delivery.ws.security.jwt;
 
 import ge.bestline.delivery.ws.dto.TokenUser;
-import io.jsonwebtoken.*;
+import ge.bestline.delivery.ws.dto.UserRoles;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,10 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -78,6 +79,22 @@ public class JwtTokenProvider {
 
     public String getUsername(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public TokenUser getRequesterUserData(HttpServletRequest req) {
+        String token = resolveToken(req);
+        Claims body = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        LinkedHashMap m = (LinkedHashMap) body.get("user");
+        TokenUser user = new TokenUser();
+        user.setId((Integer) m.get("id"));
+        user.setUserName((String) m.get("userName"));
+        user.setName((String) m.get("name"));
+        user.setLastName((String) m.get("lastName"));
+        if (m.get("warehouseId") != null) {
+            user.setWarehouseId((Integer) m.get("warehouseId"));
+        }
+        user.setRole(new HashSet((Collection) body.get("roles")));
+        return user;
     }
 
     public String resolveToken(HttpServletRequest req) {

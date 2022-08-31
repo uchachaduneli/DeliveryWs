@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -29,6 +28,10 @@ public class ParcelDao {
         if (srchRequest.getCourier() != null) {
             q.append(" and e.courier.id ='").append(srchRequest.getCourier().getId()).append("'");
         }
+
+        if (srchRequest.getAuthor() != null) {
+            q.append(" and e.author.id ='").append(srchRequest.getAuthor().getId()).append("'");
+        }
 //
 //        if (srchRequest.getDeleted() != null) {
 //            q.append(" and e.deleted ='").append(srchRequest.getDeleted()).append("'");
@@ -38,7 +41,7 @@ public class ParcelDao {
 //            q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
 //        }
 
-        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() +" order by e.prePrinted asc, e.id desc", Parcel.class);
+        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() + " order by e.prePrinted asc, e.id desc", Parcel.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());
