@@ -52,6 +52,8 @@ public class Parcel {
     private String deliveredToPersIdent;
     private String deliveredToPersRelativeLevel;
     private String deliveredToPersNote;
+    private String deliveredToPersSignature;
+    private String deliveredParcelimage;
     @ManyToOne(cascade = CascadeType.DETACH)
     @NotFound(action = NotFoundAction.IGNORE)
     private City receiverCity;
