@@ -47,6 +47,11 @@ public class Parcel {
     private String receiverContactPerson;
     private String receiverAddress;
     private String receiverPhone;
+
+    private String deliveredToPers;
+    private String deliveredToPersIdent;
+    private String deliveredToPersRelativeLevel;
+    private String deliveredToPersNote;
     @ManyToOne(cascade = CascadeType.DETACH)
     @NotFound(action = NotFoundAction.IGNORE)
     private City receiverCity;
@@ -67,6 +72,7 @@ public class Parcel {
     private ParcelStatusReason status;
     private String statusNote; // insert/update operations ar made from deliveryDetails Page
     private java.sql.Timestamp statusDateTime; //xelit sheyavt statusebismenejeris feijze
+    private Integer courierStatus; //1 = Seen else Not Seen - on mobile device
 
     private String comment;
     private Integer deliveredConfirmation; //1 yes 2 no
