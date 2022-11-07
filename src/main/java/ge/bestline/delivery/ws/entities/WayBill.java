@@ -22,7 +22,9 @@ import java.util.Date;
 @ToString
 public class WayBill {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private String rsId;
     @ManyToOne(cascade = CascadeType.DETACH, optional = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private WayBillType type;

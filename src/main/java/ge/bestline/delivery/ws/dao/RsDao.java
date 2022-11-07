@@ -27,6 +27,10 @@ public class RsDao {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
         }
 
+        if (srchRequest.getRsId() != null) {
+            q.append(" and e.rsId ='").append(srchRequest.getRsId()).append("'");
+        }
+
         if (srchRequest.getBuyerTin() != null) {
             q.append(" and e.buyerTin ='").append(srchRequest.getBuyerTin()).append("'");
         }
@@ -35,7 +39,7 @@ public class RsDao {
             q.append(" and e.buyerName like '%").append(srchRequest.getBuyerName()).append("%'");
         }
 
-        TypedQuery<WayBill> query = em.createQuery("Select e" + q.toString(), WayBill.class);
+        TypedQuery<WayBill> query = em.createQuery("Select e" + q.toString() + " order by e.id desc", WayBill.class);
         List<WayBill> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());

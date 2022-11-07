@@ -101,7 +101,7 @@ public class RsService {
         WayBill wayBill = new WayBill();
         // to avoid nullpointer Exception - some of these fields value sometimes is null
         Node mayBeNullNode = e.getElementsByTagName("ID").item(0);
-        wayBill.setId(mayBeNullNode != null ? Integer.valueOf(mayBeNullNode.getTextContent()) : null);
+        wayBill.setRsId(mayBeNullNode != null ? mayBeNullNode.getTextContent() : null);
         mayBeNullNode = e.getElementsByTagName("TYPE").item(0);
         wayBill.setType(mayBeNullNode != null ? new WayBillType(Integer.valueOf(mayBeNullNode.getTextContent())) : null);
         mayBeNullNode = e.getElementsByTagName("CREATE_DATE").item(0);
