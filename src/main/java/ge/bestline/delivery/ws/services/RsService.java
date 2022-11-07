@@ -66,10 +66,8 @@ public class RsService {
         document.getDocumentElement().normalize();
         //Here comes the root node
         Element root = document.getDocumentElement();
-        System.out.println(root.getNodeName());
         //Get all waybills
         NodeList nList = document.getElementsByTagName("WAYBILL");
-        System.out.println("============================");
 
         for (int i = 0; i < nList.getLength(); i++) {
             Node node = nList.item(i);
@@ -101,7 +99,7 @@ public class RsService {
         WayBill wayBill = new WayBill();
         // to avoid nullpointer Exception - some of these fields value sometimes is null
         Node mayBeNullNode = e.getElementsByTagName("ID").item(0);
-        wayBill.setRsId(mayBeNullNode != null ? mayBeNullNode.getTextContent() : null);
+        wayBill.setId(mayBeNullNode != null ? mayBeNullNode.getTextContent() : null);
         mayBeNullNode = e.getElementsByTagName("TYPE").item(0);
         wayBill.setType(mayBeNullNode != null ? new WayBillType(Integer.valueOf(mayBeNullNode.getTextContent())) : null);
         mayBeNullNode = e.getElementsByTagName("CREATE_DATE").item(0);
