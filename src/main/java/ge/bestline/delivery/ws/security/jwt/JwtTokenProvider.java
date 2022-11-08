@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.security.jwt;
 
 import ge.bestline.delivery.ws.dto.TokenUser;
-import ge.bestline.delivery.ws.dto.UserRoles;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -94,6 +93,7 @@ public class JwtTokenProvider {
             user.setWarehouseId((Integer) m.get("warehouseId"));
         }
         user.setRole(new HashSet((Collection) body.get("roles")));
+        user.setFromGlobalSite(req.getHeader("GL") != null);
         return user;
     }
 
@@ -104,6 +104,7 @@ public class JwtTokenProvider {
         }
         return null;
     }
+
 
     public boolean validateToken(String token) {
         try {

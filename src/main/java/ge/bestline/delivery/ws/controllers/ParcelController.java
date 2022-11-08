@@ -77,7 +77,8 @@ public class ParcelController {
     public Parcel addNew(@RequestBody Parcel obj,
                          HttpServletRequest req) {
         log.info("Adding New Parcel: " + obj.toString());
-        if (obj.getRoute() != null) {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        if (obj.getRoute() != null && !requester.isFromGlobalSite()) {
             User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
             Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
@@ -85,11 +86,8 @@ public class ParcelController {
             obj.setCourier(courier);
             obj.setRoute(route);
         }
+        obj.setAuthor(new User(requester.getId()));
         obj.setBarCode(barCodeService.getBarcodes(1).get(0));
-        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
-            obj.setAuthor(new User(requester.getId()));
-        }
         Parcel parcel = repo.save(obj);
         ParcelStatusReason psr = statusReasonRepo.findById(1).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parcels Status History"));
@@ -208,7 +206,7 @@ public class ParcelController {
             Parcel searchParams,
             HttpServletRequest req) {
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
+        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue()) && requester.isFromGlobalSite()) {
             searchParams.setAuthor(new User(requester.getId()));
         }
         return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);

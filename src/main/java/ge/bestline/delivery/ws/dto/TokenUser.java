@@ -19,6 +19,8 @@ public class TokenUser {
     private String userName;
     private Set<Role> role;
 
+    private boolean fromGlobalSite;
+
     public TokenUser(User u) {
         this.id = u.getId();
         this.warehouseId = u.getWarehouse() != null ? u.getWarehouse().getId() : null;
