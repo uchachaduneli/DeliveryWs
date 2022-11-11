@@ -96,7 +96,9 @@ public class ParcelController {
                 parcel,
                 psr.getStatus().getName(),
                 psr.getStatus().getCode(),
-                psr.getName()));
+                psr.getName(),
+                new User(requester.getId()))
+        );
         return parcel;
     }
 
@@ -127,6 +129,7 @@ public class ParcelController {
                     , existing.getStatus().getStatus().getName()
                     , existing.getStatus().getStatus().getCode()
                     , existing.getStatus().getName()
+                    , new User(requester.getId())
             ));
             existing.setStatus(request.getStatus());
         }
@@ -153,8 +156,10 @@ public class ParcelController {
 
     @PutMapping("/multipleStatusUpdate")
     @Transactional
-    public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@RequestBody StatusManagerReqDTO request) {
+    public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@RequestBody StatusManagerReqDTO request
+            , HttpServletRequest req) {
         log.info("Update Multiple Parcels Status By BarCode");
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         ParcelStatusReason status = statusReasonRepo.findById(request.getStatusId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatusId()));
         List<Parcel> res = new ArrayList<>();
@@ -165,6 +170,7 @@ public class ParcelController {
                         , status.getCode()
                         , request.getNote()
                         , request.getStatusDateTime()
+                        , new User(requester.getId())
                 ));
             }
             p.setStatus(status);
@@ -177,8 +183,10 @@ public class ParcelController {
 
     @PutMapping(path = "/deliveryDetailParcel")
     @Transactional
-    public ResponseEntity<Parcel> updateFromDeliveryDetail(@RequestBody DeliveryDetailParcelDTO request) {
+    public ResponseEntity<Parcel> updateFromDeliveryDetail(@RequestBody DeliveryDetailParcelDTO request
+            , HttpServletRequest req) {
         log.info(" updateFromDeliveryDetail started");
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         ParcelStatusReason status = statusReasonRepo.findById(request.getStatus().getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatus().getId()));
         Parcel existing = repo.findById(request.getId()).orElseThrow(() ->
@@ -189,6 +197,7 @@ public class ParcelController {
                     , status.getStatus().getName()
                     , status.getStatus().getCode()
                     , existing.getStatusNote()
+                    , new User(requester.getId())
             ));
             existing.setStatus(status);
         }

@@ -1,10 +1,13 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -25,23 +28,30 @@ public class ParcelStatusHistory {
     private Timestamp statusDateTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private Date createdTime;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Parcel parcel;
 
-    public ParcelStatusHistory(Parcel parcel, String name, String code, String reason) {
+    @ManyToOne(cascade = CascadeType.DETACH, optional = true)
+    @NotFound(action = NotFoundAction.IGNORE)
+    private User operUSer;
+
+    public ParcelStatusHistory(Parcel parcel, String name, String code, String reason, User operUSer) {
         this.parcel = parcel;
         this.reason = reason;
         this.name = name;
         this.code = code;
+        this.operUSer = operUSer;
     }
 
-    public ParcelStatusHistory(Parcel parcel, String name, String code, String reason, Timestamp statusDateTime) {
+    public ParcelStatusHistory(Parcel parcel, String name, String code, String reason, Timestamp statusDateTime, User operUSer) {
         this.parcel = parcel;
         this.reason = reason;
         this.name = name;
         this.code = code;
         this.statusDateTime = statusDateTime;
+        this.operUSer = operUSer;
     }
 
     @PrePersist
