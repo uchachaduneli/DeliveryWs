@@ -19,7 +19,7 @@ public class ParcelDao {
     public Map<String, Object> findAll(int page, int rowCount, Parcel srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where 1=1 ");
+        q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where e.deleted=2 ");
 
         if (srchRequest.getStatus() != null) {
             q.append(" and e.status.id ='").append(srchRequest.getStatus().getId()).append("'");
@@ -41,7 +41,7 @@ public class ParcelDao {
 //            q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
 //        }
 
-        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() + " order by e.prePrinted asc, e.id desc", Parcel.class);
+        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() + " order by e.id desc", Parcel.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());

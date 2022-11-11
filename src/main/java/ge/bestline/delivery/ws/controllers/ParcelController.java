@@ -78,12 +78,13 @@ public class ParcelController {
                          HttpServletRequest req) {
         log.info("Adding New Parcel: " + obj.toString());
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        if (obj.getRoute() != null && !requester.isFromGlobalSite()) {
+        if (obj.getRoute() != null && obj.getRoute().getId() > 0 && !requester.isFromGlobalSite()) {
             User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
             Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
             obj.setCourier(courier);
+            obj.setCourierStatus(1); //unseen status for mobile tab
             obj.setRoute(route);
         }
         obj.setAuthor(new User(requester.getId()));
@@ -114,11 +115,12 @@ public class ParcelController {
 
     @PutMapping(path = "/{id}")
     @Transactional
-    public ResponseEntity<Parcel> updateById(@PathVariable Integer id, @RequestBody Parcel request) {
+    public ResponseEntity<Parcel> updateById(@PathVariable Integer id,
+                                             @RequestBody Parcel request,
+                                             HttpServletRequest req) {
         log.info("Updating Parcel");
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         Parcel existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
-        User courier = userRepository.findByRouteId(request.getRoute().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + request.getRoute().getId()));
-        Route route = routeRepository.findById(request.getRoute().getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Route Using This ID : " + request.getRoute().getId()));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         if (request.getStatus().getId() != existing.getStatus().getId()) {
             statusHistoryRepo.save(new ParcelStatusHistory(existing
@@ -128,12 +130,23 @@ public class ParcelController {
             ));
             existing.setStatus(request.getStatus());
         }
+
+        if (request.getRoute() != null && request.getRoute().getId() > 0 && !requester.isFromGlobalSite()) {
+            User courier = userRepository.findByRouteId(request.getRoute().getId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + request.getRoute().getId()));
+            Route route = routeRepository.findById(request.getRoute().getId()).orElseThrow(
+                    () -> new ResourceNotFoundException("Can't find Route Using This ID : " + request.getRoute().getId()));
+            existing.setCourier(courier);
+            if (existing.getCourierStatus() == null) {
+                existing.setCourierStatus(1); //unseen status for mobile tab
+            }
+            existing.setRoute(route);
+        }
+
         existing.setSendSmsToSender(request.getSendSmsToSender());
         existing.setSendSmsToReceiver(request.getSendSmsToReceiver());
         existing.setReceiverPhone(request.getReceiverPhone());
         existing.setSenderPhone(request.getSenderPhone());
-        existing.setRoute(route);
-        existing.setCourier(courier);
         Parcel updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

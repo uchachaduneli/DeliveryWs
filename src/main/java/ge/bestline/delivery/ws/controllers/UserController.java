@@ -66,7 +66,7 @@ public class UserController {
                                                       HttpServletRequest req) {
         log.info("Getting Users with params: " + searchParams);
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {// customer updates sub customers only
+        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue()) && requester.isFromGlobalSite()) {// customer updates sub customers only
             searchParams.setParentUserId(requester.getId());
         }
         return new ResponseEntity<>(userDao.findAll(page, rowCount, searchParams), HttpStatus.OK);

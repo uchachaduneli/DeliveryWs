@@ -27,7 +27,7 @@ public class Parcel {
     private Integer deleted;
     // 1 - pre inserted with empty values, will be filled after some time
     private Integer prePrinted;
-    @Column(unique = true)
+    @Column(unique = true, updatable = false)
     private String barCode;
 
     private Integer senderId;
@@ -92,7 +92,7 @@ public class Parcel {
     @ManyToOne(cascade = CascadeType.DETACH)
     @NotFound(action = NotFoundAction.IGNORE)
     private Route route;
-    @ManyToOne(cascade = CascadeType.PERSIST, optional = true)
+    @ManyToOne(cascade = CascadeType.DETACH, optional = true)
     @JoinColumn(name = "courier_id")
     @NotFound(action = NotFoundAction.IGNORE)
     private User courier;
