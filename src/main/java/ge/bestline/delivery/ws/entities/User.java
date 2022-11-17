@@ -21,6 +21,7 @@ public class User {
     private Integer id;
     private Integer deleted;
     private Integer parentUserId;
+    private String printerMacAddress;
     private String name;
     private String lastName;
     @Column(unique = true)
