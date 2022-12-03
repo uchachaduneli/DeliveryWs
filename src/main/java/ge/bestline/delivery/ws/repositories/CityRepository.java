@@ -7,6 +7,4 @@ import java.util.Optional;
 
 public interface CityRepository extends JpaRepository<City, Integer> {
     Optional<City> findByIdAndDeleted(Integer cityOneId, int i);
-
-    City findTopByZone_NameAndDeleted(int i, int i1);
 }
