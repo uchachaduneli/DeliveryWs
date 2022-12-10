@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -37,6 +35,19 @@ public class Contact {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+
+    public Contact(String name, Integer type, Integer status,
+                   Integer deReGe, Integer hasContract,
+                   String identNumber, User user, Tariff tariff) {
+        this.name = name;
+        this.type = type;
+        this.status = status;
+        this.deReGe = deReGe;
+        this.hasContract = hasContract;
+        this.identNumber = identNumber;
+        this.user = user;
+        this.tariff = tariff;
+    }
 
     @PrePersist
     protected void onCreate() {

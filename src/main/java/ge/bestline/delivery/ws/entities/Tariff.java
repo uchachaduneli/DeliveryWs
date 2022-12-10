@@ -31,6 +31,10 @@ public class Tariff {
         this.name = name;
     }
 
+    public Tariff(Integer id) {
+        this.id = id;
+    }
+
     @PrePersist
     protected void onCreate() {
         deleted = 2;

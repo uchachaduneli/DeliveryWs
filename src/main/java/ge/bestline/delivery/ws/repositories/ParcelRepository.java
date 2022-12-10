@@ -12,4 +12,6 @@ public interface ParcelRepository extends JpaRepository<Parcel, Integer> {
     List<Parcel> findByIdIn(List<Integer> ides);
 
     Optional<Parcel> findByBarCode(String barCode);
+
+    List<Parcel> findBySenderIdentNumber(String personalNumber);
 }

@@ -4,9 +4,9 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.UserDao;
 import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.dto.UserRoles;
-import ge.bestline.delivery.ws.entities.Role;
-import ge.bestline.delivery.ws.entities.User;
-import ge.bestline.delivery.ws.entities.UserStatus;
+import ge.bestline.delivery.ws.entities.*;
+import ge.bestline.delivery.ws.repositories.ContactRepository;
+import ge.bestline.delivery.ws.repositories.ParcelRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.repositories.UserStatusRepository;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
@@ -29,15 +29,21 @@ public class UserController {
     private final UserStatusRepository userStatusRepository;
     private final UserDao userDao;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ContactRepository contactRepo;
+    private final ParcelRepository parcelRepo;
 
     public UserController(UserRepository userRepository,
                           UserStatusRepository userStatusRepository,
                           UserDao userDao,
-                          JwtTokenProvider jwtTokenProvider) {
+                          JwtTokenProvider jwtTokenProvider,
+                          ContactRepository contactRepo,
+                          ParcelRepository parcelRepo) {
         this.userRepository = userRepository;
         this.userStatusRepository = userStatusRepository;
         this.userDao = userDao;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.contactRepo = contactRepo;
+        this.parcelRepo = parcelRepo;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -50,11 +56,31 @@ public class UserController {
                            HttpServletRequest req) {
         log.info("Adding New User: " + user.toString());
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        if (requester.getRole().size()==1 && requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {// customer adds sub customers only
+        //when customer are adding sub customer user
+        if (requester.getRole().size() == 1 && requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
             user.setParentUserId(requester.getId());
             Set<Role> roles = new HashSet<>();
             roles.add(new Role(UserRoles.CUSTOMER.getValue()));
             user.setRole(roles);
+        }
+        // when office adds user for customer company
+        if (user.getRole().size() == 1 &&
+                new ArrayList<>(user.getRole()).get(0).getName().equals(UserRoles.CUSTOMER.getValue())) {
+            User res = userRepository.save(user);
+            Contact contact = new Contact(user.getName() + " " + user.getLastName(),
+                    1, 1, 2, 1,
+                    user.getPersonalNumber(),
+                    res, new Tariff(1));
+            contactRepo.save(contact);
+            // if customer have sent parcels before office create for him account
+            // then update old parcels author id to bind this user now
+            List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumber(user.getPersonalNumber());
+            if (previouslySentParcels != null && !previouslySentParcels.isEmpty()) {
+                for (Parcel p : previouslySentParcels) {
+                    p.setAuthor(res);
+                }
+                parcelRepo.saveAll(previouslySentParcels);
+            }
         }
         return userRepository.save(user);
     }
