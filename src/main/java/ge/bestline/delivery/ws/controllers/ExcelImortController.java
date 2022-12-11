@@ -74,23 +74,26 @@ public class ExcelImortController {
     }
 
     @PostMapping("/move-to-main")
-    public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "authorId", required = true) Integer authorId) {
-        List<ExcelTmpParcel> usersImportedParcels = repo.findByAuthorId(authorId);
+    public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "senderIdentNum", required = true) String senderIdentNum) {
+        List<ExcelTmpParcel> usersImportedParcels = repo.findBySenderIdentNumber(senderIdentNum);
         List<Parcel> res = new ArrayList<>();
+        if (usersImportedParcels != null && !usersImportedParcels.isEmpty()) {
+
+        }
         for (ExcelTmpParcel obj : usersImportedParcels) {
-            ContactAddress conAdrs = null;
-            try {
-                conAdrs = contactAddressRepo.findByIsPayAddress(1);
-                if (conAdrs == null) {
-                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
-                }
-            } catch (RuntimeException e) {
-                log.warn(e.getMessage());
-                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
-            } catch (Exception e) {
-                log.error(e);
-            }
-            res.add(new Parcel(obj, conAdrs));
+//            ContactAddress conAdrs = null;
+//            try {
+//                conAdrs = contactAddressRepo.findByIsPayAddress(1);
+//                if (conAdrs == null) {
+//                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
+//                }
+//            } catch (RuntimeException e) {
+//                log.warn(e.getMessage());
+//                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
+//            } catch (Exception e) {
+//                log.error(e);
+//            }
+            res.add(new Parcel(obj));
         }
         res = parcelRepo.saveAll(res);
         repo.deleteAll(usersImportedParcels);
@@ -114,7 +117,11 @@ public class ExcelImortController {
         try {
             Contact senderContact = contactRepo.findById(senderId).orElseThrow(() -> new ResourceNotFoundException("Can't find Sender Contact Using This ID=" + senderId));
             Route route = routeRepo.findById(routeId).orElseThrow(() -> new ResourceNotFoundException("Can't find Route Using This ID=" + routeId));
-            User author = userRepo.findById(authorId).orElseThrow(() -> new ResourceNotFoundException("Can't find User Using This ID : " + authorId));
+            User author = userRepo.findByPersonalNumber(senderContact.getIdentNumber());
+            if (author == null) {
+                //if sender conpany has no user account into system just set the excel importer users as author
+                author = userRepo.findById(authorId).orElseThrow(() -> new ResourceNotFoundException("Can't find User Using This ID : " + authorId));
+            }
             City senderCity = cityRepo.findById(fromCityId).orElseThrow(() -> new ResourceNotFoundException("Can't find From City Using This ID : " + fromCityId));
             Services service = servicesRepository.findById(serviceId).orElseThrow(() -> new ResourceNotFoundException("Can't find Service Using This ID : " + serviceId));
             List<ExcelTmpParcel> parsedRowsList = storageService.convertExcelToParcelList(file);

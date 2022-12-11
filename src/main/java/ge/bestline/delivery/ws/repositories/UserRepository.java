@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(nativeQuery = true, value = "select u.* from user_role join user u on u.id = user_role.user_id where role_name in ?1 group by user_id")
     List<User> findAllByRoleNameIn(Set<String> roles);
+
+    User findByPersonalNumber(String identNumber);
 }

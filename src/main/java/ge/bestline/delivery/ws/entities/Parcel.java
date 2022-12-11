@@ -10,9 +10,7 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Entity
@@ -128,21 +126,22 @@ public class Parcel {
         updatedTime = new Date();
     }
 
-    public Parcel(ExcelTmpParcel obj, ContactAddress sender) {
-        if (sender != null) {
-            this.payerId = sender.getContact().getId();
-            this.senderName = sender.getContact().getName();
-            this.senderIdentNumber = sender.getContact().getIdentNumber();
-            // set sender as payer
-            this.payerSide = 1;
+    public Parcel(ExcelTmpParcel obj) {
+        if (obj.getSender() != null) {
+            this.payerId = obj.getSender().getId();
+            this.senderName = obj.getSender().getName();
+            this.senderIdentNumber = obj.getSender().getIdentNumber();
             this.payerName = this.senderName;
             this.payerIdentNumber = this.senderIdentNumber;
         }
+
         this.senderCity = obj.getSenderCity();
         this.senderPhone = obj.getSenderPhone();
         this.senderContactPerson = obj.getSenderContactPerson();
         this.senderAddress = obj.getSenderAddress();
 
+        //for imported excel payer is sender
+        this.payerSide = 1;
         this.payerCity = this.senderCity;
         this.payerPhone = this.senderPhone;
         this.payerContactPerson = this.senderContactPerson;

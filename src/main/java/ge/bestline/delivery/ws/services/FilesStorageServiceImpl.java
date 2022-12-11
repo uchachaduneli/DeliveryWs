@@ -98,8 +98,6 @@ public class FilesStorageServiceImpl implements FilesStorageService {
                     obj.setRowIndex(rowNum);
                     for (Cell cell : row) {
                         colIndx = cell.getColumnIndex() + 1;
-
-                        System.out.println(colIndx + " " + formatter.formatCellValue(cell));
                         switch (cell.getColumnIndex()) {
                             case 0:
                                 obj.setReceiverName(formatter.formatCellValue(cell));

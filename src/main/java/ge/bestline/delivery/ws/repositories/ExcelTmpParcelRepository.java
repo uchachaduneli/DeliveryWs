@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ExcelTmpParcelRepository extends JpaRepository<ExcelTmpParcel, Integer> {
     List<ExcelTmpParcel> findByAuthorId(Integer authorId);
+
+    List<ExcelTmpParcel> findBySenderIdentNumber(String senderIdentNum);
 }
