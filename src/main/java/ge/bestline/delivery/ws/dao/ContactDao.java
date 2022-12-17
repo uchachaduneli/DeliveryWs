@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.Contact;
-import ge.bestline.delivery.ws.entities.ContactAddress;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -23,13 +22,17 @@ public class ContactDao {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
         q.append(" From ").append(Contact.class.getSimpleName())
-                .append(" e  Where 1=1 ");
+                .append(" e  Where e.deleted=2 ");
 //                .append(" Where 1=1  e LEFT JOIN ")
 //                .append(ContactAddress.class.getSimpleName())
 //                .append(" c on e.mainAddress.id=c.id Where 1=1 ");
 
         if (srchRequest.getId() != null) {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+        }
+
+        if (srchRequest.getUser() != null) {
+            q.append(" and e.user.id ='").append(srchRequest.getUser().getId()).append("'");
         }
 
         if (!StringUtils.isBlank(srchRequest.getName())) {
@@ -65,7 +68,7 @@ public class ContactDao {
         }
 
         TypedQuery<Contact> query = em.createQuery("SELECT e " + q.toString(), Contact.class);
-        List<Contact> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
+        List<Contact> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;

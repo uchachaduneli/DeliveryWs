@@ -50,7 +50,7 @@ public class ContactAddressDao {
         }
 
         TypedQuery<ContactAddress> query = em.createQuery("Select e " + q.toString(), ContactAddress.class);
-        List<ContactAddress> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
+        List<ContactAddress> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;

@@ -43,7 +43,7 @@ public class ParcelDao {
 
         TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() + " order by e.id desc", Parcel.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
-        response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
+        response.put("items", query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());
         return response;
     }

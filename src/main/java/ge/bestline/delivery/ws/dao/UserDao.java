@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -70,7 +69,7 @@ public class UserDao {
             query.setParameter("rolesInList", srchRequest.getSrchRoleName());
             cntQr.setParameter("rolesInList", srchRequest.getSrchRoleName());
         }
-        response.put("items", query.setFirstResult(page).setMaxResults(rowCount).getResultList());
+        response.put("items", query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());
         return response;
     }

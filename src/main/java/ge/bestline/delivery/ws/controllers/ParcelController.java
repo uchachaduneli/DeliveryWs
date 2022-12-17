@@ -78,20 +78,26 @@ public class ParcelController {
                          HttpServletRequest req) {
         log.info("Adding New Parcel: " + obj.toString());
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        ParcelStatusReason psr = null;
+        // if parcel is added from admin portal
         if (obj.getRoute() != null && obj.getRoute().getId() > 0 && !requester.isFromGlobalSite()) {
             User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
             Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
             obj.setCourier(courier);
-            obj.setCourierStatus(1); //unseen status for mobile tab
             obj.setRoute(route);
         }
+        // if parcel added from global
+        if (requester.isFromGlobalSite()) {
+            obj.setAddedFromGlobal(true);
+            psr = statusReasonRepo.findById(StatusReasons.PP.getStatus().getId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parcels Status History"));
+        }
+        obj.setStatus(psr);
         obj.setAuthor(new User(requester.getId()));
         obj.setBarCode(barCodeService.getBarcodes(1).get(0));
         Parcel parcel = repo.save(obj);
-        ParcelStatusReason psr = statusReasonRepo.findById(1).orElseThrow(() ->
-                new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parcels Status History"));
         statusHistoryRepo.save(new ParcelStatusHistory(
                 parcel,
                 psr.getStatus().getName(),
@@ -140,8 +146,8 @@ public class ParcelController {
             Route route = routeRepository.findById(request.getRoute().getId()).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Route Using This ID : " + request.getRoute().getId()));
             existing.setCourier(courier);
-            if (existing.getCourierStatus() == null) {
-                existing.setCourierStatus(1); //unseen status for mobile tab
+            if (existing.getStatus().getId() == StatusReasons.PP.getStatus().getId()) {
+                existing.setStatus(StatusReasons.RG.getStatus());
             }
             existing.setRoute(route);
         }

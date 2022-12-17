@@ -72,7 +72,6 @@ public class Parcel {
     private ParcelStatusReason status;
     private String statusNote; // insert/update operations ar made from deliveryDetails Page
     private java.sql.Timestamp statusDateTime; //xelit sheyavt statusebismenejeris feijze
-    private Integer courierStatus; //1 = Seen else Not Seen - on mobile device
 
     private String comment;
     private Integer deliveredConfirmation; //1 yes 2 no
@@ -106,6 +105,9 @@ public class Parcel {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+
+    @Column(updatable = false)
+    private boolean addedFromGlobal;
 
     public Parcel(String barCode) {
         this.barCode = barCode;

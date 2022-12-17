@@ -2,9 +2,12 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ContactDao;
+import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.Contact;
+import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
+import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,13 +35,16 @@ public class ContactController {
     private final ContactDao dao;
     private final UserRepository userRepository;
     private final ExcelHelper excelHelper;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public ContactController(ContactRepository repo, ContactDao dao,
-                             UserRepository userRepository, ExcelHelper excelHelper) {
+                             UserRepository userRepository, ExcelHelper excelHelper,
+                             JwtTokenProvider jwtTokenProvider) {
         this.repo = repo;
         this.dao = dao;
         this.userRepository = userRepository;
         this.excelHelper = excelHelper;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -110,7 +117,12 @@ public class ContactController {
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            Contact searchParams) {
+            Contact searchParams,
+            HttpServletRequest req) {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        if (requester.isFromGlobalSite()) {
+            searchParams.setUser(new User(requester.getId()));
+        }
         return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 

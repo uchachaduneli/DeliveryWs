@@ -1,6 +1,5 @@
 package ge.bestline.delivery.ws.dao;
 
-import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.ExcelTmpParcel;
 import org.springframework.stereotype.Repository;
 
@@ -36,8 +35,8 @@ public class ExcelTmpParcelDao {
             q.append(" and e.route.id ='").append(srchRequest.getRoute().getId()).append("'");
         }
 
-        TypedQuery<ExcelTmpParcel> query = em.createQuery( "SELECT e FROM " + q.toString(), ExcelTmpParcel.class);
-        List<ExcelTmpParcel> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
+        TypedQuery<ExcelTmpParcel> query = em.createQuery("SELECT e FROM " + q.toString(), ExcelTmpParcel.class);
+        List<ExcelTmpParcel> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) FROM "+ q.toString()).getSingleResult());
         return response;

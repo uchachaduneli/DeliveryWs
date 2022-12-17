@@ -35,7 +35,7 @@ public class ZoneDao {
         }
 
         TypedQuery<Zone> query = em.createQuery("Select e" + q.toString(), Zone.class);
-        List<Zone> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
+        List<Zone> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;

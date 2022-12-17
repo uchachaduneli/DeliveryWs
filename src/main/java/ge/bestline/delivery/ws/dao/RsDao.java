@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.WayBill;
-import ge.bestline.delivery.ws.entities.Zone;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -36,7 +35,7 @@ public class RsDao {
         }
 
         TypedQuery<WayBill> query = em.createQuery("Select e" + q.toString() + " order by e.rsCreateDate desc", WayBill.class);
-        List<WayBill> res = query.setFirstResult(page).setMaxResults(rowCount).getResultList();
+        List<WayBill> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;
