@@ -6,7 +6,9 @@ import ge.bestline.delivery.ws.dto.ResponseMessage;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.services.BarCodeService;
+import ge.bestline.delivery.ws.services.CityService;
 import ge.bestline.delivery.ws.services.FilesStorageService;
+import ge.bestline.delivery.ws.services.PriceService;
 import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
@@ -42,6 +44,8 @@ public class ExcelImortController {
     private final ContactAddressRepository contactAddressRepo;
     private final ServicesRepository servicesRepository;
     private final ExcelHelper excelHelper;
+    private final PriceService priceService;
+    private final CityService cityService;
 
     public ExcelImortController(FilesStorageService storageService,
                                 UserRepository userRepo,
@@ -52,7 +56,9 @@ public class ExcelImortController {
                                 ExcelTmpParcelDao dao,
                                 CityRepository cityRepo, ExcelTmpParcelRepository repo,
                                 ContactAddressRepository contactAddressRepo,
-                                ServicesRepository servicesRepository, ExcelHelper excelHelper) {
+                                ServicesRepository servicesRepository,
+                                ExcelHelper excelHelper,
+                                PriceService priceService, CityService cityService) {
         this.storageService = storageService;
         this.userRepo = userRepo;
         this.parcelRepo = parcelRepo;
@@ -66,6 +72,8 @@ public class ExcelImortController {
         this.contactAddressRepo = contactAddressRepo;
         this.servicesRepository = servicesRepository;
         this.excelHelper = excelHelper;
+        this.priceService = priceService;
+        this.cityService = cityService;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -141,8 +149,13 @@ public class ExcelImortController {
                 tmpObj.setSenderPhone(contactPhone);
                 tmpObj.setTmpIdForPerExcel(perImportJoningId);
                 tmpObj.setService(service);
-                tmpObj.setReceiverCity(cityRepo.findById(tmpObj.getReceiverCity().getId()).orElseThrow(() ->
-                        new RuntimeException("Can't find City using this id" + tmpObj.getReceiverCity().getId() + " At Row " + tmpObj.getRowIndex())));
+                City receiverCity = cityRepo.findById(tmpObj.getReceiverCity().getId()).orElseThrow(() ->
+                        new RuntimeException("Can't find City using this id" + tmpObj.getReceiverCity().getId() + " At Row " + tmpObj.getRowIndex()));
+                City cityForZone = cityService.getLongestDestZone(senderCity.getId(), receiverCity.getId());
+                tmpObj.setTotalPrice(priceService.calculatePrice(service.getId(),
+                        senderContact.getTariff() != null ? senderContact.getTariff().getId() : 1,
+                        cityForZone.getZone().getId(), tmpObj.getWeight()));
+                tmpObj.setReceiverCity(receiverCity);
                 repo.save(tmpObj);
 
             }

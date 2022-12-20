@@ -106,7 +106,7 @@ public class Parcel {
     @CreationTimestamp
     private Date createdTime;
 
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false, columnDefinition = "tinyint(1) default 0")
     private boolean addedFromGlobal;
 
     public Parcel(String barCode) {

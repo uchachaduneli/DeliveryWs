@@ -7,6 +7,7 @@ import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.TariffDetailsRepository;
 import ge.bestline.delivery.ws.repositories.TariffRepository;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
+import ge.bestline.delivery.ws.services.PriceService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,13 +32,15 @@ public class TariffController {
     private final TariffDetailsRepository repoDetails;
     private final ZoneRepository repoZone;
     private final CityRepository cityRepo;
+    private final PriceService priceService;
 
     public TariffController(TariffRepository repo, TariffDetailsRepository repoDetails,
-                            ZoneRepository repoZone, CityRepository cityRepo) {
+                            ZoneRepository repoZone, CityRepository cityRepo, PriceService priceService) {
         this.repo = repo;
         this.repoDetails = repoDetails;
         this.repoZone = repoZone;
         this.cityRepo = cityRepo;
+        this.priceService = priceService;
     }
 
     @PostMapping
@@ -127,21 +130,7 @@ public class TariffController {
             @PathVariable Integer tariffId,
             @PathVariable Integer zoneId,
             @PathVariable Double weight) {
-        // try to find price with exact weight
-        List<TariffDetail> details = repoDetails.findByDeletedAndService_IdAndTariff_IdAndZone_IdAndWeight(2, serviceId, tariffId, zoneId, weight);
-        if (details.isEmpty()) {
-            //  price with exact weight not fount trying to find first price with greater weight
-            details = repoDetails.findByDeletedAndService_IdAndTariff_IdAndZone_IdAndWeightGreaterThanOrderByWeightAsc(2, serviceId, tariffId, zoneId, weight);
-            if (details.isEmpty()) {
-//                log.error("Can't get Price from TariffDetails Using This IDes {serviceId}/{tariffId}/{zoneId}/{weight} : "
-//                        + serviceId + tariffId + "/" + zoneId + "/" + weight);
-                throw new ResourceNotFoundException("Can't get Price from TariffDetails Using This IDes {serviceId}/{tariffId}/{zoneId}/{weight} : "
-                        + serviceId + tariffId + "/" + zoneId + "/" + weight);
-            }
-            return ResponseEntity.ok(details.get(0).getPrice());
-        } else {
-            return ResponseEntity.ok(details.get(0).getPrice());
-        }
+        return ResponseEntity.ok(priceService.calculatePrice(serviceId, tariffId, zoneId, weight));
     }
 
     @DeleteMapping("/details")

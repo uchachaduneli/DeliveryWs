@@ -4,6 +4,7 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
+import ge.bestline.delivery.ws.services.CityService;
 import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.InputStreamResource;
@@ -28,13 +29,16 @@ import java.util.Map;
 public class CityController {
 
     private final CityRepository cityRepository;
+    private final CityService cityService;
     private final ZoneRepository zoneRepository;
     private final ExcelHelper excelHelper;
 
     public CityController(CityRepository cityRepository,
+                          CityService cityService,
                           ZoneRepository zoneRepository,
                           ExcelHelper excelHelper) {
         this.cityRepository = cityRepository;
+        this.cityService = cityService;
         this.zoneRepository = zoneRepository;
         this.excelHelper = excelHelper;
     }
@@ -107,12 +111,7 @@ public class CityController {
 
     @GetMapping(path = "/longestDestZone/{cityOneId}/{cityTwoId}")
     public ResponseEntity<City> getLongestDestZone(@PathVariable Integer cityOneId, @PathVariable Integer cityTwoId) {
-        City city1 = cityRepository.findByIdAndDeleted(cityOneId, 2).orElseThrow(() -> new ResourceNotFoundException("Can't find City Record Using This ID " + cityOneId));
-        City city2 = cityRepository.findByIdAndDeleted(cityTwoId, 2).orElseThrow(() -> new ResourceNotFoundException("Can't find City Record Using This ID " + cityTwoId));
-        if (city1.getZone().getName() == city2.getZone().getName()) {
-            return ResponseEntity.ok(city1);
-        }
-        return ResponseEntity.ok(city2.getZone().getName() > city1.getZone().getName() ? city2 : city1);
+        return ResponseEntity.ok(cityService.getLongestDestZone(cityOneId, cityTwoId));
     }
 
 }
