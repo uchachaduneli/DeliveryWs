@@ -81,26 +81,55 @@ public class ExcelImortController {
         return new ResponseEntity<>("ჩანაწერი მსგავსი ბარკოდით უკვე არსებობს", HttpStatus.BAD_REQUEST);
     }
 
+    /*
+
     @PostMapping("/move-to-main")
+    public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "authorId", required = true) Integer authorId) {
+        List<ExcelTmpParcel> usersImportedParcels = repo.findByAuthorId(authorId);
+        List<Parcel> res = new ArrayList<>();
+        for (ExcelTmpParcel obj : usersImportedParcels) {
+            ContactAddress conAdrs = null;
+            try {
+                conAdrs = contactAddressRepo.findByIsPayAddress(1);
+                if (conAdrs == null) {
+                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
+                }
+            } catch (RuntimeException e) {
+                log.warn(e.getMessage());
+                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
+            } catch (Exception e) {
+                log.error(e);
+            }
+            res.add(new Parcel(obj, conAdrs));
+        }
+        res = parcelRepo.saveAll(res);
+        repo.deleteAll(usersImportedParcels);
+        String barcodes = res.stream().map(Parcel::getBarCode).collect(Collectors.joining(","));
+        log.info("Excel Imported Rows With These BarCodes Has Been Moved To Parcels Main Table :" + barcodes);
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+     */
+
+    @PostMapping("/move-to-main")
+    @Transactional
     public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "senderIdentNum", required = true) String senderIdentNum) {
         List<ExcelTmpParcel> usersImportedParcels = repo.findBySenderIdentNumber(senderIdentNum);
         List<Parcel> res = new ArrayList<>();
-        if (usersImportedParcels != null && !usersImportedParcels.isEmpty()) {
 
-        }
         for (ExcelTmpParcel obj : usersImportedParcels) {
-//            ContactAddress conAdrs = null;
-//            try {
-//                conAdrs = contactAddressRepo.findByIsPayAddress(1);
-//                if (conAdrs == null) {
-//                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
-//                }
-//            } catch (RuntimeException e) {
-//                log.warn(e.getMessage());
-//                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
-//            } catch (Exception e) {
-//                log.error(e);
-//            }
+            ContactAddress conAdrs = null;
+            try {
+                conAdrs = contactAddressRepo.findByIsPayAddress(1);
+                if (conAdrs == null) {
+                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
+                }
+            } catch (RuntimeException e) {
+                log.warn(e.getMessage());
+                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
+            } catch (Exception e) {
+                log.error(e);
+            }
             res.add(new Parcel(obj));
         }
         res = parcelRepo.saveAll(res);
@@ -111,6 +140,7 @@ public class ExcelImortController {
     }
 
     @PostMapping("/import")
+    @Transactional
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,
                                                       @RequestParam(value = "senderId", required = false) Integer senderId,
                                                       @RequestParam(value = "routeId", required = false) Integer routeId,
