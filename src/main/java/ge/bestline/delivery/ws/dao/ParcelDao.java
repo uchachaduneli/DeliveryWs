@@ -1,6 +1,8 @@
 package ge.bestline.delivery.ws.dao;
 
+import ge.bestline.delivery.ws.dto.ParcelDTO;
 import ge.bestline.delivery.ws.entities.Parcel;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -16,30 +18,194 @@ public class ParcelDao {
         this.em = em;
     }
 
-    public Map<String, Object> findAll(int page, int rowCount, Parcel srchRequest) {
+    public Map<String, Object> findAll(int page, int rowCount, ParcelDTO obj) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
         q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where e.deleted=2 ");
 
-        if (srchRequest.getStatus() != null) {
-            q.append(" and e.status.id ='").append(srchRequest.getStatus().getId()).append("'");
+        if (obj.getAuthorId() != null) {
+            q.append(" and e.author.id ='").append(obj.getAuthorId()).append("'");
         }
 
-        if (srchRequest.getCourier() != null) {
-            q.append(" and e.courier.id ='").append(srchRequest.getCourier().getId()).append("'");
+        if (obj.getId() != null && obj.getId() > 0) {
+            q.append(" and e.id ='").append(obj.getId()).append("'");
+        }
+        if (obj.getPrePrinted() != null && obj.getPrePrinted() > 0) {
+            q.append(" and e.prePrinted ='").append(obj.getPrePrinted()).append("'");
+        }
+        if (obj.getSenderId() != null && obj.getSenderId() > 0) {
+            q.append(" and e.senderId ='").append(obj.getSenderId()).append("'");
         }
 
-        if (srchRequest.getAuthor() != null) {
-            q.append(" and e.author.id ='").append(srchRequest.getAuthor().getId()).append("'");
+        if (obj.getRouteId() != null) {
+            q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
         }
-//
-//        if (srchRequest.getDeleted() != null) {
-//            q.append(" and e.deleted ='").append(srchRequest.getDeleted()).append("'");
-//        }
-//
-//        if (srchRequest.getName() != null) {
-//            q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
-//        }
+
+        if (StringUtils.isNotEmpty(obj.getBarCode())) {
+            q.append(" and e.barCode ='").append(obj.getBarCode().trim()).append("'");
+        }
+        if (StringUtils.isNotEmpty(obj.getSenderName())) {
+            q.append(" and e.senderName like '").append(obj.getSenderName().trim()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getSenderIdentNumber())) {
+            q.append(" and e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getSenderPhone())) {
+            q.append(" and e.senderPhone like '%").append(obj.getSenderPhone()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getSenderAddress())) {
+            q.append(" and e.senderAddress like '%").append(obj.getSenderAddress()).append("%'");
+        }
+        if (obj.getSenderCityId() != null) {
+            q.append(" and e.senderCity.id ='").append(obj.getSenderCityId()).append("'");
+        }
+        if (obj.getReceiverId() != null && obj.getReceiverId() > 0) {
+            q.append(" and e.receiverId ='").append(obj.getReceiverId()).append("'");
+        }
+        if (StringUtils.isNotEmpty(obj.getReceiverName())) {
+            q.append(" and e.receiverName like '").append(obj.getReceiverName()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getReceiverIdentNumber())) {
+            q.append(" and e.receiverIdentNumber like '").append(obj.getReceiverIdentNumber()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getReceiverPhone())) {
+            q.append(" and e.receiverPhone like '%").append(obj.getReceiverPhone()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getReceiverAddress())) {
+            q.append(" and e.receiverAddress like '%").append(obj.getReceiverAddress()).append("%'");
+        }
+        if (obj.getReceiverCityId() != null) {
+            q.append(" and e.receiverCity.id ='").append(obj.getReceiverCityId()).append("'");
+        }
+
+        if (StringUtils.isNotEmpty(obj.getDeliveredToPers())) {
+            q.append(" and e.deliveredToPers like '%").append(obj.getDeliveredToPers()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getDeliveredToPersIdent())) {
+            q.append(" and e.deliveredToPersIdent like '").append(obj.getDeliveredToPersIdent()).append("%'");
+        }
+
+
+        if (obj.getPayerId() != null && obj.getPayerId() > 0) {
+            q.append(" and e.payerId ='").append(obj.getPayerId()).append("'");
+        }
+
+        if (StringUtils.isNotEmpty(obj.getPayerIdentNumber())) {
+            q.append(" and e.payerIdentNumber like '").append(obj.getPayerIdentNumber()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getPayerPhone())) {
+            q.append(" and e.payerPhone like '%").append(obj.getPayerPhone()).append("%'");
+        }
+        if (StringUtils.isNotEmpty(obj.getPayerAddress())) {
+            q.append(" and e.payerAddress like '%").append(obj.getPayerAddress()).append("%'");
+        }
+        if (obj.getPayerCityId() != null) {
+            q.append(" and e.payerCity.id ='").append(obj.getPayerCityId()).append("'");
+        }
+        //if status reasonID is presented filter with it else use this heavy condition
+        if (obj.getStatusId() != null && obj.getStatusId() > 0
+                && (obj.getStatusReasonId() == null || obj.getStatusReasonId() == 0)) {
+            q.append(" and e.status.status.id ='").append(obj.getStatusId()).append("'");
+        }
+        if (obj.getStatusReasonId() != null && obj.getStatusReasonId() > 0) {
+            q.append(" and e.status.id ='").append(obj.getStatusReasonId()).append("'");
+        }
+
+        if (StringUtils.isNotEmpty(obj.getStatusNote())) {
+            q.append(" and e.statusNote like '%").append(obj.getStatusNote()).append("%'");
+        }
+
+        if (StringUtils.isNotEmpty(obj.getComment())) {
+            q.append(" and e.comment like'%").append(obj.getComment()).append("%'");
+        }
+
+        if (obj.getDeliveredConfirmation() != null && obj.getDeliveredConfirmation() > 0) {
+            q.append(" and e.deliveredConfirmation ='").append(obj.getDeliveredConfirmation()).append("'");
+        }
+        if (obj.getCount() != null && obj.getCount() > 0) {
+            q.append(" and e.count ='").append(obj.getCount()).append("'");
+        }
+        if (obj.getWeight() != null && obj.getWeight() > 0) {
+            q.append(" and e.weight ='").append(obj.getWeight()).append("'");
+        }
+        if (obj.getTotalPrice() != null && obj.getTotalPrice() > 0) {
+            q.append(" and e.totalPrice ='").append(obj.getTotalPrice()).append("'");
+        }
+        if (obj.getDeliveryType() != null && obj.getDeliveryType() > 0) {
+            q.append(" and e.deliveryType ='").append(obj.getDeliveryType()).append("'");
+        }
+        if (obj.getPaymentType() != null && obj.getPaymentType() > 0) {
+            q.append(" and e.paymentType ='").append(obj.getPaymentType()).append("'");
+        }
+        if (obj.getPackageType() != null && obj.getPackageType() > 0) {
+            q.append(" and e.packageType ='").append(obj.getPackageType()).append("'");
+        }
+
+        if (obj.getServiceId() != null) {
+            q.append(" and e.service.id ='").append(obj.getServiceId()).append("'");
+        }
+        if (obj.getRouteId() != null) {
+            q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
+        }
+
+        if (obj.getCourierId() != null) {
+            q.append(" and e.courier.id ='").append(obj.getCourierId()).append("'");
+        }
+
+        if (obj.getTariff() != null && obj.getTariff() > 0) {
+            q.append(" and e.tariff ='").append(obj.getTariff()).append("'");
+        }
+
+        if (StringUtils.isNotEmpty(obj.getContent())) {
+            q.append(" and e.content like '%").append(obj.getContent()).append("%'");
+        }
+
+        if (obj.getCreatedTime() != null && obj.getCreatedTimeTo() != null) {
+            q.append(" and e.createdTime between ='").append(obj.getCreatedTime()).append("' and '")
+                    .append(obj.getCreatedTimeTo()).append("' ");
+        } else {
+            if (obj.getCreatedTime() != null) {
+                q.append(" and e.createdTime between ='").append(obj.getCreatedTime()).append("'");
+            }
+            if (obj.getCreatedTimeTo() != null) {
+                q.append(" and e.createdTime between ='").append(obj.getCreatedTimeTo()).append("'");
+            }
+        }
+
+        if (obj.getDeliveryTime() != null && obj.getDeliveryTimeTo() != null) {
+            q.append(" and e.deliveryTime between ='").append(obj.getDeliveryTime()).append("' and '")
+                    .append(obj.getDeliveryTimeTo()).append("' ");
+        } else {
+            if (obj.getDeliveryTime() != null) {
+                q.append(" and e.deliveryTime between ='").append(obj.getDeliveryTime()).append("'");
+            }
+            if (obj.getDeliveryTimeTo() != null) {
+                q.append(" and e.deliveryTime between ='").append(obj.getDeliveryTimeTo()).append("'");
+            }
+        }
+
+        if (obj.getWeight() != null && obj.getWeightTo() != null) {
+            q.append(" and e.weight >='").append(obj.getWeight()).append("' and e.weight <='")
+                    .append(obj.getWeightTo()).append("' ");
+        } else {
+            if (obj.getDeliveryTime() != null) {
+                q.append(" and e.weight ='").append(obj.getDeliveryTime()).append("'");
+            }
+            if (obj.getDeliveryTimeTo() != null) {
+                q.append(" and e.weight ='").append(obj.getDeliveryTimeTo()).append("'");
+            }
+        }
+        if (obj.getVolumeWeight() != null && obj.getVolumeWeightTo() != null) {
+            q.append(" and e.volumeWeight >='").append(obj.getVolumeWeight()).append("' and e.weight <='")
+                    .append(obj.getVolumeWeightTo()).append("' ");
+        } else {
+            if (obj.getDeliveryTime() != null) {
+                q.append(" and e.volumeWeight ='").append(obj.getDeliveryTime()).append("'");
+            }
+            if (obj.getDeliveryTimeTo() != null) {
+                q.append(" and e.volumeWeight ='").append(obj.getDeliveryTimeTo()).append("'");
+            }
+        }
 
         TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() + " order by e.id desc", Parcel.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);

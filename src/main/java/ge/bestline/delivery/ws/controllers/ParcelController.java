@@ -231,11 +231,11 @@ public class ParcelController {
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            Parcel searchParams,
+            ParcelDTO searchParams,
             HttpServletRequest req) {
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         if (requester.getRole().contains(UserRoles.CUSTOMER.getValue()) && requester.isFromGlobalSite()) {
-            searchParams.setAuthor(new User(requester.getId()));
+            searchParams.setAuthorId(requester.getId());
         }
         return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }

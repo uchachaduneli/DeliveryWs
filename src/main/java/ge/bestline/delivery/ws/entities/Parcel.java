@@ -45,6 +45,10 @@ public class Parcel {
     private String receiverContactPerson;
     private String receiverAddress;
     private String receiverPhone;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @NotFound(action = NotFoundAction.IGNORE)
+    private City receiverCity;
+    private Integer sendSmsToReceiver;
 
     private String deliveredToPers;
     private String deliveredToPersIdent;
@@ -52,10 +56,6 @@ public class Parcel {
     private String deliveredToPersNote;
     private String deliveredToPersSignature;
     private String deliveredParcelimage;
-    @ManyToOne(cascade = CascadeType.DETACH)
-    @NotFound(action = NotFoundAction.IGNORE)
-    private City receiverCity;
-    private Integer sendSmsToReceiver;
 
     private Integer payerId;
     private Integer payerSide; // 1 sender  2 receiver   3 third side
