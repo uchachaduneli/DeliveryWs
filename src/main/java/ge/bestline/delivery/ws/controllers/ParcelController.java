@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Log4j2
 @RestController
@@ -87,6 +87,8 @@ public class ParcelController {
                     () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
             obj.setCourier(courier);
             obj.setRoute(route);
+            psr = statusReasonRepo.findById(StatusReasons.RG.getStatus().getId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Can't find RG StatusReason"));
         }
         // if parcel added from global
         if (requester.isFromGlobalSite()) {
@@ -163,8 +165,11 @@ public class ParcelController {
     @PutMapping("/multipleStatusUpdate")
     @Transactional
     public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@RequestBody StatusManagerReqDTO request
-            , HttpServletRequest req) {
+            , HttpServletRequest req) throws ParseException {
         log.info("Update Multiple Parcels Status By BarCode");
+        Date tmpDate =  (Date) new SimpleDateFormat("yyyy-MM-dd HH:mm")
+                .parse(request.getStrStatusDateTime().replace("T", " "));
+        request.setStatusDateTime(new Timestamp(tmpDate.getTime()));
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         ParcelStatusReason status = statusReasonRepo.findById(request.getStatusId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatusId()));

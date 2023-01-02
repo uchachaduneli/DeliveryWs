@@ -13,6 +13,7 @@ import java.util.List;
 public class StatusManagerReqDTO {
     private Integer statusId;
     private String note;
+    private String strStatusDateTime;
     private Timestamp statusDateTime;
     private List<String> barCodes;
 }
