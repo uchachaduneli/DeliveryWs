@@ -8,6 +8,7 @@ import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -67,7 +69,7 @@ public class ParcelController {
     public ResponseEntity<List<Parcel>> preGeneration(@PathVariable Integer count) {
         List<Parcel> res = new ArrayList<>();
         for (String barcode : barCodeService.getBarcodes(count)) {
-            res.add(repo.save(new Parcel(barcode)));
+            res.add(repo.save(new Parcel(barcode, true)));
         }
         return ResponseEntity.ok(res);
     }
@@ -167,9 +169,7 @@ public class ParcelController {
     public ResponseEntity<List<Parcel>> updateMultiplesStatusByBarCode(@RequestBody StatusManagerReqDTO request
             , HttpServletRequest req) throws ParseException {
         log.info("Update Multiple Parcels Status By BarCode");
-        Date tmpDate =  (Date) new SimpleDateFormat("yyyy-MM-dd HH:mm")
-                .parse(request.getStrStatusDateTime().replace("T", " "));
-        request.setStatusDateTime(new Timestamp(tmpDate.getTime()));
+        request.setStatusDateTime(ParcelDTO.convertStrDateToDateObj(request.getStrStatusDateTime()));
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         ParcelStatusReason status = statusReasonRepo.findById(request.getStatusId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatusId()));
@@ -236,13 +236,26 @@ public class ParcelController {
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            ParcelDTO searchParams,
-            HttpServletRequest req) {
+            ParcelDTO srchParams,
+            HttpServletRequest req) throws ParseException {
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         if (requester.getRole().contains(UserRoles.CUSTOMER.getValue()) && requester.isFromGlobalSite()) {
-            searchParams.setAuthorId(requester.getId());
+            srchParams.setAuthorId(requester.getId());
         }
-        return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
+
+        if (StringUtils.isNotBlank(srchParams.getStrCreatedTime())) {
+            srchParams.setCreatedTime(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTime()));
+        }
+        if (StringUtils.isNotBlank(srchParams.getStrCreatedTimeTo())) {
+            srchParams.setCreatedTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTimeTo()));
+        }
+        if (StringUtils.isNotBlank(srchParams.getStrDeliveryTime())) {
+            srchParams.setDeliveryTime(ParcelDTO.convertStrDateToDateObj(srchParams.getStrDeliveryTime()));
+        }
+        if (StringUtils.isNotBlank(srchParams.getStrDeliveryTimeTo())) {
+            srchParams.setDeliveryTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrDeliveryTimeTo()));
+        }
+        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")

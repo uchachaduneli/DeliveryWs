@@ -24,7 +24,7 @@ public class Parcel {
     @JsonIgnore
     private Integer deleted;
     // 1 - pre inserted with empty values, will be filled after some time
-    private Integer prePrinted;
+    private boolean prePrinted;
     @Column(unique = true, updatable = false)
     private String barCode;
 
@@ -106,12 +106,12 @@ public class Parcel {
     @CreationTimestamp
     private Date createdTime;
 
-    @Column(updatable = false, nullable = false, columnDefinition = "tinyint(1) default 0")
+//    @Column(updatable = false, nullable = false, columnDefinition = "tinyint(1) default 0")
     private boolean addedFromGlobal;
 
-    public Parcel(String barCode) {
+    public Parcel(String barCode, boolean prePrinted) {
         this.barCode = barCode;
-        this.prePrinted = 1;
+        this.prePrinted = prePrinted;
     }
 
     @PrePersist

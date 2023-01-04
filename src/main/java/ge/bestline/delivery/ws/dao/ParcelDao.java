@@ -30,8 +30,8 @@ public class ParcelDao {
         if (obj.getId() != null && obj.getId() > 0) {
             q.append(" and e.id ='").append(obj.getId()).append("'");
         }
-        if (obj.getPrePrinted() != null && obj.getPrePrinted() > 0) {
-            q.append(" and e.prePrinted ='").append(obj.getPrePrinted()).append("'");
+        if (obj.isPrePrinted()) {
+            q.append(" and e.prePrinted ='").append(obj.isPrePrinted() ? 1 : 0).append("'");
         }
         if (obj.getSenderId() != null && obj.getSenderId() > 0) {
             q.append(" and e.senderId ='").append(obj.getSenderId()).append("'");
@@ -147,6 +147,9 @@ public class ParcelDao {
         if (obj.getRouteId() != null) {
             q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
         }
+        if (obj.isAddedFromGlobal()) {
+            q.append(" and e.addedFromGlobal ='").append(obj.isAddedFromGlobal() ? 1 : 0).append("'");
+        }
 
         if (obj.getCourierId() != null) {
             q.append(" and e.courier.id ='").append(obj.getCourierId()).append("'");
@@ -161,26 +164,26 @@ public class ParcelDao {
         }
 
         if (obj.getCreatedTime() != null && obj.getCreatedTimeTo() != null) {
-            q.append(" and e.createdTime between ='").append(obj.getCreatedTime()).append("' and '")
-                    .append(obj.getCreatedTimeTo()).append("' ");
+            q.append(" and ( e.createdTime between '").append(obj.getCreatedTime()).append("' and '")
+                    .append(obj.getCreatedTimeTo()).append("') ");
         } else {
             if (obj.getCreatedTime() != null) {
-                q.append(" and e.createdTime between ='").append(obj.getCreatedTime()).append("'");
+                q.append(" and e.createdTime ='").append(obj.getCreatedTime()).append("'");
             }
             if (obj.getCreatedTimeTo() != null) {
-                q.append(" and e.createdTime between ='").append(obj.getCreatedTimeTo()).append("'");
+                q.append(" and e.createdTime ='").append(obj.getCreatedTimeTo()).append("'");
             }
         }
 
         if (obj.getDeliveryTime() != null && obj.getDeliveryTimeTo() != null) {
-            q.append(" and e.deliveryTime between ='").append(obj.getDeliveryTime()).append("' and '")
-                    .append(obj.getDeliveryTimeTo()).append("' ");
+            q.append(" and ( e.deliveryTime between '").append(obj.getDeliveryTime()).append("' and '")
+                    .append(obj.getDeliveryTimeTo()).append("') ");
         } else {
             if (obj.getDeliveryTime() != null) {
-                q.append(" and e.deliveryTime between ='").append(obj.getDeliveryTime()).append("'");
+                q.append(" and e.deliveryTime ='").append(obj.getDeliveryTime()).append("'");
             }
             if (obj.getDeliveryTimeTo() != null) {
-                q.append(" and e.deliveryTime between ='").append(obj.getDeliveryTimeTo()).append("'");
+                q.append(" and e.deliveryTime ='").append(obj.getDeliveryTimeTo()).append("'");
             }
         }
 

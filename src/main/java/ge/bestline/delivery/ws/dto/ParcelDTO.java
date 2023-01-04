@@ -1,11 +1,13 @@
 package ge.bestline.delivery.ws.dto;
 
-import ge.bestline.delivery.ws.entities.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Data
@@ -16,7 +18,7 @@ public class ParcelDTO {
     private Integer id;
     private Integer deleted;
     // 1 - pre inserted with empty values, will be filled after some time
-    private Integer prePrinted;
+    private boolean prePrinted;
     private String barCode;
 
     private Integer senderId;
@@ -81,4 +83,15 @@ public class ParcelDTO {
     private Date deliveryTimeTo;
     private Date createdTime;
     private Date createdTimeTo;
+    private String strDeliveryTime;
+    private String strDeliveryTimeTo;
+    private String strCreatedTime;
+    private String strCreatedTimeTo;
+    private boolean addedFromGlobal;
+
+    public static Timestamp convertStrDateToDateObj(String strDate) throws ParseException {
+        Date tmpDate = (Date) new SimpleDateFormat("yyyy-MM-dd HH:mm")
+                .parse(strDate.replace("T", " "));
+        return new Timestamp(tmpDate.getTime());
+    }
 }
