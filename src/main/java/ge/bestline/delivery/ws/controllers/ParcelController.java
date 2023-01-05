@@ -182,7 +182,7 @@ public class ParcelController {
             if (p.getStatus().getId() != status.getId()) {
                 statusHistoryRepo.save(new ParcelStatusHistory(p
                         , status.getName()
-                        , status.getCode()
+                        , status.getStatus().getCode()
                         , request.getNote()
                         , request.getStatusDateTime()
                         , new User(requester.getId())
