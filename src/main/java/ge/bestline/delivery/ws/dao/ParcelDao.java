@@ -41,19 +41,19 @@ public class ParcelDao {
             q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
         }
 
-        if (StringUtils.isNotEmpty(obj.getBarCode())) {
+        if (StringUtils.isNotBlank(obj.getBarCode())) {
             q.append(" and e.barCode ='").append(obj.getBarCode().trim()).append("'");
         }
-        if (StringUtils.isNotEmpty(obj.getSenderName())) {
+        if (StringUtils.isNotBlank(obj.getSenderName())) {
             q.append(" and e.senderName like '").append(obj.getSenderName().trim()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getSenderIdentNumber())) {
+        if (StringUtils.isNotBlank(obj.getSenderIdentNumber())) {
             q.append(" and e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getSenderPhone())) {
+        if (StringUtils.isNotBlank(obj.getSenderPhone())) {
             q.append(" and e.senderPhone like '%").append(obj.getSenderPhone()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getSenderAddress())) {
+        if (StringUtils.isNotBlank(obj.getSenderAddress())) {
             q.append(" and e.senderAddress like '%").append(obj.getSenderAddress()).append("%'");
         }
         if (obj.getSenderCityId() != null) {
@@ -62,26 +62,26 @@ public class ParcelDao {
         if (obj.getReceiverId() != null && obj.getReceiverId() > 0) {
             q.append(" and e.receiverId ='").append(obj.getReceiverId()).append("'");
         }
-        if (StringUtils.isNotEmpty(obj.getReceiverName())) {
+        if (StringUtils.isNotBlank(obj.getReceiverName())) {
             q.append(" and e.receiverName like '").append(obj.getReceiverName()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getReceiverIdentNumber())) {
+        if (StringUtils.isNotBlank(obj.getReceiverIdentNumber())) {
             q.append(" and e.receiverIdentNumber like '").append(obj.getReceiverIdentNumber()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getReceiverPhone())) {
+        if (StringUtils.isNotBlank(obj.getReceiverPhone())) {
             q.append(" and e.receiverPhone like '%").append(obj.getReceiverPhone()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getReceiverAddress())) {
+        if (StringUtils.isNotBlank(obj.getReceiverAddress())) {
             q.append(" and e.receiverAddress like '%").append(obj.getReceiverAddress()).append("%'");
         }
         if (obj.getReceiverCityId() != null) {
             q.append(" and e.receiverCity.id ='").append(obj.getReceiverCityId()).append("'");
         }
 
-        if (StringUtils.isNotEmpty(obj.getDeliveredToPers())) {
+        if (StringUtils.isNotBlank(obj.getDeliveredToPers())) {
             q.append(" and e.deliveredToPers like '%").append(obj.getDeliveredToPers()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getDeliveredToPersIdent())) {
+        if (StringUtils.isNotBlank(obj.getDeliveredToPersIdent())) {
             q.append(" and e.deliveredToPersIdent like '").append(obj.getDeliveredToPersIdent()).append("%'");
         }
 
@@ -90,13 +90,13 @@ public class ParcelDao {
             q.append(" and e.payerId ='").append(obj.getPayerId()).append("'");
         }
 
-        if (StringUtils.isNotEmpty(obj.getPayerIdentNumber())) {
+        if (StringUtils.isNotBlank(obj.getPayerIdentNumber())) {
             q.append(" and e.payerIdentNumber like '").append(obj.getPayerIdentNumber()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getPayerPhone())) {
+        if (StringUtils.isNotBlank(obj.getPayerPhone())) {
             q.append(" and e.payerPhone like '%").append(obj.getPayerPhone()).append("%'");
         }
-        if (StringUtils.isNotEmpty(obj.getPayerAddress())) {
+        if (StringUtils.isNotBlank(obj.getPayerAddress())) {
             q.append(" and e.payerAddress like '%").append(obj.getPayerAddress()).append("%'");
         }
         if (obj.getPayerCityId() != null) {
@@ -111,11 +111,11 @@ public class ParcelDao {
             q.append(" and e.status.id ='").append(obj.getStatusReasonId()).append("'");
         }
 
-        if (StringUtils.isNotEmpty(obj.getStatusNote())) {
+        if (StringUtils.isNotBlank(obj.getStatusNote())) {
             q.append(" and e.statusNote like '%").append(obj.getStatusNote()).append("%'");
         }
 
-        if (StringUtils.isNotEmpty(obj.getComment())) {
+        if (StringUtils.isNotBlank(obj.getComment())) {
             q.append(" and e.comment like'%").append(obj.getComment()).append("%'");
         }
 
@@ -159,7 +159,7 @@ public class ParcelDao {
             q.append(" and e.tariff ='").append(obj.getTariff()).append("'");
         }
 
-        if (StringUtils.isNotEmpty(obj.getContent())) {
+        if (StringUtils.isNotBlank(obj.getContent())) {
             q.append(" and e.content like '%").append(obj.getContent()).append("%'");
         }
 

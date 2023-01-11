@@ -2,10 +2,12 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.DeliveryDetailDao;
-import ge.bestline.delivery.ws.entities.City;
-import ge.bestline.delivery.ws.entities.DeliveryDetail;
-import ge.bestline.delivery.ws.entities.Parcel;
+import ge.bestline.delivery.ws.dto.StatusReasons;
+import ge.bestline.delivery.ws.dto.TokenUser;
+import ge.bestline.delivery.ws.dto.UserRoles;
+import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
+import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -13,8 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
@@ -28,6 +34,10 @@ public class DeliveryDetailsController {
     private final WarehouseRepository warehouseRepository;
     private final UserRepository userRepository;
     private final DeliveryDetailsRepository deliveryDetailsRepository;
+    private final ParcelRepository parcelRepo;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final ParselStatusHistoryRepo statusHistoryRepo;
+    private final ParcelStatusReasonRepository statusReasonRepo;
 
     public DeliveryDetailsController(DeliveryDetailRepository repo,
                                      BarCodeService barCodeService,
@@ -35,7 +45,11 @@ public class DeliveryDetailsController {
                                      UserRepository userRepository,
                                      WarehouseRepository warehouseRepository,
                                      DeliveryDetailDao dao,
-                                     DeliveryDetailsRepository deliveryDetailsRepository) {
+                                     DeliveryDetailsRepository deliveryDetailsRepository,
+                                     ParcelRepository parcelRepo,
+                                     JwtTokenProvider jwtTokenProvider,
+                                     ParselStatusHistoryRepo statusHistoryRepo,
+                                     ParcelStatusReasonRepository statusReasonRepo) {
         this.repo = repo;
         this.barCodeService = barCodeService;
         this.routeRepository = routeRepository;
@@ -43,18 +57,50 @@ public class DeliveryDetailsController {
         this.userRepository = userRepository;
         this.dao = dao;
         this.deliveryDetailsRepository = deliveryDetailsRepository;
+        this.parcelRepo = parcelRepo;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.statusHistoryRepo = statusHistoryRepo;
+        this.statusReasonRepo = statusReasonRepo;
     }
 
     @PostMapping
     @Transactional
-    public DeliveryDetail addNew(@RequestBody DeliveryDetail obj) {
+    public DeliveryDetail addNew(@RequestBody DeliveryDetail obj,
+                                 HttpServletRequest req) {
         log.info("Adding New DeliveryDetail: " + obj.toString());
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         routeRepository.findById(obj.getRoute().getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
-        userRepository.findById(obj.getUser().getId()).orElseThrow(
+        User user = userRepository.findById(obj.getUser().getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Can't find User Using This ID : " + obj.getUser().getId()));
         warehouseRepository.findById(obj.getWarehouse().getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Can't find Warehouse Using This ID : " + obj.getWarehouse().getId()));
+        ParcelStatusReason status = null;
+        if (user.hasRole(UserRoles.COURIER.getValue())) {
+            status = statusReasonRepo.findById(StatusReasons.WC.getStatus().getId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Can't find WC StatusReason"));
+        } else if (user.hasRole(UserRoles.OFFICE.getValue())) {
+            status = statusReasonRepo.findById(StatusReasons.CC.getStatus().getId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Can't find CC StatusReason"));
+        }
+        if (status != null) {
+            List<Parcel> loadedParcels = parcelRepo.findByIdIn(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()));
+            List<ParcelStatusHistory> statusHistories = new ArrayList<>();
+            for (Parcel p : loadedParcels) {
+                p.setStatus(status);
+                statusHistories.add(new ParcelStatusHistory(
+                        p,
+                        status.getStatus().getName(),
+                        status.getStatus().getCode(),
+                        status.getName(),
+                        new User(requester.getId())));
+            }
+            parcelRepo.saveAll(loadedParcels);
+            statusHistoryRepo.saveAll(statusHistories);
+        } else {
+            throw new ResourceNotFoundException("Selected User Has No COURIER OR OFFICE ROLE");
+        }
+
         return repo.save(obj);
     }
 

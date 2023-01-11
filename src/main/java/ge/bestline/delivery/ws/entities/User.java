@@ -76,4 +76,13 @@ public class User {
     protected void onUpdate() {
         updatedTime = new Date();
     }
+
+    public boolean hasRole(String roleName) {
+        for (Role r : role) {
+            if (r.getName().equals(roleName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

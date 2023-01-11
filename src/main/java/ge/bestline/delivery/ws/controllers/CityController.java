@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.dao.CityDao;
 import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.repositories.CityRepository;
 import ge.bestline.delivery.ws.repositories.ZoneRepository;
@@ -9,10 +10,6 @@ import ge.bestline.delivery.ws.util.ExcelHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,15 +29,17 @@ public class CityController {
     private final CityService cityService;
     private final ZoneRepository zoneRepository;
     private final ExcelHelper excelHelper;
+    private final CityDao dao;
 
     public CityController(CityRepository cityRepository,
                           CityService cityService,
                           ZoneRepository zoneRepository,
-                          ExcelHelper excelHelper) {
+                          ExcelHelper excelHelper, CityDao dao) {
         this.cityRepository = cityRepository;
         this.cityService = cityService;
         this.zoneRepository = zoneRepository;
         this.excelHelper = excelHelper;
+        this.dao = dao;
     }
 
     @GetMapping("/excel")
@@ -95,13 +94,7 @@ public class CityController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             City searchParams) {
-        Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount, Sort.by("name").ascending());
-        Page<City> pageAuths = null;
-        pageAuths = cityRepository.findAll(paging);
-        resp.put("items", pageAuths.getContent());
-        resp.put("total_count", pageAuths.getTotalElements());
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+        return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
