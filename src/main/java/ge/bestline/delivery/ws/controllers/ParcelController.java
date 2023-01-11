@@ -82,15 +82,19 @@ public class ParcelController {
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         ParcelStatusReason psr = null;
         // if parcel is added from admin portal
-        if (obj.getRoute() != null && obj.getRoute().getId() > 0 && !requester.isFromGlobalSite()) {
-            User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
-                    () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
-            Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
-                    () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
-            obj.setCourier(courier);
-            obj.setRoute(route);
-            psr = statusReasonRepo.findById(StatusReasons.RG.getStatus().getId()).orElseThrow(() ->
-                    new ResourceNotFoundException("Can't find RG StatusReason"));
+        if (!requester.isFromGlobalSite()) {
+            if (obj.getRoute() != null && obj.getRoute().getId() > 0) {
+                User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
+                        () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
+                Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
+                        () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
+                obj.setCourier(courier);
+                obj.setRoute(route);
+                psr = statusReasonRepo.findById(StatusReasons.RG.getStatus().getId()).orElseThrow(() ->
+                        new ResourceNotFoundException("Can't find parcel status reason with RG - enum's value"));
+            }
+            psr = statusReasonRepo.findById(StatusReasons.PP.getStatus().getId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Can't find StatusReason Record with PP - enum's value"));
         }
         // if parcel added from global
         if (requester.isFromGlobalSite()) {
@@ -178,7 +182,7 @@ public class ParcelController {
             if (p.getStatus().getId() != status.getId()) {
                 statusHistoryRepo.save(new ParcelStatusHistory(p
                         , status.getName()
-                        , status.getCode()
+                        , status.getStatus().getCode()
                         , request.getNote()
                         , request.getStatusDateTime()
                         , new User(requester.getId())

@@ -25,10 +25,9 @@ public class ParcelStatusHistory {
     private String name;
     private String reason;
     private String code;
-    private Timestamp statusDateTime;
+    private Date statusDateTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private Date createdTime;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Parcel parcel;
