@@ -105,9 +105,8 @@ public class Parcel {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-
-//    @Column(updatable = false, nullable = false, columnDefinition = "tinyint(1) default 0")
     private boolean addedFromGlobal;
+    private boolean invoiced; // parcell has been added to invoice
 
     public Parcel(String barCode, boolean prePrinted) {
         this.barCode = barCode;
