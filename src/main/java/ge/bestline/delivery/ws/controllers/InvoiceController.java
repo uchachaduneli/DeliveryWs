@@ -7,12 +7,17 @@ import ge.bestline.delivery.ws.entities.Invoice;
 import ge.bestline.delivery.ws.entities.Parcel;
 import ge.bestline.delivery.ws.repositories.InvoiceRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
+import ge.bestline.delivery.ws.services.MailService;
+import ge.bestline.delivery.ws.services.PDFService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.naming.ConfigurationException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +31,18 @@ public class InvoiceController {
     private final InvoiceRepository repo;
     private final ParcelRepository parcelRepo;
     private final InvoiceDao dao;
+    private final PDFService pdfService;
+    private final MailService mailService;
 
     public InvoiceController(InvoiceRepository repo,
                              ParcelRepository parcelRepo,
-                             InvoiceDao dao) {
+                             InvoiceDao dao,
+                             PDFService pdfService, MailService mailService) {
         this.repo = repo;
         this.parcelRepo = parcelRepo;
         this.dao = dao;
+        this.pdfService = pdfService;
+        this.mailService = mailService;
     }
 
     @PostMapping
@@ -48,7 +58,31 @@ public class InvoiceController {
         } else {
             throw new ResourceNotFoundException("Parcel List Should Not Be Empty");
         }
-        return repo.save(obj);
+        Invoice res = repo.save(obj);
+        try {
+            res.setPdf(pdfService.generateInvoice(res));
+            repo.save(res);
+        } catch (Exception e) {
+            repo.delete(res);
+            throw new RuntimeException("Can't generate pdf ", e);
+        }
+        return res;
+    }
+
+    @GetMapping("/test")
+    public String genPdf() {
+        Invoice res = repo.findById(1).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : "));
+        try {
+            return pdfService.generateInvoice(res);
+        } catch (Exception e) {
+            throw new RuntimeException("Can't generate pdf ", e);
+        }
+    }
+
+    @GetMapping("/meiltest")
+    public String meiltest() throws MessagingException, ConfigurationException, IOException {
+        mailService.sendEmail("uchachaduneli@gmail.com", "რამე საბჯექთი", "სომე ბოდი some body", null);
+        return "ok";
     }
 
     @DeleteMapping("/{id}")

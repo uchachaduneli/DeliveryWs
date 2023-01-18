@@ -36,7 +36,7 @@ public class InvoiceDao {
     public Map<String, Object> findAll(int page, int rowCount, InvoiceDTO srchRequest) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
-        q.append(" From ").append(Invoice.class.getSimpleName()).append(" e Where deleted=2 ");
+        q.append(" From ").append(Invoice.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");

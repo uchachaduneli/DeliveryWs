@@ -23,6 +23,9 @@ public class Invoice {
     private String identNumber;
     private String status;
     private String payStatus;
+    private String payerAddress;
+    private Double payedAmount;
+    private Double amount;
     private String pdf;
     private Date operationDate;
     @ManyToMany(cascade = CascadeType.DETACH)

@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.services;
 
 import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.ExcelTmpParcel;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 
 @Log4j2
 @Service
+@Data
 public class FilesStorageServiceImpl implements FilesStorageService {
     @Value("${uploadsPath}")
     private String uploadsPath;
