@@ -3,13 +3,13 @@ package ge.bestline.delivery.ws.services;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.naming.ConfigurationException;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -41,7 +41,6 @@ public class MailService {
 
     public void sendEmail(String Bcc, String subject, String text, List<String> attachments) throws MessagingException, IOException, ConfigurationException {
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
         props.put("mail.smtp.host", "smtp.office365.com");
         props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
