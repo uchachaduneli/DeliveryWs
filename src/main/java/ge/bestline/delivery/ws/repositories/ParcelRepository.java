@@ -1,6 +1,8 @@
 package ge.bestline.delivery.ws.repositories;
 
 import ge.bestline.delivery.ws.entities.Parcel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -15,6 +17,6 @@ public interface ParcelRepository extends JpaRepository<Parcel, Integer> {
 
     List<Parcel> findBySenderIdentNumber(String personalNumber);
 
-    List<Parcel> findByPayerIdentNumberAndDeletedAndInvoiced(String personalNumber, Integer deleted, boolean invoiced);
+    Page<Parcel> findByPayerIdentNumberAndDeletedAndInvoiced(String identNumber, int i, boolean b, Pageable paging);
 
 }

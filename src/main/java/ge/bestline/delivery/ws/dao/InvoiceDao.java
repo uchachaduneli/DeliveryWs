@@ -20,16 +20,28 @@ public class InvoiceDao {
         this.em = em;
     }
 
-    public Map<String, Object> loadAllForInvoiceGeneration(int page, int rowCount) {
+    public Map<String, Object> loadAllForInvoiceGeneration(int page, int rowCount, InvoiceDTO srchObj) {
         Map<String, Object> response = new HashMap<>();
+        String qrStr = "";
+        String nativeQrStr = "";
+        if (StringUtils.isNotBlank(srchObj.getName())) {
+            qrStr += " and p.payerName like '" + srchObj.getName() + "%'";
+            nativeQrStr += " and p.payer_name like '" + srchObj.getName() + "%'";
+        }
+        if (StringUtils.isNotBlank(srchObj.getIdentNumber())) {
+            qrStr += " and p.payerIdentNumber like '" + srchObj.getIdentNumber() + "%' ";
+            nativeQrStr += " and p.payer_ident_number like '" + srchObj.getIdentNumber() + "%' ";
+        }
         List<InvoiceDTO> list =
                 em.createQuery("select new ge.bestline.delivery.ws.dto.InvoiceDTO(p.payerName," +
-                                " p.payerIdentNumber, count(p.payerIdentNumber)) from " + Parcel.class.getSimpleName() +
-                                " p where p.deleted = 2 and p.invoiced = false group by p.payerName, p.payerIdentNumber "
+                                " p.payerIdentNumber, count(p.payerIdentNumber), sum(p.totalPrice)) from " + Parcel.class.getSimpleName() +
+                                " p where p.deleted = 2 and p.invoiced = false " + qrStr +
+                                "group by p.payerName, p.payerIdentNumber "
                         , InvoiceDTO.class).setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", list);
         response.put("total_count", em.createNativeQuery("select count(1) from (select p.payer_ident_number from deliverydb.parcel"
-                + " p where p.deleted = 2 and p.invoiced = false group by p.payer_ident_number) a").getSingleResult());
+                + " p where p.deleted = 2 and p.invoiced = false " + nativeQrStr +
+                "group by p.payer_ident_number) a").getSingleResult());
         return response;
     }
 

@@ -24,11 +24,13 @@ public class InvoiceDTO {
     private String strOperationDateTo;
     private List<Parcel> parcels;
     private long parcelsCount;
+    private Double amount;
 
     // for invoice generation page list
-    public InvoiceDTO(String name, String identNumber, long parcelsCount) {
+    public InvoiceDTO(String name, String identNumber, long parcelsCount, Double amount) {
         this.name = name;
         this.identNumber = identNumber;
         this.parcelsCount = parcelsCount;
+        this.amount = amount;
     }
 }

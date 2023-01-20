@@ -10,6 +10,10 @@ import ge.bestline.delivery.ws.repositories.ParcelRepository;
 import ge.bestline.delivery.ws.services.MailService;
 import ge.bestline.delivery.ws.services.PDFService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,17 +118,24 @@ public class InvoiceController {
     @GetMapping("/notYetGenerated")
     public ResponseEntity<Map<String, Object>> loadAllForInvoiceGeneration(
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int rowCount) {
-        return new ResponseEntity<>(dao.loadAllForInvoiceGeneration(page, rowCount), HttpStatus.OK);
+            @RequestParam(required = false, defaultValue = "10") int rowCount,
+            InvoiceDTO srchObj) {
+        return new ResponseEntity<>(dao.loadAllForInvoiceGeneration(page, rowCount, srchObj), HttpStatus.OK);
     }
 
     // generaciis feijze romelimes archevis mere gamosatani amanatebis sia saidanac amoakleben Tu romelime
     // ar undad am invoishi ro ijdes
-    @GetMapping("/payerUnInvoicedParcels/{identNumber}")
-    public ResponseEntity<List<Parcel>> getPayerUnInvoicedParcels(String identNumber) {
-        return new ResponseEntity<>(
-                parcelRepo.findByPayerIdentNumberAndDeletedAndInvoiced(identNumber, 2, false)
-                , HttpStatus.OK);
+    @GetMapping("/payerUnInvoicedParcels")
+    public ResponseEntity<Map<String, Object>> getPayerUnInvoicedParcels(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int rowCount,
+            @RequestParam(required = true) String identNumber) {
+        Map<String, Object> resp = new HashMap<>();
+        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
+        Page<Parcel> pageAuths = parcelRepo.findByPayerIdentNumberAndDeletedAndInvoiced(identNumber, 2, false, paging);
+        resp.put("items", pageAuths.getContent());
+        resp.put("total_count", pageAuths.getTotalElements());
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
