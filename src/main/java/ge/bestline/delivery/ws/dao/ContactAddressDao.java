@@ -49,14 +49,10 @@ public class ContactAddressDao {
             q.append(" and e.city.id ='").append(srchRequest.getCity().getId()).append("'");
         }
 
-        TypedQuery<ContactAddress> query = em.createQuery("Select e " + q.toString(), ContactAddress.class);
+        TypedQuery<ContactAddress> query = em.createQuery("Select e " + q.toString() + " order by e.isPayAddress asc, e.id desc", ContactAddress.class);
         List<ContactAddress> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
         return response;
-    }
-
-    public int resetIsPayAddressField() {
-        return em.createQuery("update " + ContactAddress.class.getSimpleName() + " set isPayAddress ='2'").executeUpdate();
     }
 }

@@ -67,7 +67,7 @@ public class ContactDao {
             q.append(" and e.identNumber ='").append(srchRequest.getIdentNumber()).append("'");
         }
 
-        TypedQuery<Contact> query = em.createQuery("SELECT e " + q.toString(), Contact.class);
+        TypedQuery<Contact> query = em.createQuery("SELECT e " + q.toString() + " order by e.id desc", Contact.class);
         List<Contact> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());

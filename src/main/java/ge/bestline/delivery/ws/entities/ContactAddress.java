@@ -41,7 +41,6 @@ public class ContactAddress {
 
     @PrePersist
     protected void onCreate() {
-        isPayAddress = 2;
         createdTime = new Date();
     }
 

@@ -132,4 +132,13 @@ public class ContactController {
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 
+    @GetMapping(path = "byIdentNum/{identNum}")
+    public Contact getByIdentNumber(@PathVariable String identNum) {
+        log.info("Getting Contact With identNum: " + identNum);
+        Contact c = repo.findByIdentNumber(identNum);
+        if (c != null)
+            return c;
+        else throw new ResourceNotFoundException("Can't find Record Using This identNumber: " + identNum);
+    }
+
 }

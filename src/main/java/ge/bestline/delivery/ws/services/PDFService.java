@@ -168,7 +168,8 @@ public class PDFService {
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
         cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
-        cell2 = new PdfPCell(new Paragraph(invoice.getPayerAddress(), font12));
+//        cell2 = new PdfPCell(new Paragraph(invoice.getPayerAddress(), font12));
+        cell2 = new PdfPCell(new Paragraph("", font12));
         cell2.setBorderColor(BaseColor.WHITE);
         cell2.setPadding(10);
         cell2.setHorizontalAlignment(Element.ALIGN_LEFT);

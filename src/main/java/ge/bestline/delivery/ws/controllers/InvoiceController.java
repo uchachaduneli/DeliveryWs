@@ -10,6 +10,7 @@ import ge.bestline.delivery.ws.repositories.ParcelRepository;
 import ge.bestline.delivery.ws.services.MailService;
 import ge.bestline.delivery.ws.services.PDFService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import javax.naming.ConfigurationException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,11 +53,18 @@ public class InvoiceController {
 
     @PostMapping
     @Transactional
-    public Invoice addNew(@RequestBody Invoice obj) {
-        log.info("Adding New Invoice: " + obj.toString());
+    public Invoice generateInvoice(@RequestBody InvoiceDTO dtoObj) throws ParseException {
+        log.info("Generating New Invoice: " + dtoObj.toString());
+        if (StringUtils.isNotBlank(dtoObj.getStrOperationDate())) {
+            dtoObj.setOperationDate(InvoiceDTO.convertStrDateToDateObj(dtoObj.getStrOperationDate()));
+        }
+        Invoice obj = new Invoice(dtoObj);
         if (obj.getParcels() != null && !obj.getParcels().isEmpty()) {
             List<Parcel> loadedParcels = parcelRepo.findByIdIn(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()));
             for (Parcel p : loadedParcels) {
+                if (p.getTotalPrice() == null) {
+                    throw new RuntimeException("Price For Parcel:" + p.getBarCode() + " is not defined, you need to fix this");
+                }
                 p.setInvoiced(true);
             }
             parcelRepo.saveAll(loadedParcels);

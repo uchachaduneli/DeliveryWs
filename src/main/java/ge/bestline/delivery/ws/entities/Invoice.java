@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import ge.bestline.delivery.ws.dto.InvoiceDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,9 +22,9 @@ public class Invoice {
     private Integer id;
     private String name;
     private String identNumber;
+    private String emailToSent;
     private String status;
     private String payStatus;
-    private String payerAddress;
     private Double payedAmount;
     private Double amount;
     private String pdf;
@@ -44,5 +45,19 @@ public class Invoice {
     @PreUpdate
     protected void onUpdate() {
         updatedTime = new Date();
+    }
+
+    public Invoice(InvoiceDTO dto) {
+        this.id = dto.getId();
+        this.name = dto.getName();
+        this.identNumber = dto.getIdentNumber();
+        this.emailToSent = dto.getEmailToSent();
+        this.status = dto.getStatus();
+        this.payStatus = dto.getPayStatus();
+        this.payedAmount = dto.getPayedAmount();
+        this.amount = dto.getAmount();
+        this.pdf = dto.getPdf();
+        this.operationDate = dto.getOperationDate();
+        this.parcels = dto.getParcels();
     }
 }
