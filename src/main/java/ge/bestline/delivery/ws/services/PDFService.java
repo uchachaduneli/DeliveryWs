@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,10 +62,10 @@ public class PDFService {
 
     public String generateInvoice(Invoice invoice) throws DocumentException, IOException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        if (!Files.exists(Paths.get(uploadsPath + "\\Invoices\\"))) {
-            Files.createDirectory(Paths.get(uploadsPath + "\\Invoices\\"));
+        if (!Files.exists(Paths.get(uploadsPath + File.separator + "Invoices" + File.separator))) {
+            Files.createDirectory(Paths.get(uploadsPath + File.separator + "Invoices" + File.separator));
         }
-        String pdfPath = uploadsPath + "\\Invoices\\" + invoice.getId() + "-" + new SimpleDateFormat("dd_MM_yyyy-HH_mm_ss").format(new Date()) + ".pdf";
+        String pdfPath = uploadsPath + File.separator + "Invoices" + File.separator + invoice.getId() + "-" + new SimpleDateFormat("dd_MM_yyyy-HH_mm_ss").format(new Date()) + ".pdf";
         Document document = new Document(PageSize.A4, 10, 10, 10, 10);
         document.addTitle("Invoice#" + invoice.getId());
         document.addSubject("Invoice For " + invoice.getName() + " " + invoice.getIdentNumber());

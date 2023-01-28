@@ -59,5 +59,6 @@ public class Invoice {
         this.pdf = dto.getPdf();
         this.operationDate = dto.getOperationDate();
         this.parcels = dto.getParcels();
+        this.payedAmount=0.0;
     }
 }

@@ -3,6 +3,8 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.InvoiceDao;
 import ge.bestline.delivery.ws.dto.InvoiceDTO;
+import ge.bestline.delivery.ws.dto.InvoicePaymentStatus;
+import ge.bestline.delivery.ws.dto.InvoiceStatus;
 import ge.bestline.delivery.ws.entities.Invoice;
 import ge.bestline.delivery.ws.entities.Parcel;
 import ge.bestline.delivery.ws.repositories.InvoiceRepository;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log4j2
 @RestController
@@ -59,18 +62,23 @@ public class InvoiceController {
             dtoObj.setOperationDate(InvoiceDTO.convertStrDateToDateObj(dtoObj.getStrOperationDate()));
         }
         Invoice obj = new Invoice(dtoObj);
+        Double priceSum = 0.0;
         if (obj.getParcels() != null && !obj.getParcels().isEmpty()) {
             List<Parcel> loadedParcels = parcelRepo.findByIdIn(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()));
             for (Parcel p : loadedParcels) {
                 if (p.getTotalPrice() == null) {
                     throw new RuntimeException("Price For Parcel:" + p.getBarCode() + " is not defined, you need to fix this");
                 }
+                priceSum += p.getTotalPrice();
                 p.setInvoiced(true);
             }
             parcelRepo.saveAll(loadedParcels);
         } else {
             throw new ResourceNotFoundException("Parcel List Should Not Be Empty");
         }
+        obj.setAmount(priceSum);
+        obj.setStatus(InvoiceStatus.CREATED.getStatus());
+        obj.setPayStatus(InvoicePaymentStatus.UNPAYED.getStatus());
         Invoice res = repo.save(obj);
         try {
             res.setPdf(pdfService.generateInvoice(res));
@@ -96,6 +104,20 @@ public class InvoiceController {
     public String meiltest() throws MessagingException, ConfigurationException, IOException {
         mailService.sendEmail("uchachaduneli@gmail.com", "რამე საბჯექთი", "სომე ბოდი some body", null);
         return "ok";
+    }
+
+    @GetMapping("/statuses")
+    public List<String> getStatuses() {
+        return Stream.of(InvoiceStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/paymentStatuses")
+    public List<String> getPaymentStatuses() {
+        return Stream.of(InvoicePaymentStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 
     @DeleteMapping("/{id}")
