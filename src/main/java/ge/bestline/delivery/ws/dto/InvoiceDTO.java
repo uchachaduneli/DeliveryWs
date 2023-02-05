@@ -29,6 +29,7 @@ public class InvoiceDTO {
     private List<Parcel> parcels;
     private long parcelsCount;
     private Double amount;
+    private Double newAmount;
     private Double payedAmount;
     private String payerEmail;
 

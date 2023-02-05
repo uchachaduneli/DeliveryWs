@@ -5,6 +5,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import ge.bestline.delivery.ws.entities.Invoice;
 import ge.bestline.delivery.ws.entities.Parcel;
 import lombok.extern.log4j.Log4j2;
@@ -15,6 +16,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -60,8 +62,8 @@ public class PDFService {
         }
     }
 
-    public String generateInvoice(Invoice invoice) throws DocumentException, IOException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    public String generateInvoice(Invoice invoice) throws DocumentException, IOException, URISyntaxException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         if (!Files.exists(Paths.get(uploadsPath + File.separator + "Invoices" + File.separator))) {
             Files.createDirectory(Paths.get(uploadsPath + File.separator + "Invoices" + File.separator));
         }
@@ -91,17 +93,20 @@ public class PDFService {
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
         cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
-        PdfPCell cell2 = new PdfPCell(new Paragraph("", font12));
+        Image image = Image.getInstance(Paths.get(PDFService.class.getResource("/images/logo.png").toURI()).toFile().getAbsolutePath());
+        image.scaleAbsolute(100, 50);
+
+        PdfPCell cell2 = new PdfPCell(image);
         cell2.setBorderColor(BaseColor.WHITE);
         cell2.setPaddingLeft(10);
         cell1.setPaddingBottom(20);
-        cell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
         cell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("სერვისი: შიდა მომსახურება", font12));
+        cell1 = new PdfPCell(new Paragraph("", font12));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -116,14 +121,14 @@ public class PDFService {
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("მომწოდებელი", font14Bold));
+        cell1 = new PdfPCell(new Paragraph("შემსრულებელი", font14Bold));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
         cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
-        cell2 = new PdfPCell(new Paragraph("გადამხდელი", font14Bold));
+        cell2 = new PdfPCell(new Paragraph("დამკვეთი", font14Bold));
         cell2.setBorderColor(BaseColor.WHITE);
         cell2.setPadding(10);
         cell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -133,7 +138,7 @@ public class PDFService {
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("შ.პ.ს. \"ექსპრეს ლაინ\"", font12));
+        cell1 = new PdfPCell(new Paragraph("შ.პ.ს. \"ექსპრეს ხაზი\"", font12));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -148,7 +153,7 @@ public class PDFService {
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("ს/კ ექსლაინის კოდი", font12));
+        cell1 = new PdfPCell(new Paragraph("ს/კ 405178258", font12));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -163,7 +168,7 @@ public class PDFService {
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("ექსლაინის მისამართი", font12));
+        cell1 = new PdfPCell(new Paragraph("დ.უზნაძის 4", font12));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -179,7 +184,7 @@ public class PDFService {
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("ჯიგო ბანკი - BANKCODE", font12));
+        cell1 = new PdfPCell(new Paragraph("ს.ს თიბისი ბანკი - TBCBGE22", font12));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -194,7 +199,37 @@ public class PDFService {
         table.addCell(cell1);
         table.addCell(cell2);
 
-        cell1 = new PdfPCell(new Paragraph("ანგარიშის ნომერი", font12));
+        cell1 = new PdfPCell(new Paragraph("ა.ნ. GE64TB7713936080100010", font12));
+        cell1.setBorderColor(BaseColor.WHITE);
+        cell1.setPadding(10);
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+        cell2 = new PdfPCell(new Paragraph("", font12));
+        cell2.setBorderColor(BaseColor.WHITE);
+        cell2.setPadding(10);
+        cell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+        table.addCell(cell1);
+        table.addCell(cell2);
+
+        cell1 = new PdfPCell(new Paragraph("ს.ს საქართველოს ბანკი - BAGAGE22", font12));
+        cell1.setBorderColor(BaseColor.WHITE);
+        cell1.setPadding(10);
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+        cell2 = new PdfPCell(new Paragraph("", font12));
+        cell2.setBorderColor(BaseColor.WHITE);
+        cell2.setPadding(10);
+        cell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell2.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+        table.addCell(cell1);
+        table.addCell(cell2);
+
+        cell1 = new PdfPCell(new Paragraph("ა.ნ. GE54BG0000000498958429", font12));
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
         cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -217,12 +252,12 @@ public class PDFService {
         document.add(emptyParagraph);
 
 
-        table = new PdfPTable(5);
+        table = new PdfPTable(6);
         table.setWidthPercentage(100); //Width 100%
         table.setSpacingBefore(10f); //Space before table
         table.setSpacingAfter(10f); //Space after table
         //Set Column widths
-        float[] colWidths = {1f, 1f, 1f, 1f, 1f};
+        float[] colWidths = {1f, 1f, 1f, 1f, 1f, 1f};
         table.setWidths(colWidths);
 
 
@@ -230,16 +265,17 @@ public class PDFService {
         table.addCell(getParcelsTableCell("გზავნილის #", true, font14Bold));
         table.addCell(getParcelsTableCell("გამგზავნი ქალაქი", true, font14Bold));
         table.addCell(getParcelsTableCell("მიმღები ქალაქი", true, font14Bold));
+        table.addCell(getParcelsTableCell("წონა", true, font14Bold));
         table.addCell(getParcelsTableCell("ფასი", true, font14Bold));
         table.setHeaderRows(1);
 
-        SimpleDateFormat delivTimeFrmt = new SimpleDateFormat("dd.MM.yyyy");
         Double parcelPriceSum = 0.0;
         for (Parcel p : invoice.getParcels()) {
-            table.addCell(getParcelsTableCell(p.getDeliveryTime() != null ? delivTimeFrmt.format(p.getDeliveryTime()) : "-", false, font12));
+            table.addCell(getParcelsTableCell(p.getDeliveryTime() != null ? simpleDateFormat.format(p.getDeliveryTime()) : "-", false, font12));
             table.addCell(getParcelsTableCell(p.getBarCode(), false, font12Bold));
             table.addCell(getParcelsTableCell(p.getSenderCity() != null ? p.getSenderCity().getName() : "-", false, font12));
             table.addCell(getParcelsTableCell(p.getReceiverCity() != null ? p.getReceiverCity().getName() : "", false, font12));
+            table.addCell(getParcelsTableCell(p.getWeight() + "", false, font12));
             table.addCell(getParcelsTableCell(p.getTotalPrice() + "", false, font12));
             parcelPriceSum += p.getTotalPrice();
         }
@@ -252,10 +288,14 @@ public class PDFService {
         table.setSpacingAfter(10f); //Space after table
         table.setWidths(columnWidths);
 
-        cell1 = new PdfPCell(new Paragraph("", font12));
+//        File file = ResourceUtils.getFile("classpath:/images/sign.jpg");
+        image = Image.getInstance(Paths.get(PDFService.class.getResource("/images/sign.jpg").toURI()).toFile().getAbsolutePath());
+        image.scaleAbsolute(100, 100);
+
+        cell1 = new PdfPCell(image);
         cell1.setBorderColor(BaseColor.WHITE);
         cell1.setPadding(10);
-        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setHorizontalAlignment(Element.ALIGN_RIGHT);
         cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
 
         cell2 = new PdfPCell(new Paragraph("სულ ლარი: " + parcelPriceSum, font12));
@@ -268,6 +308,22 @@ public class PDFService {
         table.addCell(cell2);
 
         document.add(table);
+
+        LineSeparator lineSeparator = new LineSeparator();
+        lineSeparator.setLineWidth(1);
+        document.add(lineSeparator);
+        Paragraph p;//= new Paragraph();
+        //p.setAlignment(Element.ALIGN_CENTER);
+//        p.add(lineSeparator);
+//        document.add(p);
+        document.add(new Chunk(""));
+        document.add(new Chunk(""));
+        p = new Paragraph("გთხოვთ ანგარიშსწორება მოახდინოთ ხუთი საბანკო დღის განმავლობაში, " +
+                "გადმორიცხვისას მიუთითეთ ინვოისის ნომერი, " +
+                "გმადლობთ თანამშრომლობისათვის", font12);
+        p.setAlignment(Element.ALIGN_CENTER);
+        document.add(p);
+
 
         document.close();
         writer.close();

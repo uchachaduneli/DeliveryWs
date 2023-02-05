@@ -22,6 +22,7 @@ public class User {
     private Integer deleted;
     private Integer parentUserId;
     private String printerMacAddress;
+    private String firebaseToken;
     private String name;
     private String lastName;
     @Column(unique = true)

@@ -2,14 +2,14 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.DeliveryDetailDao;
-import ge.bestline.delivery.ws.dto.StatusReasons;
-import ge.bestline.delivery.ws.dto.TokenUser;
-import ge.bestline.delivery.ws.dto.UserRoles;
+import ge.bestline.delivery.ws.dto.*;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,13 +104,20 @@ public class DeliveryDetailsController {
         return repo.save(obj);
     }
 
+    @SneakyThrows
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            DeliveryDetail searchParams) {
-        log.info("Getting DeliveryDetails with params: " + searchParams);
-        return new ResponseEntity<>(dao.findAll(page, rowCount, searchParams), HttpStatus.OK);
+            DeliveryDetailDTO srchParams) {
+        log.info("Getting DeliveryDetails with params: " + srchParams);
+        if (StringUtils.isNotBlank(srchParams.getStrCreatedTime())) {
+            srchParams.setCreatedTime(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTime()));
+        }
+        if (StringUtils.isNotBlank(srchParams.getStrCreatedTimeTo())) {
+            srchParams.setCreatedTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTimeTo()));
+        }
+        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams), HttpStatus.OK);
     }
 
     @GetMapping("barcode")

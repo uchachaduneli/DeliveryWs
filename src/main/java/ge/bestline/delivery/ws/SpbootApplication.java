@@ -1,12 +1,18 @@
 package ge.bestline.delivery.ws;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
+import java.io.IOException;
 import java.net.URI;
 
 import static org.springframework.web.servlet.function.RequestPredicates.GET;
@@ -16,8 +22,26 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 public class SpbootApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-
         SpringApplication.run(SpbootApplication.class, args);
+    }
+
+
+    @Bean
+    FirebaseMessaging firebaseMessaging() throws IOException {
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(new ClassPathResource("firebase-service-account.json").getInputStream());
+        FirebaseOptions firebaseOptions = FirebaseOptions
+                .builder()
+                .setCredentials(googleCredentials)
+                .build();
+        FirebaseApp app = null;
+        if (FirebaseApp.getApps() == null || FirebaseApp.getApps().isEmpty()) {
+            app = FirebaseApp.initializeApp(firebaseOptions, "exline-delivery");
+            return FirebaseMessaging.getInstance(app);
+        } else {
+            app = FirebaseApp.getInstance("exline-delivery");
+            return FirebaseMessaging.getInstance(app);
+        }
     }
 
     @Bean

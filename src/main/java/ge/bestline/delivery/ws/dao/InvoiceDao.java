@@ -35,12 +35,12 @@ public class InvoiceDao {
         List<InvoiceDTO> list =
                 em.createQuery("select new ge.bestline.delivery.ws.dto.InvoiceDTO(p.payerName," +
                                 " p.payerIdentNumber, count(p.payerIdentNumber), sum(p.totalPrice)) from " + Parcel.class.getSimpleName() +
-                                " p where p.deleted = 2 and p.invoiced = false " + qrStr +
-                                "group by p.payerName, p.payerIdentNumber "
+                                " p where p.deleted = 2 and p.invoiced = false and p.paymentType=1 and p.payerIdentNumber is not null " + qrStr +
+                                " group by p.payerName, p.payerIdentNumber "
                         , InvoiceDTO.class).setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", list);
         response.put("total_count", em.createNativeQuery("select count(1) from (select p.payer_ident_number from deliverydb.parcel"
-                + " p where p.deleted = 2 and p.invoiced = false " + nativeQrStr +
+                + " p where p.deleted = 2 and p.invoiced = false and p.payment_type=1 and p.payer_ident_number is not null " + nativeQrStr +
                 "group by p.payer_ident_number) a").getSingleResult());
         return response;
     }

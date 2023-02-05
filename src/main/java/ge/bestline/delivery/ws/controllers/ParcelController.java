@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.controllers;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ParcelDao;
 import ge.bestline.delivery.ws.dto.*;
@@ -7,6 +8,7 @@ import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
+import ge.bestline.delivery.ws.services.FirebaseMessagingService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -38,6 +40,7 @@ public class ParcelController {
     private final RouteRepository routeRepository;
     private final BarCodeService barCodeService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final FirebaseMessagingService firebaseService;
 
     public ParcelController(ParcelRepository repo,
                             VolumeWeightIndexRepository volumeWeightIndexRepository,
@@ -46,7 +49,9 @@ public class ParcelController {
                             ParcelStatusReasonRepository statusReasonRepo,
                             UserRepository userRepository,
                             RouteRepository routeRepository,
-                            BarCodeService barCodeService, JwtTokenProvider jwtTokenProvider) {
+                            BarCodeService barCodeService,
+                            JwtTokenProvider jwtTokenProvider,
+                            FirebaseMessagingService firebaseService) {
         this.repo = repo;
         this.volumeWeightIndexRepository = volumeWeightIndexRepository;
         this.packagesRepo = packagesRepo;
@@ -57,11 +62,19 @@ public class ParcelController {
         this.routeRepository = routeRepository;
         this.barCodeService = barCodeService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.firebaseService = firebaseService;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
         return new ResponseEntity<>("მსგავსი ამანათი უკვე არსებობს", HttpStatus.BAD_REQUEST);
+    }
+
+
+    @PostMapping("/send-notification")
+    public String sendNotification(@RequestBody FirebaseNote note,
+                                   @RequestParam String token) throws FirebaseMessagingException {
+        return firebaseService.sendNotification(note, token);
     }
 
     @PostMapping(path = "/prePrint/{count}")
@@ -89,6 +102,12 @@ public class ParcelController {
                 Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
                         () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
                 obj.setCourier(courier);
+                try {
+                    firebaseService.sendNotification(new FirebaseNote("ახალი ამანათი", "გთხოვთ იხილოთ ახალი გამოძახებების განყოფილება"), courier.getFirebaseToken());
+                } catch (FirebaseMessagingException e) {
+                    log.error("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
+                    throw new RuntimeException("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
+                }
                 obj.setRoute(route);
                 psr = statusReasonRepo.findById(StatusReasons.RG.getStatus().getId()).orElseThrow(() ->
                         new ResourceNotFoundException("Can't find parcel status reason with RG - enum's value"));
@@ -156,6 +175,12 @@ public class ParcelController {
             existing.setCourier(courier);
             if (existing.getStatus().getId() == StatusReasons.PP.getStatus().getId()) {
                 existing.setStatus(StatusReasons.RG.getStatus());
+                try {
+                    firebaseService.sendNotification(new FirebaseNote("ახალი ამანათი", "გთხოვთ იხილოთ ახალი გამოძახებების განყოფილება"), courier.getFirebaseToken());
+                } catch (FirebaseMessagingException e) {
+                    log.error("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
+                    throw new RuntimeException("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
+                }
             }
             existing.setRoute(route);
         }

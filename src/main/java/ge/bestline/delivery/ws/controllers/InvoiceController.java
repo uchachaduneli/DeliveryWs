@@ -5,10 +5,12 @@ import ge.bestline.delivery.ws.dao.InvoiceDao;
 import ge.bestline.delivery.ws.dto.InvoiceDTO;
 import ge.bestline.delivery.ws.dto.InvoicePaymentStatus;
 import ge.bestline.delivery.ws.dto.InvoiceStatus;
+import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.Invoice;
 import ge.bestline.delivery.ws.entities.Parcel;
 import ge.bestline.delivery.ws.repositories.InvoiceRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
+import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.MailService;
 import ge.bestline.delivery.ws.services.PDFService;
 import lombok.extern.log4j.Log4j2;
@@ -22,10 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
-import javax.naming.ConfigurationException;
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,16 +43,40 @@ public class InvoiceController {
     private final InvoiceDao dao;
     private final PDFService pdfService;
     private final MailService mailService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public InvoiceController(InvoiceRepository repo,
                              ParcelRepository parcelRepo,
                              InvoiceDao dao,
-                             PDFService pdfService, MailService mailService) {
+                             PDFService pdfService, MailService mailService,
+                             JwtTokenProvider jwtTokenProvider) {
         this.repo = repo;
         this.parcelRepo = parcelRepo;
         this.dao = dao;
         this.pdfService = pdfService;
         this.mailService = mailService;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    @PutMapping("/pay")
+    @Transactional
+    public Invoice generateInvoice(@RequestBody InvoiceDTO request, HttpServletRequest req) throws ParseException {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        log.warn(requester.getName() + " " + requester.getLastName() + " makes payment for invoice with ID " + request.getId()
+                + " new amount: " + request.getNewAmount());
+        Invoice existing = repo.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Invoice Using This ID : "));
+        if (request.getNewAmount() == null) {
+            throw new RuntimeException("New Payed Amount Shouldn't be null");
+        }
+        existing.setPayedAmount((existing.getPayedAmount() == null ? 0.0 : existing.getPayedAmount()) + request.getNewAmount());
+        if (existing.getPayedAmount() > existing.getAmount() || existing.getPayedAmount().equals(existing.getAmount())) {
+            existing.setPayStatus(InvoicePaymentStatus.PAYED.getStatus());
+        } else {
+            existing.setPayStatus(InvoicePaymentStatus.PARTIALLY_PAID.getStatus());
+        }
+
+        repo.save(existing);
+        return existing;
     }
 
     @PostMapping
@@ -90,20 +115,23 @@ public class InvoiceController {
         return res;
     }
 
-    @GetMapping("/test")
-    public String genPdf() {
-        Invoice res = repo.findById(1).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : "));
+    @PostMapping("/email")
+    public ResponseEntity<Invoice> meiltest(@RequestBody InvoiceDTO request, HttpServletRequest req) throws ParseException {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        log.warn(requester.getName() + " " + requester.getLastName() + " tries to send invoice via Email  invoice# " + request.getId()
+                + " email: " + request.getEmailToSent());
+        Invoice invoice = repo.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Invoice Using This ID : "));
         try {
-            return pdfService.generateInvoice(res);
+            mailService.sendEmail(request.getEmailToSent(), "Invoice #" + invoice.getId(), "",
+                    invoice.getPdf() != null ? Arrays.asList(invoice.getPdf()) : null);
         } catch (Exception e) {
-            throw new RuntimeException("Can't generate pdf ", e);
+            invoice.setStatus(InvoiceStatus.SENT_FAILED.getStatus());
+            repo.save(invoice);
+            throw new RuntimeException(e);
         }
-    }
-
-    @GetMapping("/meiltest")
-    public String meiltest() throws MessagingException, ConfigurationException, IOException {
-        mailService.sendEmail("uchachaduneli@gmail.com", "რამე საბჯექთი", "სომე ბოდი some body", null);
-        return "ok";
+        invoice.setStatus(InvoiceStatus.SENT.getStatus());
+        repo.save(invoice);
+        return ResponseEntity.ok(invoice);
     }
 
     @GetMapping("/statuses")

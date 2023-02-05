@@ -149,6 +149,12 @@
             <artifactId>itextpdf</artifactId>
             <version>5.5.13.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.1.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -158,8 +164,9 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
-                    <!--  <exclude>**/application.properties</exclude>-->
+                    <!--                      <exclude>**/application.properties</exclude>-->
                     <exclude>fonts/*</exclude><!--es fontebis excludi unda iyos ise ar ibildeba-->
+                    <exclude>images/*</exclude><!--es unda iyos ise ar gaibildeba-->
                 </excludes>
             </resource>
             <resource><!--esec unda iyos ro resursebshi fonti gaayolos-->
@@ -167,6 +174,13 @@
                 <filtering>false</filtering>
                 <includes>
                     <include>fonts/*</include>
+                </includes>
+            </resource>
+            <resource><!--esec ro suratebi gaayolos bilds-->
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>images/*</include>
                 </includes>
             </resource>
         </resources>
