@@ -67,7 +67,8 @@ public class PDFService {
         if (!Files.exists(Paths.get(uploadsPath + File.separator + "Invoices" + File.separator))) {
             Files.createDirectory(Paths.get(uploadsPath + File.separator + "Invoices" + File.separator));
         }
-        String pdfPath = uploadsPath + File.separator + "Invoices" + File.separator + invoice.getId() + "-" + new SimpleDateFormat("dd_MM_yyyy-HH_mm_ss").format(new Date()) + ".pdf";
+        String fileName = invoice.getId() + "-" + new SimpleDateFormat("dd_MM_yyyy-HH_mm_ss").format(new Date()) + ".pdf";
+        String pdfPath = uploadsPath + File.separator + "Invoices" + File.separator + fileName;
         Document document = new Document(PageSize.A4, 10, 10, 10, 10);
         document.addTitle("Invoice#" + invoice.getId());
         document.addSubject("Invoice For " + invoice.getName() + " " + invoice.getIdentNumber());
@@ -328,7 +329,7 @@ public class PDFService {
         document.close();
         writer.close();
 
-        return pdfPath;
+        return fileName;
     }
 
     private PdfPCell getParcelsTableCell(String text, boolean hasBackground, Font font) {

@@ -87,7 +87,8 @@ public class ParcelDTO {
     private String strDeliveryTimeTo;
     private String strCreatedTime;
     private String strCreatedTimeTo;
-    private boolean addedFromGlobal;
+    private Boolean addedFromGlobal;
+    private Boolean invoiced;
 
     public static Timestamp convertStrDateToDateObj(String strDate) throws ParseException {
         Date tmpDate = (Date) new SimpleDateFormat("yyyy-MM-dd HH:mm")

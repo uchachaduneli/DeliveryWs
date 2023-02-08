@@ -16,10 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -93,6 +91,7 @@ public class DeliveryDetailsController {
                         status.getStatus().getName(),
                         status.getStatus().getCode(),
                         status.getName(),
+                        new Timestamp(new Date().getTime()),
                         new User(requester.getId())));
             }
             parcelRepo.saveAll(loadedParcels);

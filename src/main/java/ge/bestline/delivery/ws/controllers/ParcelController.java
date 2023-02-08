@@ -19,11 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 @RestController
@@ -130,6 +128,7 @@ public class ParcelController {
                 psr.getStatus().getName(),
                 psr.getStatus().getCode(),
                 psr.getName(),
+                new Timestamp(new Date().getTime()),
                 new User(requester.getId()))
         );
         return parcel;
@@ -158,10 +157,13 @@ public class ParcelController {
         Parcel existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         if (request.getStatus().getId() != existing.getStatus().getId()) {
+            ParcelStatusReason status = statusReasonRepo.findById(request.getStatus().getId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Can't find parcel status reason with ID " + request.getStatus().getId()));
             statusHistoryRepo.save(new ParcelStatusHistory(existing
-                    , existing.getStatus().getStatus().getName()
-                    , existing.getStatus().getStatus().getCode()
-                    , existing.getStatus().getName()
+                    , status.getStatus().getName()
+                    , status.getStatus().getCode()
+                    , status.getName()
+                    , new Timestamp(new Date().getTime())
                     , new User(requester.getId())
             ));
             existing.setStatus(request.getStatus());
@@ -237,6 +239,7 @@ public class ParcelController {
                     , status.getStatus().getName()
                     , status.getStatus().getCode()
                     , existing.getStatusNote()
+                    , new Timestamp(new Date().getTime())
                     , new User(requester.getId())
             ));
             existing.setStatus(status);
@@ -284,7 +287,7 @@ public class ParcelController {
         if (StringUtils.isNotBlank(srchParams.getStrDeliveryTimeTo())) {
             srchParams.setDeliveryTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrDeliveryTimeTo()));
         }
-        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams), HttpStatus.OK);
+        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams, false), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")

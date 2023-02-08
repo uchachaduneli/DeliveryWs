@@ -18,7 +18,7 @@ public class ParcelDao {
         this.em = em;
     }
 
-    public Map<String, Object> findAll(int page, int rowCount, ParcelDTO obj) {
+    public Map<String, Object> findAll(int page, int rowCount, ParcelDTO obj, boolean needTotalPriceSum) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
         q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where e.deleted=2 ");
@@ -39,6 +39,10 @@ public class ParcelDao {
 
         if (obj.getRouteId() != null) {
             q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
+        }
+
+        if (obj.getInvoiced() != null) {
+            q.append(" and e.invoiced ='").append(obj.getInvoiced().booleanValue()).append("'");
         }
 
         if (StringUtils.isNotBlank(obj.getBarCode())) {
@@ -91,7 +95,7 @@ public class ParcelDao {
         }
 
         if (StringUtils.isNotBlank(obj.getPayerIdentNumber())) {
-            q.append(" and e.payerIdentNumber like '").append(obj.getPayerIdentNumber()).append("%'");
+            q.append(" and e.payerIdentNumber = '").append(obj.getPayerIdentNumber()).append("'");
         }
         if (StringUtils.isNotBlank(obj.getPayerPhone())) {
             q.append(" and e.payerPhone like '%").append(obj.getPayerPhone()).append("%'");
@@ -147,8 +151,8 @@ public class ParcelDao {
         if (obj.getRouteId() != null) {
             q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
         }
-        if (obj.isAddedFromGlobal()) {
-            q.append(" and e.addedFromGlobal ='").append(obj.isAddedFromGlobal() ? 1 : 0).append("'");
+        if (obj.getAddedFromGlobal() != null) {
+            q.append(" and e.addedFromGlobal ='").append(obj.getAddedFromGlobal().booleanValue()).append("'");
         }
 
         if (obj.getCourierId() != null) {
@@ -168,10 +172,10 @@ public class ParcelDao {
                     .append(obj.getCreatedTimeTo()).append("') ");
         } else {
             if (obj.getCreatedTime() != null) {
-                q.append(" and e.createdTime ='").append(obj.getCreatedTime()).append("'");
+                q.append(" and e.createdTime >'").append(obj.getCreatedTime()).append("'");
             }
             if (obj.getCreatedTimeTo() != null) {
-                q.append(" and e.createdTime ='").append(obj.getCreatedTimeTo()).append("'");
+                q.append(" and e.createdTime <'").append(obj.getCreatedTimeTo()).append("'");
             }
         }
 
@@ -180,10 +184,10 @@ public class ParcelDao {
                     .append(obj.getDeliveryTimeTo()).append("') ");
         } else {
             if (obj.getDeliveryTime() != null) {
-                q.append(" and e.deliveryTime ='").append(obj.getDeliveryTime()).append("'");
+                q.append(" and e.deliveryTime >'").append(obj.getDeliveryTime()).append("'");
             }
             if (obj.getDeliveryTimeTo() != null) {
-                q.append(" and e.deliveryTime ='").append(obj.getDeliveryTimeTo()).append("'");
+                q.append(" and e.deliveryTime <'").append(obj.getDeliveryTimeTo()).append("'");
             }
         }
 
@@ -214,6 +218,9 @@ public class ParcelDao {
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         response.put("items", query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());
+        if (needTotalPriceSum) {
+            response.put("total_price_sum", em.createQuery("SELECT sum(e.totalPrice) " + q.toString(), Double.class).getSingleResult());
+        }
         return response;
     }
 }

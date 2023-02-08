@@ -35,7 +35,7 @@ public class InvoiceDTO {
 
 
     // for invoice generation page list
-    public InvoiceDTO(String name, String identNumber, long parcelsCount, Double amount) {
+    public InvoiceDTO(String identNumber, long parcelsCount, Double amount) {
         this.name = name;
         this.identNumber = identNumber;
         this.parcelsCount = parcelsCount;

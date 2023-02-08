@@ -9,7 +9,6 @@ import ge.bestline.delivery.ws.repositories.FilesRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.services.FilesStorageService;
-import ge.bestline.delivery.ws.services.FilesStorageServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
@@ -70,33 +68,35 @@ public class FilesController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Files>> getListFiles(@RequestParam(required = false) Integer parcelId) {
-        if (parcelId != null) {
-            log.info("Getting List of Files for parcel with ID " + parcelId);
-            List<Files> res = filesRepo.findByParcelId(parcelId);
-            res.forEach(f -> f.setUrl(MvcUriComponentsBuilder
-                    .fromMethodName(FilesController.class, "getFile", f.getName()).build().toString()));
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-        } else {
-            // list all docs from upload dir if
-            log.info("Getting List of all files from Upload Dir - parcelID is not presented");
-            List<Files> fileInfos = storageService.loadAll().map(path -> {
-                String filename = path.getFileName().toString();
-                String url = MvcUriComponentsBuilder
-                        .fromMethodName(FilesController.class, "getFile", path.getFileName().toString()).build().toString();
-                return new Files(filename, url);
-            }).collect(Collectors.toList());
-            return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
-        }
+    public ResponseEntity<List<Files>> getListFiles(@RequestParam(required = true) Integer parcelId) {
+        log.info("Getting List of Files for parcel with ID " + parcelId);
+        List<Files> res = filesRepo.findByParcelId(parcelId);
+        res.forEach(f -> f.setUrl(MvcUriComponentsBuilder
+                .fromMethodName(FilesController.class, "getFile", f.getName()).build().toString()));
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @GetMapping("/{filename:.+}")
+//    @GetMapping(value = "/getFile/{filename}")
+//    public @ResponseBody byte[] getFileByName(@PathVariable String filename) throws IOException {
+////        InputStream in = getClass()
+////                .getResourceAsStream("/com/baeldung/produceimage/image.jpg");
+//        return IOUtils.toByteArray(storageService.load(filename).getInputStream());
+//    }
+
+    @GetMapping("/getFile")
     @ResponseBody
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        Resource file = storageService.load(filename);
+    public ResponseEntity<Resource> getFile(@RequestParam(required = true) String fileName) {
+        Resource file = storageService.load(fileName);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
+//    @GetMapping("/{filename:.+}")
+//    @ResponseBody
+//    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+//        Resource file = storageService.load(filename);
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+//    }
 
     @DeleteMapping("/{filename:.+}")
     @ResponseBody

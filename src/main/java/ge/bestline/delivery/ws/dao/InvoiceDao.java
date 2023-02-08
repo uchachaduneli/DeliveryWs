@@ -33,11 +33,16 @@ public class InvoiceDao {
             nativeQrStr += " and p.payer_ident_number like '" + srchObj.getIdentNumber() + "%' ";
         }
         List<InvoiceDTO> list =
-                em.createQuery("select new ge.bestline.delivery.ws.dto.InvoiceDTO(p.payerName," +
+                em.createQuery("select new ge.bestline.delivery.ws.dto.InvoiceDTO(" +
                                 " p.payerIdentNumber, count(p.payerIdentNumber), sum(p.totalPrice)) from " + Parcel.class.getSimpleName() +
                                 " p where p.deleted = 2 and p.invoiced = false and p.paymentType=1 and p.payerIdentNumber is not null " + qrStr +
-                                " group by p.payerName, p.payerIdentNumber "
+                                " group by p.payerIdentNumber "
                         , InvoiceDTO.class).setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
+        for (InvoiceDTO invoiceDTO : list) {
+            List<String> names = em.createQuery("select e.payerName from " + Parcel.class.getSimpleName()
+                    + " e where e.payerIdentNumber='" + invoiceDTO.getIdentNumber() + "'", String.class).setMaxResults(1).getResultList();
+            invoiceDTO.setName(names != null && !names.isEmpty() ? names.get(0) : "-");
+        }
         response.put("items", list);
         response.put("total_count", em.createNativeQuery("select count(1) from (select p.payer_ident_number from deliverydb.parcel"
                 + " p where p.deleted = 2 and p.invoiced = false and p.payment_type=1 and p.payer_ident_number is not null " + nativeQrStr +

@@ -47,10 +47,10 @@ public class DeliveryDetailDao {
                     .append(srchRequest.getCreatedTimeTo()).append("') ");
         } else {
             if (srchRequest.getCreatedTime() != null) {
-                q.append(" and e.created_time ='").append(srchRequest.getCreatedTime()).append("'");
+                q.append(" and e.created_time >'").append(srchRequest.getCreatedTime()).append("'");
             }
             if (srchRequest.getCreatedTimeTo() != null) {
-                q.append(" and e.created_time ='").append(srchRequest.getCreatedTimeTo()).append("'");
+                q.append(" and e.created_time <'").append(srchRequest.getCreatedTimeTo()).append("'");
             }
         }
 

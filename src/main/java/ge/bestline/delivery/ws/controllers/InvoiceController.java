@@ -2,10 +2,8 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.InvoiceDao;
-import ge.bestline.delivery.ws.dto.InvoiceDTO;
-import ge.bestline.delivery.ws.dto.InvoicePaymentStatus;
-import ge.bestline.delivery.ws.dto.InvoiceStatus;
-import ge.bestline.delivery.ws.dto.TokenUser;
+import ge.bestline.delivery.ws.dao.ParcelDao;
+import ge.bestline.delivery.ws.dto.*;
 import ge.bestline.delivery.ws.entities.Invoice;
 import ge.bestline.delivery.ws.entities.Parcel;
 import ge.bestline.delivery.ws.repositories.InvoiceRepository;
@@ -15,10 +13,6 @@ import ge.bestline.delivery.ws.services.MailService;
 import ge.bestline.delivery.ws.services.PDFService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +35,7 @@ public class InvoiceController {
     private final InvoiceRepository repo;
     private final ParcelRepository parcelRepo;
     private final InvoiceDao dao;
+    private final ParcelDao parcelDao;
     private final PDFService pdfService;
     private final MailService mailService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -48,11 +43,14 @@ public class InvoiceController {
     public InvoiceController(InvoiceRepository repo,
                              ParcelRepository parcelRepo,
                              InvoiceDao dao,
-                             PDFService pdfService, MailService mailService,
+                             ParcelDao parcelDao,
+                             PDFService pdfService,
+                             MailService mailService,
                              JwtTokenProvider jwtTokenProvider) {
         this.repo = repo;
         this.parcelRepo = parcelRepo;
         this.dao = dao;
+        this.parcelDao = parcelDao;
         this.pdfService = pdfService;
         this.mailService = mailService;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -188,13 +186,17 @@ public class InvoiceController {
     public ResponseEntity<Map<String, Object>> getPayerUnInvoicedParcels(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            @RequestParam(required = true) String identNumber) {
-        Map<String, Object> resp = new HashMap<>();
-        Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
-        Page<Parcel> pageAuths = parcelRepo.findByPayerIdentNumberAndDeletedAndInvoiced(identNumber, 2, false, paging);
-        resp.put("items", pageAuths.getContent());
-        resp.put("total_count", pageAuths.getTotalElements());
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+            ParcelDTO srchParams) throws ParseException {
+
+        if (StringUtils.isNotBlank(srchParams.getStrCreatedTime())) {
+            srchParams.setCreatedTime(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTime()));
+        }
+        if (StringUtils.isNotBlank(srchParams.getStrCreatedTimeTo())) {
+            srchParams.setCreatedTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTimeTo()));
+        }
+        srchParams.setPaymentType(1);// always return only invoices
+        srchParams.setInvoiced(false);// always return not already invoiced parcels
+        return new ResponseEntity<>(parcelDao.findAll(page, rowCount, srchParams, true), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")

@@ -105,26 +105,12 @@ public class Parcel {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    private boolean addedFromGlobal;
-    private boolean invoiced; // parcell has been added to invoice
+    private Boolean addedFromGlobal;
+    private Boolean invoiced; // parcell has been added to invoice
 
     public Parcel(String barCode, boolean prePrinted) {
         this.barCode = barCode;
         this.prePrinted = prePrinted;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        deleted = 2;
-        if (status == null) {
-            status = new ParcelStatusReason(1);
-        }
-        createdTime = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedTime = new Date();
     }
 
     public Parcel(ExcelTmpParcel obj) {
@@ -135,6 +121,7 @@ public class Parcel {
             this.payerName = this.senderName;
             this.payerIdentNumber = this.senderIdentNumber;
         }
+        this.paymentType = 1;// all excell imported parcels are invoice
 
         this.senderCity = obj.getSenderCity();
         this.senderPhone = obj.getSenderPhone();
@@ -163,5 +150,20 @@ public class Parcel {
         this.route = obj.getRoute();
         this.author = obj.getAuthor();
         this.content = obj.getContent();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedTime = new Date();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        deleted = 2;
+        invoiced = false;
+        if (status == null) {
+            status = new ParcelStatusReason(1);
+        }
+        createdTime = new Date();
     }
 }

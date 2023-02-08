@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.User;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -63,7 +64,7 @@ public class UserDao {
             q.append(" and e.password='").append(srchRequest.getPassword()).append("'");
         }
 
-        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e " + q.toString() +" order by e.id desc", User.class);
+        TypedQuery<User> query = em.createQuery("SELECT DISTINCT e " + q.toString() + " order by e.id desc", User.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         if (srchRequest.getSrchRoleName() != null && !srchRequest.getSrchRoleName().isEmpty()) {
             query.setParameter("rolesInList", srchRequest.getSrchRoleName());
@@ -72,6 +73,11 @@ public class UserDao {
         response.put("items", query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());
         return response;
+    }
+
+    @Transactional
+    public void removeUserExistingRoles(Integer userId) {
+        em.createNativeQuery("DELETE FROM user_role where user_id='" + userId + "'").executeUpdate();
     }
 
     public User findByUserNameAndPassword(String username, String password) {

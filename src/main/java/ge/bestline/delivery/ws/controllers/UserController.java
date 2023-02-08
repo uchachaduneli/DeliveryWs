@@ -15,6 +15,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
@@ -52,6 +53,7 @@ public class UserController {
     }
 
     @PostMapping
+    @Transactional
     public User addNewUser(@RequestBody User user,
                            HttpServletRequest req) {
         log.info("Adding New User: " + user.toString());
@@ -62,26 +64,25 @@ public class UserController {
             Set<Role> roles = new HashSet<>();
             roles.add(new Role(UserRoles.CUSTOMER.getValue()));
             user.setRole(roles);
-        }
-        // when office adds user for customer company
-        if (user.getRole().size() == 1 &&
-                new ArrayList<>(user.getRole()).get(0).getName().equals(UserRoles.CUSTOMER.getValue())) {
-            User res = userRepository.save(user);
-            Contact contact = new Contact(user.getName() + " " + user.getLastName(),
-                    1, 1, 2, 1,
-                    user.getPersonalNumber(),
-                    res, new Tariff(1));
-            contactRepo.save(contact);
-            // if customer have sent parcels before office create for him account
-            // then update old parcels author id to bind this user now
-            List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumber(user.getPersonalNumber());
-            if (previouslySentParcels != null && !previouslySentParcels.isEmpty()) {
-                for (Parcel p : previouslySentParcels) {
-                    p.setAuthor(res);
+        } else         // when office adds user for customer company
+            if (user.getRole().size() == 1 &&
+                    new ArrayList<>(user.getRole()).get(0).getName().equals(UserRoles.CUSTOMER.getValue())) {
+                User res = userRepository.save(user);
+                Contact contact = new Contact(user.getName() + " " + user.getLastName(),
+                        1, 1, 2, 1,
+                        user.getPersonalNumber(),
+                        res, new Tariff(1));
+                contactRepo.save(contact);
+                // if customer have sent parcels before office create for him account
+                // then update old parcels author id to bind this user now
+                List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumber(user.getPersonalNumber());
+                if (previouslySentParcels != null && !previouslySentParcels.isEmpty()) {
+                    for (Parcel p : previouslySentParcels) {
+                        p.setAuthor(res);
+                    }
+                    parcelRepo.saveAll(previouslySentParcels);
                 }
-                parcelRepo.saveAll(previouslySentParcels);
             }
-        }
         return userRepository.save(user);
     }
 
@@ -111,20 +112,23 @@ public class UserController {
     }
 
     @PutMapping
+    @Transactional
     public ResponseEntity<User> updateById(@RequestBody User request) {
         log.info("Updating User");
         User user = userRepository.findById(request.getId()).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
         log.info("Old Values: " + user.toString() + "    New Values: " + request.toString());
         user.setName(request.getName());
         user.setUserName(request.getUserName());
+
+        userDao.removeUserExistingRoles(user.getId());
         user.setRole(request.getRole());
+
         user.setLastName(request.getLastName());
         user.setCity(request.getCity());
         user.setRoute(request.getRoute());
+        user.setWarehouse(request.getWarehouse());
         user.setPersonalNumber(request.getPersonalNumber());
         user.setPhone(request.getPhone());
-        user.setRole(request.getRole());
-        user.setWarehouse(request.getWarehouse());
         User updatedUser = userRepository.save(user);
         return ResponseEntity.ok(updatedUser);
     }

@@ -9,14 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.ServerResponse;
 
 import java.io.IOException;
-import java.net.URI;
-
-import static org.springframework.web.servlet.function.RequestPredicates.GET;
-import static org.springframework.web.servlet.function.RouterFunctions.route;
+import java.util.Date;
 
 @SpringBootApplication
 public class SpbootApplication extends SpringBootServletInitializer {
@@ -34,21 +29,15 @@ public class SpbootApplication extends SpringBootServletInitializer {
                 .builder()
                 .setCredentials(googleCredentials)
                 .build();
-        FirebaseApp app = null;
-        if (FirebaseApp.getApps() == null || FirebaseApp.getApps().isEmpty()) {
-            app = FirebaseApp.initializeApp(firebaseOptions, "exline-delivery");
-            return FirebaseMessaging.getInstance(app);
-        } else {
-            app = FirebaseApp.getInstance("exline-delivery");
-            return FirebaseMessaging.getInstance(app);
-        }
+        FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions, "exline-delivery" + new Date().getTime());
+        return FirebaseMessaging.getInstance(app);
     }
 
-    @Bean
-    RouterFunction<ServerResponse> routerFunction() {
-        return route(GET("/swagger"), req ->
-                ServerResponse.temporaryRedirect(URI.create("swagger-ui.html")).build());
-    }
+//    @Bean
+//    RouterFunction<ServerResponse> routerFunction() {
+//        return route(GET("/swagger"), req ->
+//                ServerResponse.temporaryRedirect(URI.create("swagger-ui.html")).build());
+//    }
 
     // insert test data
 //    @Bean
