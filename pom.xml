@@ -18,6 +18,7 @@
         <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <jackson-bom.version>2.14.2</jackson-bom.version>
     </properties>
 
     <dependencies>
@@ -164,7 +165,7 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
-<!--                                          <exclude>**/application.properties</exclude>-->
+                    <exclude>**/application.properties</exclude>
                     <exclude>fonts/*</exclude><!--es fontebis excludi unda iyos ise ar ibildeba-->
                     <exclude>images/*</exclude><!--es unda iyos ise ar gaibildeba-->
                 </excludes>

@@ -29,6 +29,8 @@ public class Invoice {
     private Double amount;
     private String pdf;
     private Date operationDate;
+    @ManyToOne(cascade = CascadeType.DETACH, optional = false)
+    private User author;
     @ManyToMany(cascade = CascadeType.DETACH)
     private List<Parcel> parcels;
     @Temporal(TemporalType.TIMESTAMP)
@@ -59,6 +61,6 @@ public class Invoice {
         this.pdf = dto.getPdf();
         this.operationDate = dto.getOperationDate();
         this.parcels = dto.getParcels();
-        this.payedAmount=0.0;
+        this.payedAmount = 0.0;
     }
 }

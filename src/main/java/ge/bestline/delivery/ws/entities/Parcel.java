@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,13 +11,17 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
+import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonFilter("fieldsFilter")
 public class Parcel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -122,6 +127,7 @@ public class Parcel {
             this.payerIdentNumber = this.senderIdentNumber;
         }
         this.paymentType = 1;// all excell imported parcels are invoice
+        this.addedFromGlobal = false;
 
         this.senderCity = obj.getSenderCity();
         this.senderPhone = obj.getSenderPhone();
@@ -165,5 +171,14 @@ public class Parcel {
             status = new ParcelStatusReason(1);
         }
         createdTime = new Date();
+    }
+
+    public static Set<String> fieldsNameList() {
+        Set<String> res = new HashSet<>();
+        Field[] fields = Parcel.class.getDeclaredFields();
+        for (Field f : fields) {
+            res.add(f.getName());
+        }
+        return res;
     }
 }

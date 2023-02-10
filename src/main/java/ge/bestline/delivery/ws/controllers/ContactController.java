@@ -70,7 +70,7 @@ public class ContactController {
     @Transactional
     public Contact addNew(@RequestBody Contact obj) {
         log.info("Adding New Contact: " + obj.toString());
-        if (obj.getIdentNumber() != null && repo.findByIdentNumber(obj.getIdentNumber()) != null) {
+        if (obj.getIdentNumber() != null && repo.findFirstByIdentNumber(obj.getIdentNumber()) != null) {
             throw new ConstraintViolationException("Already Exists", new SQLException(), "identNumber");
         }
         return repo.save(obj);
@@ -82,7 +82,7 @@ public class ContactController {
         log.info("Updating Contact");
         Contact existing = repo.findById(request.getId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Record Using This ID : " + request.getId()));
-        Contact foundedByIdent = repo.findByIdentNumber(request.getIdentNumber());
+        Contact foundedByIdent = repo.findFirstByIdentNumber(request.getIdentNumber());
         if (foundedByIdent != null && existing.getId() != foundedByIdent.getId()) {
             throw new ConstraintViolationException("Already Exists", new SQLException(), "identNumber");
         }
@@ -132,10 +132,10 @@ public class ContactController {
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
     }
 
-    @GetMapping(path = "byIdentNum/{identNum}")
+    @GetMapping(path = "/byIdentNum/{identNum}")
     public Contact getByIdentNumber(@PathVariable String identNum) {
         log.info("Getting Contact With identNum: " + identNum);
-        Contact c = repo.findByIdentNumber(identNum);
+        Contact c = repo.findFirstByIdentNumber(identNum);
         if (c != null)
             return c;
         else throw new ResourceNotFoundException("Can't find Record Using This identNumber: " + identNum);

@@ -272,13 +272,14 @@ public class PDFService {
 
         Double parcelPriceSum = 0.0;
         for (Parcel p : invoice.getParcels()) {
-            table.addCell(getParcelsTableCell(p.getDeliveryTime() != null ? simpleDateFormat.format(p.getDeliveryTime()) : "-", false, font12));
+            table.addCell(getParcelsTableCell(p.getCreatedTime() != null ? simpleDateFormat.format(p.getCreatedTime()) : "-", false, font12));
             table.addCell(getParcelsTableCell(p.getBarCode(), false, font12Bold));
             table.addCell(getParcelsTableCell(p.getSenderCity() != null ? p.getSenderCity().getName() : "-", false, font12));
             table.addCell(getParcelsTableCell(p.getReceiverCity() != null ? p.getReceiverCity().getName() : "", false, font12));
             table.addCell(getParcelsTableCell(p.getWeight() + "", false, font12));
             table.addCell(getParcelsTableCell(p.getTotalPrice() + "", false, font12));
-            parcelPriceSum += p.getTotalPrice();
+            if (p.getTotalPrice() != null)
+                parcelPriceSum += p.getTotalPrice();
         }
         document.add(table);
         document.add(emptyParagraph);

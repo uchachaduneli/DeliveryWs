@@ -59,8 +59,19 @@ public class InvoiceDao {
             q.append(" and e.id ='").append(srchRequest.getId()).append("'");
         }
 
+        if (srchRequest.getAuthor() != null && srchRequest.getAuthor().getId() > 0) {
+            q.append(" and e.author.id ='").append(srchRequest.getAuthor().getId()).append("'");
+        }
+
         if (StringUtils.isNotBlank(srchRequest.getName())) {
             q.append(" and e.name like '%").append(srchRequest.getName()).append("%'");
+        }
+
+        if (StringUtils.isNotBlank(srchRequest.getStatus())) {
+            q.append(" and e.status ='").append(srchRequest.getStatus()).append("'");
+        }
+        if (StringUtils.isNotBlank(srchRequest.getPayStatus())) {
+            q.append(" and e.payStatus ='").append(srchRequest.getPayStatus()).append("'");
         }
 
         if (StringUtils.isNotBlank(srchRequest.getIdentNumber())) {
@@ -79,7 +90,7 @@ public class InvoiceDao {
             }
         }
 
-        TypedQuery<Invoice> query = em.createQuery("Select e" + q.toString(), Invoice.class);
+        TypedQuery<Invoice> query = em.createQuery("Select e " + q.toString() + " order by e.id desc", Invoice.class);
         List<Invoice> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());

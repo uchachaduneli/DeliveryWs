@@ -1,5 +1,8 @@
 package ge.bestline.delivery.ws.controllers;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.DeliveryDetailDao;
 import ge.bestline.delivery.ws.dto.*;
@@ -12,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -105,7 +109,7 @@ public class DeliveryDetailsController {
 
     @SneakyThrows
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAll(
+    public MappingJacksonValue getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
             DeliveryDetailDTO srchParams) {
@@ -116,7 +120,16 @@ public class DeliveryDetailsController {
         if (StringUtils.isNotBlank(srchParams.getStrCreatedTimeTo())) {
             srchParams.setCreatedTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrCreatedTimeTo()));
         }
-        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams), HttpStatus.OK);
+
+        Set<String> fieldsToExclude = Parcel.fieldsNameList();
+        fieldsToExclude.removeAll(Arrays.asList("id", "deliveryTime", "barCode", "weight", "senderName", "senderIdentNumber",
+                "receiverName", "receiverIdentNumber", "status"));
+        SimpleBeanPropertyFilter simpleBeanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude);
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("fieldsFilter", simpleBeanPropertyFilter);
+        Map<String, Object> response = dao.findAll(page, rowCount, srchParams);
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(response);
+        mappingJacksonValue.setFilters(filterProvider);
+        return mappingJacksonValue;
     }
 
     @GetMapping("barcode")

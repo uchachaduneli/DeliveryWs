@@ -1,6 +1,7 @@
 package ge.bestline.delivery.ws.dto;
 
 import ge.bestline.delivery.ws.entities.Parcel;
+import ge.bestline.delivery.ws.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class InvoiceDTO {
     private Double newAmount;
     private Double payedAmount;
     private String payerEmail;
+    private User author;
 
 
     // for invoice generation page list

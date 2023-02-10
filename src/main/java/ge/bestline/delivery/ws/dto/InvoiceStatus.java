@@ -3,7 +3,9 @@ package ge.bestline.delivery.ws.dto;
 public enum InvoiceStatus {
     CREATED("CREATED"),
     SENT("SENT"),
-    SENT_FAILED("SENT FAILED");
+    SENT_FAILED("SENT FAILED"),
+
+    REMOVED("REMOVED");
 
     private String status;
 

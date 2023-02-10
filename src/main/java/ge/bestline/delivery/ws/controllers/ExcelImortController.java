@@ -3,8 +3,10 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ExcelTmpParcelDao;
 import ge.bestline.delivery.ws.dto.ResponseMessage;
+import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
+import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import ge.bestline.delivery.ws.services.CityService;
 import ge.bestline.delivery.ws.services.FilesStorageService;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +44,7 @@ public class ExcelImortController {
     private final DocTypeRepository docTypeRepo;
     private final ExcelTmpParcelDao dao;
     private final CityRepository cityRepo;
+    private final JwtTokenProvider jwtTokenProvider;
     private final ExcelTmpParcelRepository repo;
     private final ContactAddressRepository contactAddressRepo;
     private final ServicesRepository servicesRepository;
@@ -54,7 +59,7 @@ public class ExcelImortController {
                                 RouteRepository routeRepo,
                                 DocTypeRepository docTypeRepo,
                                 ExcelTmpParcelDao dao,
-                                CityRepository cityRepo, ExcelTmpParcelRepository repo,
+                                CityRepository cityRepo, JwtTokenProvider jwtTokenProvider, ExcelTmpParcelRepository repo,
                                 ContactAddressRepository contactAddressRepo,
                                 ServicesRepository servicesRepository,
                                 ExcelHelper excelHelper,
@@ -68,6 +73,7 @@ public class ExcelImortController {
         this.docTypeRepo = docTypeRepo;
         this.dao = dao;
         this.cityRepo = cityRepo;
+        this.jwtTokenProvider = jwtTokenProvider;
         this.repo = repo;
         this.contactAddressRepo = contactAddressRepo;
         this.servicesRepository = servicesRepository;
@@ -80,36 +86,6 @@ public class ExcelImortController {
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
         return new ResponseEntity<>("ჩანაწერი მსგავსი ბარკოდით უკვე არსებობს", HttpStatus.BAD_REQUEST);
     }
-
-    /*
-
-    @PostMapping("/move-to-main")
-    public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "authorId", required = true) Integer authorId) {
-        List<ExcelTmpParcel> usersImportedParcels = repo.findByAuthorId(authorId);
-        List<Parcel> res = new ArrayList<>();
-        for (ExcelTmpParcel obj : usersImportedParcels) {
-            ContactAddress conAdrs = null;
-            try {
-                conAdrs = contactAddressRepo.findByIsPayAddress(1);
-                if (conAdrs == null) {
-                    throw new RuntimeException("Can't Find PayAddress For Contact " + obj.getSender().getIdentNumber());
-                }
-            } catch (RuntimeException e) {
-                log.warn(e.getMessage());
-                conAdrs = contactAddressRepo.findFirstByContact_Id(obj.getSender().getId());
-            } catch (Exception e) {
-                log.error(e);
-            }
-            res.add(new Parcel(obj, conAdrs));
-        }
-        res = parcelRepo.saveAll(res);
-        repo.deleteAll(usersImportedParcels);
-        String barcodes = res.stream().map(Parcel::getBarCode).collect(Collectors.joining(","));
-        log.info("Excel Imported Rows With These BarCodes Has Been Moved To Parcels Main Table :" + barcodes);
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
-     */
 
     @PostMapping("/move-to-main")
     @Transactional
@@ -220,6 +196,18 @@ public class ExcelImortController {
         ExcelTmpParcel existing = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Deleting ExcelTmpParcel: " + existing.toString());
         repo.delete(existing);
+        Map<String, Boolean> resp = new HashMap<>();
+        resp.put("deleted", Boolean.TRUE);
+        return ResponseEntity.ok(resp);
+    }
+
+    @DeleteMapping("/all")
+    @Transactional
+    public ResponseEntity<Map<String, Boolean>> deleteAll(HttpServletRequest req) throws ParseException {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        List<ExcelTmpParcel> existings = repo.findAll();
+        log.info("Deleting All Tmp Excel Imports, Operating User Is: " + requester.getName() + " " + requester.getLastName());
+        repo.deleteAll(existings);
         Map<String, Boolean> resp = new HashMap<>();
         resp.put("deleted", Boolean.TRUE);
         return ResponseEntity.ok(resp);
