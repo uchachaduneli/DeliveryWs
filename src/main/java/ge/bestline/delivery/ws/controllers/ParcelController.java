@@ -271,7 +271,7 @@ public class ParcelController {
             ParcelDTO srchParams,
             HttpServletRequest req) throws ParseException {
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        if (requester.getRole().contains(UserRoles.CUSTOMER.getValue()) && requester.isFromGlobalSite()) {
+        if (requester.isFromGlobalSite()) {
             srchParams.setAuthorId(requester.getId());
         }
 

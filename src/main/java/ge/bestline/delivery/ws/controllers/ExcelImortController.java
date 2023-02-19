@@ -3,6 +3,7 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ExcelTmpParcelDao;
 import ge.bestline.delivery.ws.dto.ResponseMessage;
+import ge.bestline.delivery.ws.dto.StatusReasons;
 import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
@@ -26,6 +27,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,11 +48,13 @@ public class ExcelImortController {
     private final CityRepository cityRepo;
     private final JwtTokenProvider jwtTokenProvider;
     private final ExcelTmpParcelRepository repo;
+    private final ParcelStatusReasonRepository statusReasonRepo;
     private final ContactAddressRepository contactAddressRepo;
     private final ServicesRepository servicesRepository;
     private final ExcelHelper excelHelper;
     private final PriceService priceService;
     private final CityService cityService;
+    private final ParselStatusHistoryRepo statusHistoryRepo;
 
     public ExcelImortController(FilesStorageService storageService,
                                 UserRepository userRepo,
@@ -60,10 +64,10 @@ public class ExcelImortController {
                                 DocTypeRepository docTypeRepo,
                                 ExcelTmpParcelDao dao,
                                 CityRepository cityRepo, JwtTokenProvider jwtTokenProvider, ExcelTmpParcelRepository repo,
-                                ContactAddressRepository contactAddressRepo,
+                                ParcelStatusReasonRepository statusReasonRepo, ContactAddressRepository contactAddressRepo,
                                 ServicesRepository servicesRepository,
                                 ExcelHelper excelHelper,
-                                PriceService priceService, CityService cityService) {
+                                PriceService priceService, CityService cityService, ParselStatusHistoryRepo statusHistoryRepo) {
         this.storageService = storageService;
         this.userRepo = userRepo;
         this.parcelRepo = parcelRepo;
@@ -75,11 +79,13 @@ public class ExcelImortController {
         this.cityRepo = cityRepo;
         this.jwtTokenProvider = jwtTokenProvider;
         this.repo = repo;
+        this.statusReasonRepo = statusReasonRepo;
         this.contactAddressRepo = contactAddressRepo;
         this.servicesRepository = servicesRepository;
         this.excelHelper = excelHelper;
         this.priceService = priceService;
         this.cityService = cityService;
+        this.statusHistoryRepo = statusHistoryRepo;
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -89,10 +95,16 @@ public class ExcelImortController {
 
     @PostMapping("/move-to-main")
     @Transactional
-    public ResponseEntity<List<Parcel>> moveToMainTable(@RequestParam(value = "senderIdentNum", required = true) String senderIdentNum) {
+    public ResponseEntity<List<Parcel>> moveToMainTable(
+            @RequestParam(value = "senderIdentNum", required = true) String senderIdentNum,
+            HttpServletRequest req) {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        log.info("moving exel imported rows to parcels main table " + requester.getName() + " " + requester.getLastName());
         List<ExcelTmpParcel> usersImportedParcels = repo.findBySenderIdentNumber(senderIdentNum);
         List<Parcel> res = new ArrayList<>();
-
+        List<ParcelStatusHistory> statusHistories = new ArrayList<>();
+        ParcelStatusReason status = statusReasonRepo.findById(StatusReasons.PP.getStatus().getId()).orElseThrow(() ->
+                new ResourceNotFoundException("Can't find StatusReason Record with PP - enum's value"));
         for (ExcelTmpParcel obj : usersImportedParcels) {
             ContactAddress conAdrs = null;
             try {
@@ -107,8 +119,19 @@ public class ExcelImortController {
                 log.error(e);
             }
             res.add(new Parcel(obj));
+
         }
         res = parcelRepo.saveAll(res);
+        for (Parcel p : res) {
+            statusHistories.add(new ParcelStatusHistory(
+                    p,
+                    status.getStatus().getName(),
+                    status.getStatus().getCode(),
+                    status.getName(),
+                    new Timestamp(new Date().getTime()),
+                    new User(requester.getId())));
+        }
+        statusHistoryRepo.saveAll(statusHistories);
         repo.deleteAll(usersImportedParcels);
         String barcodes = res.stream().map(Parcel::getBarCode).collect(Collectors.joining(","));
         log.info("Excel Imported Rows With These BarCodes Has Been Moved To Parcels Main Table :" + barcodes);

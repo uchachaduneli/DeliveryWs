@@ -23,6 +23,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String LOGIN_ENDPOINT = "/auth/login";
+    private static final String PARCEL_STATUS_CHECK_ENDPOINT = "/check/**";
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
@@ -45,8 +46,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests()
-                .antMatchers(LOGIN_ENDPOINT).permitAll()
+        http.authorizeRequests().antMatchers(LOGIN_ENDPOINT).permitAll().and()
+                .authorizeRequests().antMatchers(PARCEL_STATUS_CHECK_ENDPOINT).permitAll()
                 .anyRequest().authenticated();
         http.exceptionHandling().accessDeniedPage(LOGIN_ENDPOINT);
         http.apply(new JwtConfigurer(jwtTokenProvider));

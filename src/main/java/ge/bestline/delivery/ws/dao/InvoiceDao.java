@@ -75,7 +75,7 @@ public class InvoiceDao {
         }
 
         if (StringUtils.isNotBlank(srchRequest.getIdentNumber())) {
-            q.append(" and e.identNumber like '%").append(srchRequest.getIdentNumber()).append("%'");
+            q.append(" and e.identNumber = '").append(srchRequest.getIdentNumber()).append("'");
         }
 
         if (srchRequest.getOperationDate() != null && srchRequest.getOperationDateTo() != null) {

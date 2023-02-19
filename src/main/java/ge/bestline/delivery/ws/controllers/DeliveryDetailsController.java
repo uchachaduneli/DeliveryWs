@@ -123,7 +123,7 @@ public class DeliveryDetailsController {
 
         Set<String> fieldsToExclude = Parcel.fieldsNameList();
         fieldsToExclude.removeAll(Arrays.asList("id", "deliveryTime", "barCode", "weight", "senderName", "senderIdentNumber",
-                "receiverName", "receiverIdentNumber", "status"));
+                "receiverName", "receiverIdentNumber", "status", "count", "receiverAddress", "receiverPhone"));
         SimpleBeanPropertyFilter simpleBeanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude);
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter("fieldsFilter", simpleBeanPropertyFilter);
         Map<String, Object> response = dao.findAll(page, rowCount, srchParams);

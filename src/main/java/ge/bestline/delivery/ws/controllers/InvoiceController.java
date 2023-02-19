@@ -184,7 +184,21 @@ public class InvoiceController {
     public MappingJacksonValue getAll(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int rowCount,
-            InvoiceDTO searchParams) {
+            InvoiceDTO searchParams,
+            HttpServletRequest req) {
+        log.info("getting invoices");
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+
+        if (requester.isFromGlobalSite()) {
+            searchParams.setStatus("SENT");
+            User u = userRepository.findById(requester.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Can't find User Using This ID : " + requester.getId()));
+            if (StringUtils.isBlank(u.getPersonalNumber())) {
+                return null;
+            } else {
+                searchParams.setIdentNumber(u.getPersonalNumber());
+            }
+        }
         Set<String> fieldsToExclude = Parcel.fieldsNameList();
         fieldsToExclude.removeAll(Arrays.asList("barCode", "totalPrice", "id", "weight"));
         SimpleBeanPropertyFilter simpleBeanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude);
