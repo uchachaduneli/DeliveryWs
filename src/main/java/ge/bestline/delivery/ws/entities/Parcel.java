@@ -81,6 +81,7 @@ public class Parcel {
     private String comment;
     private Integer deliveredConfirmation; //1 yes 2 no
     private Integer count;
+    private Integer scannedCount;
     private Double weight;
     private Double volumeWeight;
     private Double gadafutvisPrice;

@@ -253,15 +253,16 @@ public class PDFService {
         document.add(emptyParagraph);
 
 
-        table = new PdfPTable(6);
+        table = new PdfPTable(7);
         table.setWidthPercentage(100); //Width 100%
         table.setSpacingBefore(10f); //Space before table
         table.setSpacingAfter(10f); //Space after table
         //Set Column widths
-        float[] colWidths = {1f, 1f, 1f, 1f, 1f, 1f};
+        float[] colWidths = {1f, 1f, 1f, 1f, 1f, 1f, 1f};
         table.setWidths(colWidths);
 
 
+        table.addCell(getParcelsTableCell("#", true, font14Bold));
         table.addCell(getParcelsTableCell("თარიღი", true, font14Bold));
         table.addCell(getParcelsTableCell("გზავნილის #", true, font14Bold));
         table.addCell(getParcelsTableCell("გამგზავნი ქალაქი", true, font14Bold));
@@ -271,7 +272,9 @@ public class PDFService {
         table.setHeaderRows(1);
 
         Double parcelPriceSum = 0.0;
+        int i = 1;
         for (Parcel p : invoice.getParcels()) {
+            table.addCell(getParcelsTableCell(i + "", false, font12Bold));
             table.addCell(getParcelsTableCell(p.getCreatedTime() != null ? simpleDateFormat.format(p.getCreatedTime()) : "-", false, font12));
             table.addCell(getParcelsTableCell(p.getBarCode(), false, font12Bold));
             table.addCell(getParcelsTableCell(p.getSenderCity() != null ? p.getSenderCity().getName() : "-", false, font12));
@@ -280,6 +283,7 @@ public class PDFService {
             table.addCell(getParcelsTableCell(p.getTotalPrice() + "", false, font12));
             if (p.getTotalPrice() != null)
                 parcelPriceSum += p.getTotalPrice();
+            i++;
         }
         document.add(table);
         document.add(emptyParagraph);

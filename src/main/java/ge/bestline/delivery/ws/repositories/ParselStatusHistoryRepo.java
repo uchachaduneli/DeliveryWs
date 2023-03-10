@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface ParselStatusHistoryRepo extends JpaRepository<ParcelStatusHistory, Integer> {
     List<ParcelStatusHistory> findByParcelId(Integer id);
+
+    List<ParcelStatusHistory> findByParcelIdOrderByStatusDateTimeAsc(Integer id);
+
 }

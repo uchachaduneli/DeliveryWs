@@ -4,6 +4,7 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.ContactDao;
 import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.Contact;
+import ge.bestline.delivery.ws.entities.Tariff;
 import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
@@ -68,7 +69,11 @@ public class ContactController {
 
     @PostMapping
     @Transactional
-    public Contact addNew(@RequestBody Contact obj) {
+    public Contact addNew(@RequestBody Contact obj, HttpServletRequest req) {
+        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+        if (requester.isFromGlobalSite()) {
+            obj.setTariff(new Tariff(1));
+        }
         log.info("Adding New Contact: " + obj.toString());
         if (obj.getIdentNumber() != null && repo.findFirstByIdentNumber(obj.getIdentNumber()) != null) {
             throw new ConstraintViolationException("Already Exists", new SQLException(), "identNumber");

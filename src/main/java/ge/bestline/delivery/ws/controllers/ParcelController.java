@@ -137,7 +137,7 @@ public class ParcelController {
     @GetMapping(path = "/statusHistory/{id}")
     public ResponseEntity<List<ParcelStatusHistory>> getParcelStatusHistoryByParcelId(@PathVariable Integer id) {
         log.info("Getting ParcelStatusHistory By Parcel ID: " + id);
-        return ResponseEntity.ok(statusHistoryRepo.findByParcelId(id));
+        return ResponseEntity.ok(statusHistoryRepo.findByParcelIdOrderByStatusDateTimeAsc(id));
     }
 
     @GetMapping(path = "/byBarCode/{barCode}")
