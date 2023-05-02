@@ -134,4 +134,10 @@ public class ContactAddressController {
         return repo.findByContact_Id(contactId);
     }
 
+    @GetMapping(path = "contactPayAddresses/{contactId}")
+    public List<ContactAddress> getContactPayAddresses(@PathVariable Integer contactId) {
+        log.info("Getting Pay Address With Contact ID: " + contactId);
+        return repo.findByContactIdAndIsPayAddress(contactId, 1);
+    }
+
 }

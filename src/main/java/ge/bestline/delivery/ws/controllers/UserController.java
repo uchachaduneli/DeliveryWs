@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.UserDao;
+import ge.bestline.delivery.ws.dto.CourierCheckInOutDTO;
 import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.dto.UserRoles;
 import ge.bestline.delivery.ws.entities.*;
@@ -97,6 +98,15 @@ public class UserController {
             searchParams.setParentUserId(requester.getId());
         }
         return new ResponseEntity<>(userDao.findAll(page, rowCount, searchParams), HttpStatus.OK);
+    }
+
+    @GetMapping("/CoutiersInOut")
+    public ResponseEntity<Map<String, Object>> getCoutiersInOut(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int rowCount,
+            CourierCheckInOutDTO searchParams, HttpServletRequest req) {
+        log.info("Getting Coutiers In/Out with params: " + searchParams);
+        return new ResponseEntity<>(userDao.getCoutiersInOut(page, rowCount, searchParams), HttpStatus.OK);
     }
 
     @GetMapping(path = "/statuses")

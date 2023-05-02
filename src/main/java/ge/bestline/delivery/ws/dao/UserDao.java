@@ -1,6 +1,9 @@
 package ge.bestline.delivery.ws.dao;
 
+import ge.bestline.delivery.ws.dto.CourierCheckInOutDTO;
+import ge.bestline.delivery.ws.entities.CourierCheckInOut;
 import ge.bestline.delivery.ws.entities.User;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,5 +90,47 @@ public class UserDao {
                 .append(" and e.password='").append(password).append("'");
         TypedQuery<User> query = em.createQuery(q.toString(), User.class);
         return query.getSingleResult();
+    }
+
+    public Map<String, Object> getCoutiersInOut(int page, int rowCount, CourierCheckInOutDTO srchRequest) {
+        Map<String, Object> response = new HashMap<>();
+        StringBuilder q = new StringBuilder(" FROM ").append(CourierCheckInOut.class);
+
+        if (StringUtils.isNotBlank(srchRequest.getCarNumber())) {
+            q.append(" and e.carNumber like '%").append(srchRequest.getCourier().getPersonalNumber()).append("%'");
+        }
+        if (srchRequest.isChekIn()) {
+            q.append(" and e.isChekIn ='").append(srchRequest.isChekIn()).append("' ");
+        }
+
+        if (srchRequest.getCourier() != null) {
+            if (StringUtils.isNotBlank(srchRequest.getCourier().getName())) {
+                q.append(" and e.courier.name like '%").append(srchRequest.getCourier().getName()).append("%'");
+            }
+            if (StringUtils.isNotBlank(srchRequest.getCourier().getLastName())) {
+                q.append(" and e.courier.lastName like '%").append(srchRequest.getCourier().getLastName()).append("%'");
+            }
+
+            if (StringUtils.isNotBlank(srchRequest.getCourier().getPersonalNumber())) {
+                q.append(" and e.courier.personalNumber like '%").append(srchRequest.getCourier().getPersonalNumber()).append("%'");
+            }
+
+            if (StringUtils.isNotBlank(srchRequest.getCourier().getPhone())) {
+                q.append(" and e.courier.phone like '%").append(srchRequest.getCourier().getPhone()).append("%'");
+            }
+
+            if (srchRequest.getCourier().getRoute() != null && srchRequest.getCourier().getRoute().getId() != null) {
+                q.append(" and e.courier.route.id ='").append(srchRequest.getCourier().getRoute().getId()).append("'");
+            }
+
+            if (StringUtils.isNotBlank(srchRequest.getCourier().getUserName())) {
+                q.append(" and e.courier.userName='").append(srchRequest.getCourier().getUserName()).append("'");
+            }
+        }
+        TypedQuery<CourierCheckInOut> query = em.createQuery("SELECT count(1) " + q.toString(), CourierCheckInOut.class);
+        TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
+        response.put("items", query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList());
+        response.put("total_count", cntQr.getSingleResult());
+        return response;
     }
 }

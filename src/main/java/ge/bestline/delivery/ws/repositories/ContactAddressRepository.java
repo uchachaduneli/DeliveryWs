@@ -13,4 +13,5 @@ public interface ContactAddressRepository extends JpaRepository<ContactAddress, 
 
     ContactAddress findFirstByContact_Id(Integer id);
 
+    List<ContactAddress> findByContactIdAndIsPayAddress(Integer contactId, int i);
 }

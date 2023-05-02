@@ -101,10 +101,14 @@ public class ParcelController {
                         () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
                 obj.setCourier(courier);
                 try {
-                    firebaseService.sendNotification(new FirebaseNote("ახალი ამანათი", "გთხოვთ იხილოთ ახალი გამოძახებების განყოფილება"), courier.getFirebaseToken());
-                } catch (FirebaseMessagingException e) {
+                    if (StringUtils.isNotBlank(courier.getFirebaseToken())) {
+                        firebaseService.sendNotification(new FirebaseNote("ახალი ამანათი", "გთხოვთ იხილოთ ახალი გამოძახებების განყოფილება"), courier.getFirebaseToken());
+                    } else {
+                        log.error("Can't Send Notiff To Courier Via Firebase, Courier Token is Null or blank. -> " + courier.getFirebaseToken());
+                    }
+                } catch (Exception e) {
                     log.error("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
-                    throw new RuntimeException("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
+//                    throw new RuntimeException("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
                 }
                 obj.setRoute(route);
                 psr = statusReasonRepo.findById(StatusReasons.RG.getStatus().getId()).orElseThrow(() ->
@@ -118,6 +122,8 @@ public class ParcelController {
             obj.setAddedFromGlobal(true);
             psr = statusReasonRepo.findById(StatusReasons.PP.getStatus().getId()).orElseThrow(() ->
                     new ResourceNotFoundException("Can't find Default StatusReason Record At ID=1 For Parcels Status History"));
+        } else {
+            obj.setAddedFromGlobal(false);
         }
         obj.setStatus(psr);
         obj.setAuthor(new User(requester.getId()));
@@ -178,19 +184,55 @@ public class ParcelController {
             if (existing.getStatus().getId() == StatusReasons.PP.getStatus().getId()) {
                 existing.setStatus(StatusReasons.RG.getStatus());
                 try {
-                    firebaseService.sendNotification(new FirebaseNote("ახალი ამანათი", "გთხოვთ იხილოთ ახალი გამოძახებების განყოფილება"), courier.getFirebaseToken());
-                } catch (FirebaseMessagingException e) {
+                    if (StringUtils.isNotBlank(courier.getFirebaseToken())) {
+                        firebaseService.sendNotification(new FirebaseNote("ახალი ამანათი", "გთხოვთ იხილოთ ახალი გამოძახებების განყოფილება"), courier.getFirebaseToken());
+                    } else {
+                        log.error("Can't Send Notiff To Courier Via Firebase, Courier Token is Null or blank. -> " + courier.getFirebaseToken());
+                    }
+                } catch (Exception e) {
                     log.error("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
-                    throw new RuntimeException("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
+//                    throw new RuntimeException("Can't Send Notiff To Courier Via Firebase " + courier.getName() + " " + courier.getLastName() + " " + courier.getPersonalNumber(), e);
                 }
             }
             existing.setRoute(route);
         }
 
+        if (request.getTotalPrice() != null && !requester.isFromGlobalSite() && existing.getTotalPrice() != request.getTotalPrice()) {
+            existing.setTotalPrice(request.getTotalPrice());
+        }
+
+        existing.setSenderIdentNumber(request.getSenderIdentNumber());
+        existing.setSenderCity(request.getSenderCity());
+        existing.setSenderName(request.getSenderName());
+        existing.setSenderAddress(request.getSenderAddress());
+        existing.setSenderPhone(request.getSenderPhone());
         existing.setSendSmsToSender(request.getSendSmsToSender());
+        existing.setSenderContactPerson(request.getSenderContactPerson());
+
+        existing.setReceiverCity(request.getReceiverCity());
+        existing.setReceiverName(request.getReceiverName());
+        existing.setReceiverAddress(request.getReceiverAddress());
+        existing.setReceiverIdentNumber(request.getReceiverIdentNumber());
         existing.setSendSmsToReceiver(request.getSendSmsToReceiver());
         existing.setReceiverPhone(request.getReceiverPhone());
-        existing.setSenderPhone(request.getSenderPhone());
+        existing.setReceiverContactPerson(request.getReceiverContactPerson());
+
+        existing.setPayerCity(request.getPayerCity());
+        existing.setPayerName(request.getPayerName());
+        existing.setPayerAddress(request.getPayerAddress());
+        existing.setPayerIdentNumber(request.getPayerIdentNumber());
+        existing.setPayerPhone(request.getPayerPhone());
+        existing.setPayerContactPerson(request.getPayerContactPerson());
+
+        existing.setPayerSide(request.getPayerSide());
+        existing.setCount(request.getCount());
+        existing.setWeight(request.getWeight());
+        existing.setDeliveryType(request.getDeliveryType());
+        existing.setPaymentType(request.getPaymentType());
+        existing.setPackageType(request.getPackageType());
+        existing.setContent(request.getContent());
+        existing.setComment(request.getComment());
+
         Parcel updatedObj = repo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

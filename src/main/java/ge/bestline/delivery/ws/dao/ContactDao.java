@@ -71,6 +71,14 @@ public class ContactDao {
         List<Contact> res = query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList();
         response.put("items", res);
         response.put("total_count", em.createQuery("SELECT count(1) " + q.toString()).getSingleResult());
+
+
+        // return main address if exact filtering field are presented
+//        if (!StringUtils.isBlank(srchRequest.getIdentNumber()) || srchRequest.getId() != null && res != null && !res.isEmpty()) {
+//            TypedQuery<ContactAddress> addressTypedQuery = em.createQuery("Select e from " + ContactAddress.class.getSimpleName()
+//                    + " e where e.isPayAddress='1' and e.contact.id=" + res.get(0).getId(), ContactAddress.class);
+//            response.put("mainAddress", query.getResultList());
+//        }
         return response;
     }
 }
