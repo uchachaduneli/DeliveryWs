@@ -54,7 +54,7 @@ public class ExcelImortController {
     private final ExcelHelper excelHelper;
     private final PriceService priceService;
     private final CityService cityService;
-    private final ParselStatusHistoryRepo statusHistoryRepo;
+    private final ParcelStatusHistoryRepo statusHistoryRepo;
 
     public ExcelImortController(FilesStorageService storageService,
                                 UserRepository userRepo,
@@ -67,7 +67,7 @@ public class ExcelImortController {
                                 ParcelStatusReasonRepository statusReasonRepo, ContactAddressRepository contactAddressRepo,
                                 ServicesRepository servicesRepository,
                                 ExcelHelper excelHelper,
-                                PriceService priceService, CityService cityService, ParselStatusHistoryRepo statusHistoryRepo) {
+                                PriceService priceService, CityService cityService, ParcelStatusHistoryRepo statusHistoryRepo) {
         this.storageService = storageService;
         this.userRepo = userRepo;
         this.parcelRepo = parcelRepo;

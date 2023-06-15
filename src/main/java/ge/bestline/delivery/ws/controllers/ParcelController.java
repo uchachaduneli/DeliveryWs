@@ -32,7 +32,7 @@ public class ParcelController {
     private final VolumeWeightIndexRepository volumeWeightIndexRepository;
     private final PackagesRepository packagesRepo;
     private final ParcelDao dao;
-    private final ParselStatusHistoryRepo statusHistoryRepo;
+    private final ParcelStatusHistoryRepo statusHistoryRepo;
     private final ParcelStatusReasonRepository statusReasonRepo;
     private final UserRepository userRepository;
     private final RouteRepository routeRepository;
@@ -43,7 +43,7 @@ public class ParcelController {
     public ParcelController(ParcelRepository repo,
                             VolumeWeightIndexRepository volumeWeightIndexRepository,
                             PackagesRepository packagesRepo, ParcelDao dao,
-                            ParselStatusHistoryRepo statusHistoryRepo,
+                            ParcelStatusHistoryRepo statusHistoryRepo,
                             ParcelStatusReasonRepository statusReasonRepo,
                             UserRepository userRepository,
                             RouteRepository routeRepository,

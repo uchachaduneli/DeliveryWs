@@ -1,10 +1,11 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
+import ge.bestline.delivery.ws.Exception.WaybillException;
 import ge.bestline.delivery.ws.dao.WaybillDao;
 import ge.bestline.delivery.ws.dto.WaybillDTO;
 import ge.bestline.delivery.ws.entities.WayBill;
-import ge.bestline.delivery.ws.repositories.TranporterWaybillRepository;
+import ge.bestline.delivery.ws.repositories.TransporterWaybillRepository;
 import ge.bestline.delivery.ws.services.RsService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.datatype.DatatypeConfigurationException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Log4j2
@@ -21,11 +24,11 @@ import java.util.Map;
 public class RsController {
     private final RsService rsService;
     private final WaybillDao dao;
-    private final TranporterWaybillRepository repo;
+    private final TransporterWaybillRepository repo;
 
     public RsController(RsService rsService,
                         WaybillDao dao,
-                        TranporterWaybillRepository repo) {
+                        TransporterWaybillRepository repo) {
         this.rsService = rsService;
         this.dao = dao;
         this.repo = repo;
@@ -51,6 +54,29 @@ public class RsController {
     public WayBill getWayBillById(@PathVariable Integer id) {
         log.info("Getting Zone With ID: " + id);
         return repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID"));
+    }
+
+    @GetMapping(path = "closeWaybill/{barCode}")
+    public ResponseEntity<Map<String, String>> closeWayBillByBarCode(@PathVariable String barCode) {
+        log.info("closing Waybill With barCode: " + barCode);
+        Map<String, String> res = new HashMap<>();
+        try {
+            rsService.closeRsWaybill(barCode);
+            res.put("status", "ok");
+        } catch (WaybillException e) {
+            log.error("Can't Close Waybill Rs Service Returned With Error " + e.getMessage());
+            res.put("status", "failed");
+            res.put("reason", e.getMessage());
+        } catch (NumberFormatException e) {
+            log.error("Can't Close Waybill", e);
+            res.put("status", "failed");
+            res.put("reason", e.getMessage());
+        } catch (DatatypeConfigurationException e) {
+            log.error("Can't Close Waybill, error occured before Rs calling ", e);
+            res.put("status", "failed");
+            res.put("reason", e.getMessage());
+        }
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
 }

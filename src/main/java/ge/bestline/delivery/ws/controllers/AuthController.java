@@ -6,6 +6,7 @@ import ge.bestline.delivery.ws.dto.Token;
 import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
+import ge.bestline.delivery.ws.services.RsService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,12 @@ public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDao userDao;
+    private final RsService rsService;
 
-    public AuthController(JwtTokenProvider jwtTokenProvider, UserDao userDao) {
+    public AuthController(JwtTokenProvider jwtTokenProvider, UserDao userDao, RsService rsService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDao = userDao;
+        this.rsService = rsService;
     }
 
     @PostMapping("/login")

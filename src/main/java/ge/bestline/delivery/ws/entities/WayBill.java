@@ -1,6 +1,5 @@
 package ge.bestline.delivery.ws.entities;
 
-import ge.bestline.delivery.soapclient.GetTransporterWaybillsResponse;
 import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,8 +10,6 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 @Data
@@ -48,6 +45,8 @@ public class WayBill {
     @Timestamp
     private Date beginDate;
     private String waybillComment;
+    @Transient
+    private String parsedWaybillComment;
     private Integer isConfirmed;
     private Integer isCorrected;
     private Integer buyerSt;
@@ -57,9 +56,10 @@ public class WayBill {
     @CreationTimestamp
     private Date createdTime;
 
-//    public WayBill(GetTransporterWaybillsResponse response) {
-//        this.buyerTin = response.getGetTransporterWaybillsResult().getContent().
-//    }
+    public WayBill(String id, String parsedWaybillComment) {
+        this.id = id;
+        this.parsedWaybillComment = parsedWaybillComment;
+    }
 
     @PrePersist
     protected void onCreate() {

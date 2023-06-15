@@ -38,7 +38,7 @@ public class DeliveryDetailsController {
     private final DeliveryDetailsRepository deliveryDetailsRepository;
     private final ParcelRepository parcelRepo;
     private final JwtTokenProvider jwtTokenProvider;
-    private final ParselStatusHistoryRepo statusHistoryRepo;
+    private final ParcelStatusHistoryRepo statusHistoryRepo;
     private final ParcelStatusReasonRepository statusReasonRepo;
 
     public DeliveryDetailsController(DeliveryDetailRepository repo,
@@ -50,7 +50,7 @@ public class DeliveryDetailsController {
                                      DeliveryDetailsRepository deliveryDetailsRepository,
                                      ParcelRepository parcelRepo,
                                      JwtTokenProvider jwtTokenProvider,
-                                     ParselStatusHistoryRepo statusHistoryRepo,
+                                     ParcelStatusHistoryRepo statusHistoryRepo,
                                      ParcelStatusReasonRepository statusReasonRepo) {
         this.repo = repo;
         this.barCodeService = barCodeService;
