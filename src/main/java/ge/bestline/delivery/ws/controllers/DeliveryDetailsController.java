@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.DeliveryDetailDao;
-import ge.bestline.delivery.ws.dto.*;
+import ge.bestline.delivery.ws.dto.DeliveryDetailDTO;
+import ge.bestline.delivery.ws.dto.ParcelDTO;
+import ge.bestline.delivery.ws.dto.StatusReasons;
+import ge.bestline.delivery.ws.dto.TokenUser;
 import ge.bestline.delivery.ws.entities.*;
 import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -27,43 +31,19 @@ import java.util.stream.Collectors;
 @Log4j2
 @RestController
 @RequestMapping(path = "/deliveryDetails")
+@AllArgsConstructor
 public class DeliveryDetailsController {
-
     private final DeliveryDetailRepository repo;
     private final BarCodeService barCodeService;
     private final DeliveryDetailDao dao;
     private final RouteRepository routeRepository;
     private final WarehouseRepository warehouseRepository;
     private final UserRepository userRepository;
-    private final DeliveryDetailsRepository deliveryDetailsRepository;
+    private final DeliveryDetailRepository deliveryDetailsRepository;
     private final ParcelRepository parcelRepo;
     private final JwtTokenProvider jwtTokenProvider;
     private final ParcelStatusHistoryRepo statusHistoryRepo;
     private final ParcelStatusReasonRepository statusReasonRepo;
-
-    public DeliveryDetailsController(DeliveryDetailRepository repo,
-                                     BarCodeService barCodeService,
-                                     RouteRepository routeRepository,
-                                     UserRepository userRepository,
-                                     WarehouseRepository warehouseRepository,
-                                     DeliveryDetailDao dao,
-                                     DeliveryDetailsRepository deliveryDetailsRepository,
-                                     ParcelRepository parcelRepo,
-                                     JwtTokenProvider jwtTokenProvider,
-                                     ParcelStatusHistoryRepo statusHistoryRepo,
-                                     ParcelStatusReasonRepository statusReasonRepo) {
-        this.repo = repo;
-        this.barCodeService = barCodeService;
-        this.routeRepository = routeRepository;
-        this.warehouseRepository = warehouseRepository;
-        this.userRepository = userRepository;
-        this.dao = dao;
-        this.deliveryDetailsRepository = deliveryDetailsRepository;
-        this.parcelRepo = parcelRepo;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.statusHistoryRepo = statusHistoryRepo;
-        this.statusReasonRepo = statusReasonRepo;
-    }
 
     @PostMapping
     @Transactional
@@ -78,12 +58,18 @@ public class DeliveryDetailsController {
         warehouseRepository.findById(obj.getWarehouse().getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Can't find Warehouse Using This ID : " + obj.getWarehouse().getId()));
         ParcelStatusReason status = null;
-        if (user.hasRole(UserRoles.COURIER.getValue())) {
+//        if (user.hasRole(UserRoles.COURIER.getValue())) {
+        if (obj.getCourierOrReception() == 1) {// courier
+            if (StringUtils.isBlank(obj.getCarNumber())) {
+                throw new RuntimeException("Car Number is mandatory");
+            }
             status = statusReasonRepo.findById(StatusReasons.WC.getStatus().getId()).orElseThrow(() ->
                     new ResourceNotFoundException("Can't find WC StatusReason"));
-        } else if (user.hasRole(UserRoles.OFFICE.getValue())) {
+        } else {//reception
+//            if (user.hasRole(UserRoles.OFFICE.getValue())) {
             status = statusReasonRepo.findById(StatusReasons.CC.getStatus().getId()).orElseThrow(() ->
                     new ResourceNotFoundException("Can't find CC StatusReason"));
+//            }
         }
         if (status != null) {
             List<Parcel> loadedParcels = parcelRepo.findByIdIn(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()));

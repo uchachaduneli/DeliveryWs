@@ -26,12 +26,12 @@ public class Syncroniser {
     public void runTask() {
         try {
             if (syncEnabled) {
-                rsService.syncWayBills();
                 log.info("************ RS Waybill Sync Started ************");
+                rsService.syncWayBills();
+                log.info("************ RS Waybill Sync Finished ************");
             }
         } catch (Exception e) {
             log.error("Waybill Sync Failed", e);
-            return;
         }
     }
 }

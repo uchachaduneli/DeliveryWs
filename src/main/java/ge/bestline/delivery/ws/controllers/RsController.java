@@ -26,9 +26,7 @@ public class RsController {
     private final WaybillDao dao;
     private final TransporterWaybillRepository repo;
 
-    public RsController(RsService rsService,
-                        WaybillDao dao,
-                        TransporterWaybillRepository repo) {
+    public RsController(RsService rsService, WaybillDao dao, TransporterWaybillRepository repo) {
         this.rsService = rsService;
         this.dao = dao;
         this.repo = repo;
@@ -61,7 +59,7 @@ public class RsController {
         log.info("closing Waybill With barCode: " + barCode);
         Map<String, String> res = new HashMap<>();
         try {
-            rsService.closeRsWaybill(barCode);
+            rsService.closeRsWaybill(null, barCode);
             res.put("status", "ok");
         } catch (WaybillException e) {
             log.error("Can't Close Waybill Rs Service Returned With Error " + e.getMessage());

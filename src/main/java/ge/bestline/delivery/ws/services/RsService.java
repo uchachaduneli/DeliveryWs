@@ -3,14 +3,9 @@ package ge.bestline.delivery.ws.services;
 import ge.bestline.delivery.soapclient.*;
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.Exception.WaybillException;
-import ge.bestline.delivery.ws.dto.RsErrorCode;
-import ge.bestline.delivery.ws.dto.RsSyncStatus;
-import ge.bestline.delivery.ws.dto.StatusReasons;
+import ge.bestline.delivery.ws.dto.*;
 import ge.bestline.delivery.ws.entities.*;
-import ge.bestline.delivery.ws.repositories.ChekInOutRepository;
-import ge.bestline.delivery.ws.repositories.ParcelRepository;
-import ge.bestline.delivery.ws.repositories.ParcelStatusHistoryRepo;
-import ge.bestline.delivery.ws.repositories.TransporterWaybillRepository;
+import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.util.SOAPConnector;
 import lombok.extern.log4j.Log4j2;
 import org.apache.xerces.dom.ElementNSImpl;
@@ -26,6 +21,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -39,17 +35,19 @@ public class RsService {
     private final ParcelRepository parcelRepo;
     private final ParcelStatusHistoryRepo parcelStatusHistoryRepo;
     private final ChekInOutRepository chekInOutRepo;
+    private final DeliveryDetailRepository delivDetRepo;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     public RsService(SOAPConnector soapConnector,
                      TransporterWaybillRepository transporterWaybillRepository,
                      ParcelRepository parcelRepo, ParcelStatusHistoryRepo parcelStatusHistoryRepo,
-                     ChekInOutRepository chekInOutRepo) {
+                     ChekInOutRepository chekInOutRepo, DeliveryDetailRepository delivDetRepo) {
         this.soapConnector = soapConnector;
         this.transporterWaybillRepository = transporterWaybillRepository;
         this.parcelRepo = parcelRepo;
         this.parcelStatusHistoryRepo = parcelStatusHistoryRepo;
         this.chekInOutRepo = chekInOutRepo;
+        this.delivDetRepo = delivDetRepo;
     }
 
     public void syncWayBills() throws Exception {
@@ -204,10 +202,16 @@ public class RsService {
         return null;
     }
 
-    //OK statusianebistvis zednadebis daxurva
-    public void closeRsWaybill(String parcelBarCode) throws WaybillException, DatatypeConfigurationException, NumberFormatException {
-        WayBill wayBill = transporterWaybillRepository.findByBarCodeInComment(parcelBarCode).orElseThrow(() ->
-                new WaybillException("Can't find Waybill With This Barcode In Comment " + parcelBarCode));
+    //OK statusianebistvis zednadebis daxurva weibilis aidit an barkodit
+    public void closeRsWaybill(Integer waybillId, String parcelBarCode) throws WaybillException, DatatypeConfigurationException, NumberFormatException {
+        WayBill wayBill = null;
+        if (waybillId != null) {
+            wayBill = transporterWaybillRepository.findByIdAndStatusIdNot(waybillId, RsWaybillStatuses.CLOSED.getValue()).orElseThrow(() ->
+                    new WaybillException("Can't find Waybill With This Barcode In Comment " + parcelBarCode));
+        } else {
+            wayBill = transporterWaybillRepository.findUnClosedByBarCodeInComment(parcelBarCode).orElseThrow(() ->
+                    new WaybillException("Can't find Waybill With This Barcode In Comment " + parcelBarCode));
+        }
         log.info("Waybill For Close is found with this barCode:" + parcelBarCode + " waybillId:" + wayBill.getId() + " Calling RS Service To Close Waybill");
         CloseWaybillTransporter closeWaybillTransporterReq = new CloseWaybillTransporter();
         closeWaybillTransporterReq.setSp(rsPass);
@@ -227,9 +231,85 @@ public class RsService {
     }
 
     // sync waybill transporter details - driver, carnumber, date to rs
-    public void syncParcelsWithPUStatusesToRs() {
-        // map of barCode-wayBillId pairs
-        Map<String, Integer> barcodesFromWaybillComments = transporterWaybillRepository.getBarCodesFromCurrentDayWaybillsComment();
+    public void wayBillTransporterSyncToRs() {
+        // map of current days barCode-wayBillId pairs from waybills parsed comment
+        Map<String, Integer> barcodesFromWaybillComments = new HashMap<>();
+        List<Object[]> tmp = transporterWaybillRepository.getBarCodesFromCurrentDayWaybillsComment();
+        for (Object[] ob : tmp) {
+            barcodesFromWaybillComments.put((String) ob[0], Integer.valueOf(ob[1].toString()));
+        }
+        // sync PU
+        syncParcelsWithPUStatusesToRs(barcodesFromWaybillComments);
+        //  sync WC
+        syncParcelsWithWCStatusesToRs(barcodesFromWaybillComments);
+
+        // OK statusianebis listi, mimdinare dgis
+        List<Parcel> parcelsBarCodesWithOkStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.OK1.getOkStatusIdes()));
+        for (Parcel p : parcelsBarCodesWithOkStatus) {
+            try {
+                closeRsWaybill(barcodesFromWaybillComments.get(p.getBarCode()), null);
+            } catch (Exception e) {
+                log.error(e);
+            }
+        }
+
+    }
+
+    public void syncParcelsWithWCStatusesToRs(Map<String, Integer> barcodesFromWaybillComments) {
+        log.info("Starting Rs Sync For WC status");
+        // WC statusianebis listi komentaridan amoparsuli weibilebidan
+        List<Parcel> parcelsBarCodesWithWCStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.WC.getStatus().getId()));
+        // for per parcel barcode gets car number from latest delivery detail record of this parcel
+        //barcode - car_number pairs
+        List<DeliveryDetailDTO> parcelsWCToSync =
+                delivDetRepo.findParcelsLatestDetailsPairsForCarNumbers(parcelsBarCodesWithWCStatus.stream().map(Parcel::getBarCode).collect(Collectors.toList()));
+        for (DeliveryDetailDTO p : parcelsWCToSync) {
+            try {
+                SaveWaybillTransporter saveWaybillTranspRequest = new SaveWaybillTransporter();
+                saveWaybillTranspRequest.setSp(rsPass);
+                saveWaybillTranspRequest.setSu(rsUser);
+                saveWaybillTranspRequest.setWaybillId(barcodesFromWaybillComments.get(p.getParcelBarCode()));
+                saveWaybillTranspRequest.setCarNumber(p.getCarNumber());
+                saveWaybillTranspRequest.setDriverTin(p.getCourierIdentNum());
+                saveWaybillTranspRequest.setDriverName(p.getCourierDesc());
+                saveWaybillTranspRequest.setTransId(1); // es 1-ani saavtomobilo gadazidvis kodia
+                saveWaybillTranspRequest.setChekDriverTin(1); // 0 ucxoetis moqalaqe 1 saqartvelos moqalaqe
+                log.info("Calling WC Rs Sync With Params: " + saveWaybillsReqToString(saveWaybillTranspRequest));
+                SaveWaybillTransporterResponse response = (SaveWaybillTransporterResponse) soapConnector.callWebService(saveWaybillTranspRequest,
+                        "http://tempuri.org/save_waybill_transporter");
+                if (response.getSaveWaybillTransporterResult() != 1) {
+                    RsErrorCode rsErrorCode = getErrorCodeReason(response.getSaveWaybillTransporterResult());
+                    throw new WaybillException("Can't Save Waybill for WC status of parcel " + p.getParcelBarCode() + " Rs Returns error: " + rsErrorCode.toString());
+                } else {
+                    log.info("Rs Waybill Transporter Save(rs service) for Parcel " + p.getParcelBarCode() + " with WC status finished successfully, Now Calling 'send_waybill_transporter'");
+                    SendWaybillTransporter sendWaybillTransReq = new SendWaybillTransporter();
+                    sendWaybillTransReq.setSp(rsPass);
+                    sendWaybillTransReq.setSu(rsUser);
+                    sendWaybillTransReq.setWaybillId(barcodesFromWaybillComments.get(p.getParcelBarCode()));
+                    XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar());
+                    sendWaybillTransReq.setBeginDate(date);
+                    SendWaybillTransporterResponse resp = (SendWaybillTransporterResponse) soapConnector.callWebService(sendWaybillTransReq
+                            , "http://tempuri.org/send_waybill_transporter");
+                    if (resp.getSendWaybillTransporterResult() != 1) {
+                        RsErrorCode rsErrorCode = getErrorCodeReason(resp.getSendWaybillTransporterResult());
+                        throw new WaybillException("Can't Sync Rs Send Waybill Transporter for WC status of parcel " + p.getParcelBarCode() + " Rs Returns error: " + rsErrorCode.toString());
+                    } else {
+                        log.info("Rs Sync for Parcel: " + p.getParcelBarCode() + " with status WC completed successfully");
+                    }
+                }
+            } catch (ResourceNotFoundException e) {
+                log.error(e.getMessage(), e);
+            } catch (WaybillException e) {
+                log.error(e);
+            } catch (DatatypeConfigurationException e) {
+                log.error("Calling send_waybill_transporter failed ", e);
+            }
+        }
+        log.info("Finished Rs Sync For WC status");
+    }
+
+    public void syncParcelsWithPUStatusesToRs(Map<String, Integer> barcodesFromWaybillComments) {
+        log.info("Starting Rs Sync For PU status");
         // PU statusianebis listi, mimdinare dgis
         List<Parcel> parcelsWithPUStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.PU.getStatus().getId()));
         for (Parcel p : parcelsWithPUStatus) {
@@ -239,7 +319,7 @@ public class RsService {
                         new ResourceNotFoundException("Can't find Courier Who Set PU On parcel " + p.getBarCode() + " to sync his car number with RS"));
                 //getting couriers last car's number when going out
                 CourierCheckInOut courierCheckInOut = chekInOutRepo.findCouriersLastCheckoutRecord(psh.getOperUSer().getId()).orElseThrow(() ->
-                        new ResourceNotFoundException("Can't find Couriers chekout operation to get car number for Rs sync, courier:  "
+                        new ResourceNotFoundException("Can't find Couriers checkout operation to get car number for Rs sync, courier:  "
                                 + psh.getOperUSer().getName() + " " + psh.getOperUSer().getName() + " " + psh.getOperUSer().getPersonalNumber()));
                 SaveWaybillTransporter saveWaybillTranspRequest = new SaveWaybillTransporter();
                 saveWaybillTranspRequest.setSp(rsPass);
@@ -257,7 +337,7 @@ public class RsService {
                     RsErrorCode rsErrorCode = getErrorCodeReason(response.getSaveWaybillTransporterResult());
                     throw new WaybillException("Can't Save Waybill for PU status of parcel " + p.getBarCode() + " Rs Returns error: " + rsErrorCode.toString());
                 } else {
-                    log.info("Rs Waybill Transporter Save for Parcel " + p.getBarCode() + " with PU status finished successfully, Now Calling 'send_waybill_transporter'");
+                    log.info("Rs Waybill Transporter Save(rs service) for Parcel " + p.getBarCode() + " with PU status finished successfully, Now Calling 'send_waybill_transporter'");
                     SendWaybillTransporter sendWaybillTransReq = new SendWaybillTransporter();
                     sendWaybillTransReq.setSp(rsPass);
                     sendWaybillTransReq.setSu(rsUser);
@@ -281,6 +361,7 @@ public class RsService {
                 log.error("Calling send_waybill_transporter failed ", e);
             }
         }
+        log.info("Finished Rs Sync For PU status");
     }
 
     private String saveWaybillsReqToString(SaveWaybillTransporter req) {

@@ -26,15 +26,11 @@ public class WaybillSendSyncroniser {
 
     @Scheduled(cron = "${data.rs.waybill.sendInterval}")
     public void runTask() {
-        System.out.println("WaybillSendSyncroniser " + new Date().toString());
-//        try {
-//            if (syncEnabled) {
-//                rsService.syncWayBills();
-//                log.info("************ RS Waybill Sync Started ************");
-//            }
-//        } catch (Exception e) {
-//            log.error("Waybill Sync Failed", e);
-//            return;
-//        }
+        log.info("WaybillSendSyncroniser " + new Date().toString());
+        if (syncEnabled) {
+            log.info("************  Waybill to RS Sync Started ************");
+            rsService.wayBillTransporterSyncToRs();
+            log.info("************  Waybill to RS Sync Finished ************");
+        }
     }
 }

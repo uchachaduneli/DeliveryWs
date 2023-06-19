@@ -24,6 +24,7 @@ public class CourierCheckInOut {
     private Integer id;
     private String carNumber;
     private Integer odometer;
+    private Integer distance;
     @NotNull
     private boolean isChekIn;
     @ManyToOne(cascade = CascadeType.PERSIST, optional = false)

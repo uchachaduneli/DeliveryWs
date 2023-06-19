@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -19,8 +20,11 @@ public class DeliveryDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @NotNull
+    private Integer courierOrReception;// 1 courier 2 reception
     @Column(unique = true)
     private String detailBarCode;
+    private String carNumber;
     @ManyToOne(cascade = CascadeType.DETACH)
     private Route route;
     @ManyToOne(cascade = CascadeType.DETACH)
