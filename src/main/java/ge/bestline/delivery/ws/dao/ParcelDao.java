@@ -23,10 +23,6 @@ public class ParcelDao {
         StringBuilder q = new StringBuilder();
         q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where e.deleted=2 ");
 
-        if (obj.getAuthorId() != null) {
-            q.append(" and e.author.id ='").append(obj.getAuthorId()).append("'");
-        }
-
         if (obj.getId() != null && obj.getId() > 0) {
             q.append(" and e.id ='").append(obj.getId()).append("'");
         }
@@ -51,9 +47,18 @@ public class ParcelDao {
         if (StringUtils.isNotBlank(obj.getSenderName())) {
             q.append(" and e.senderName like '").append(obj.getSenderName().trim()).append("%'");
         }
-        if (StringUtils.isNotBlank(obj.getSenderIdentNumber())) {
-            q.append(" and e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%'");
+        if (obj.getSearchingFromGlobal() != null && obj.getSearchingFromGlobal()) {
+            q.append(" and (e.author.id ='").append(obj.getAuthorId()).append("' ");
+            q.append(" or e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%')");
+        } else {
+            if (obj.getAuthorId() != null) {
+                q.append(" and e.author.id ='").append(obj.getAuthorId()).append("'");
+            }
+            if (StringUtils.isNotBlank(obj.getSenderIdentNumber())) {
+                q.append(" and e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%'");
+            }
         }
+
         if (StringUtils.isNotBlank(obj.getSenderPhone())) {
             q.append(" and e.senderPhone like '%").append(obj.getSenderPhone()).append("%'");
         }

@@ -88,6 +88,7 @@ public class ParcelDTO {
     private String strCreatedTime;
     private String strCreatedTimeTo;
     private Boolean addedFromGlobal;
+    private Boolean searchingFromGlobal;
     private Boolean invoiced;
 
     public static Timestamp convertStrDateToDateObj(String strDate) throws ParseException {

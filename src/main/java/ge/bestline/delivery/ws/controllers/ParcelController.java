@@ -9,6 +9,7 @@ import ge.bestline.delivery.ws.repositories.*;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import ge.bestline.delivery.ws.services.FirebaseMessagingService;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -23,6 +24,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
 
+@Data
 @Log4j2
 @RestController
 @RequestMapping(path = "/parcel")
@@ -39,29 +41,7 @@ public class ParcelController {
     private final BarCodeService barCodeService;
     private final JwtTokenProvider jwtTokenProvider;
     private final FirebaseMessagingService firebaseService;
-
-    public ParcelController(ParcelRepository repo,
-                            VolumeWeightIndexRepository volumeWeightIndexRepository,
-                            PackagesRepository packagesRepo, ParcelDao dao,
-                            ParcelStatusHistoryRepo statusHistoryRepo,
-                            ParcelStatusReasonRepository statusReasonRepo,
-                            UserRepository userRepository,
-                            RouteRepository routeRepository,
-                            BarCodeService barCodeService,
-                            JwtTokenProvider jwtTokenProvider,
-                            FirebaseMessagingService firebaseService) {
-        this.repo = repo;
-        this.volumeWeightIndexRepository = volumeWeightIndexRepository;
-        this.packagesRepo = packagesRepo;
-        this.dao = dao;
-        this.statusHistoryRepo = statusHistoryRepo;
-        this.statusReasonRepo = statusReasonRepo;
-        this.userRepository = userRepository;
-        this.routeRepository = routeRepository;
-        this.barCodeService = barCodeService;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.firebaseService = firebaseService;
-    }
+    private final UserRepository userRepo;
 
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
@@ -314,7 +294,13 @@ public class ParcelController {
             HttpServletRequest req) throws ParseException {
         TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
         if (requester.isFromGlobalSite()) {
-            srchParams.setAuthorId(requester.getId());
+            srchParams.setSearchingFromGlobal(true);
+            // roca globalidan akitxavs daubrunebs tavis damatebulebs an romelshic gamgzavnadaa moxseniebuli
+            Optional<User> user = userRepo.findById(requester.getId());
+            if (user.isPresent()) {
+                srchParams.setAuthorId(requester.getId());
+                srchParams.setSenderIdentNumber(user.get().getPersonalNumber());
+            }
         }
 
         if (StringUtils.isNotBlank(srchParams.getStrCreatedTime())) {
