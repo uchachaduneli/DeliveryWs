@@ -148,6 +148,7 @@ public class ParcelStatusController {
         ParcelStatusReason existing = statusReasonRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Can't find Record Using This ID : " + id));
         log.info("Old Values: " + existing.toString() + "    New Values: " + request.toString());
         existing.setName(request.getName());
+        existing.setShowInMobail(request.getShowInMobail());
         ParcelStatusReason updatedObj = statusReasonRepo.save(existing);
         return ResponseEntity.ok(updatedObj);
     }

@@ -29,6 +29,8 @@ public class ParcelStatusReason {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
+    @Column(columnDefinition = "boolean default false")
+    private Boolean showInMobail;
 
     public ParcelStatusReason(Integer id) {
         this.id = id;

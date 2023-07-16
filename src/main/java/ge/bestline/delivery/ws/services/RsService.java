@@ -204,6 +204,7 @@ public class RsService {
 
     //OK statusianebistvis zednadebis daxurva weibilis aidit an barkodit
     public void closeRsWaybill(Integer waybillId, String parcelBarCode) throws WaybillException, DatatypeConfigurationException, NumberFormatException {
+        log.info("Started Closing Waybill(#" + parcelBarCode + ") with OK status");
         WayBill wayBill = null;
         if (waybillId != null) {
             wayBill = transporterWaybillRepository.findByIdAndStatusIdNot(waybillId, RsWaybillStatuses.CLOSED.getValue()).orElseThrow(() ->
@@ -228,6 +229,7 @@ public class RsService {
         } else {
             log.info("Waybill With ID: " + wayBill.getId() + " Closed Successfully");
         }
+        log.info("Waybill(#" + parcelBarCode + ") with OK status Closed On RS");
     }
 
     // sync waybill transporter details - driver, carnumber, date to rs
@@ -244,6 +246,7 @@ public class RsService {
         syncParcelsWithWCStatusesToRs(barcodesFromWaybillComments);
 
         // OK statusianebis listi, mimdinare dgis
+        log.info("Starting Rs Sync For OK status");
         List<Parcel> parcelsBarCodesWithOkStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.OK1.getOkStatusIdes()));
         for (Parcel p : parcelsBarCodesWithOkStatus) {
             try {
@@ -252,6 +255,7 @@ public class RsService {
                 log.error(e);
             }
         }
+        log.info("Finished Rs Sync For OK status");
 
     }
 
