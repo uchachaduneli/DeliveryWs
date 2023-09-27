@@ -75,9 +75,9 @@ public class ParcelController {
         // if parcel is added from admin portal
         if (!requester.isFromGlobalSite()) {
             if (obj.getRoute() != null && obj.getRoute().getId() > 0) {
-                User courier = userRepository.findByRouteId(obj.getRoute().getId()).orElseThrow(
+                User courier = userRepository.findByRouteIdAndDeleted(obj.getRoute().getId(), 2).orElseThrow(
                         () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + obj.getRoute().getId()));
-                Route route = routeRepository.findById(obj.getRoute().getId()).orElseThrow(
+                Route route = routeRepository.findByIdAndDeleted(obj.getRoute().getId(), 2).orElseThrow(
                         () -> new ResourceNotFoundException("Can't find Route Using This ID : " + obj.getRoute().getId()));
                 obj.setCourier(courier);
                 try {
@@ -129,7 +129,7 @@ public class ParcelController {
     @GetMapping(path = "/byBarCode/{barCode}")
     public ResponseEntity<Parcel> getParcelByBarCode(@PathVariable String barCode) {
         log.info("Getting Parcel By BarCode : " + barCode);
-        Parcel parcel = repo.findByBarCode(barCode).orElseThrow(() -> new ResourceNotFoundException("Can't find Parcel Using This BarCode : " + barCode));
+        Parcel parcel = repo.findByBarCodeAndDeleted(barCode, 2).orElseThrow(() -> new ResourceNotFoundException("Can't find Parcel Using This BarCode : " + barCode));
         return ResponseEntity.ok(parcel);
     }
 
@@ -156,9 +156,9 @@ public class ParcelController {
         }
 
         if (request.getRoute() != null && request.getRoute().getId() > 0 && !requester.isFromGlobalSite()) {
-            User courier = userRepository.findByRouteId(request.getRoute().getId()).orElseThrow(
+            User courier = userRepository.findByRouteIdAndDeleted(request.getRoute().getId(), 2).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Courier Using This Route ID : " + request.getRoute().getId()));
-            Route route = routeRepository.findById(request.getRoute().getId()).orElseThrow(
+            Route route = routeRepository.findByIdAndDeleted(request.getRoute().getId(), 2).orElseThrow(
                     () -> new ResourceNotFoundException("Can't find Route Using This ID : " + request.getRoute().getId()));
             existing.setCourier(courier);
             if (existing.getStatus().getId() == StatusReasons.PP.getStatus().getId()) {
@@ -227,7 +227,7 @@ public class ParcelController {
         ParcelStatusReason status = statusReasonRepo.findById(request.getStatusId()).orElseThrow(() ->
                 new ResourceNotFoundException("Can't find Status Using This ID : " + request.getStatusId()));
         List<Parcel> res = new ArrayList<>();
-        for (Parcel p : repo.findByBarCodeIn(request.getBarCodes())) {
+        for (Parcel p : repo.findByBarCodeInAndDeleted(request.getBarCodes(), 2)) {
             if (p.getStatus().getId() != status.getId()) {
                 statusHistoryRepo.save(new ParcelStatusHistory(p
                         , status.getName()
@@ -315,7 +315,7 @@ public class ParcelController {
         if (StringUtils.isNotBlank(srchParams.getStrDeliveryTimeTo())) {
             srchParams.setDeliveryTimeTo(ParcelDTO.convertStrDateToDateObj(srchParams.getStrDeliveryTimeTo()));
         }
-        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams, false), HttpStatus.OK);
+        return new ResponseEntity<>(dao.findAll(page, rowCount, srchParams, false, requester.isFromGlobalSite()), HttpStatus.OK);
     }
 
     @GetMapping(path = "/{id}")
@@ -328,7 +328,7 @@ public class ParcelController {
     public ResponseEntity<List<ParcelWithPackagesDTO>> getById(@RequestParam List<Integer> ides) {
         log.info("Getting Parcels ID In: " + ides.toString());
         List<ParcelWithPackagesDTO> res = new ArrayList<>();
-        for (Parcel p : repo.findByIdIn(ides)) {
+        for (Parcel p : repo.findByIdInAndDeleted(ides, 2)) {
             res.add(new ParcelWithPackagesDTO(p, packagesRepo.findByParcelId(p.getId())));
         }
         return new ResponseEntity<>(res, HttpStatus.OK);

@@ -151,7 +151,7 @@ public class RsService {
         if (mayBeNullNode != null) {
             wayBill.setWaybillComment(mayBeNullNode.getTextContent().trim());
             try {
-                Optional<Parcel> p = parcelRepo.findByBarCode(wayBill.getWaybillComment());
+                Optional<Parcel> p = parcelRepo.findByBarCodeAndDeleted(wayBill.getWaybillComment(), 2);
                 if (p.isPresent()) {
                     wayBill.setSyncStatus(RsSyncStatus.IsProcessing.getValue());
                 } else {
@@ -207,7 +207,7 @@ public class RsService {
         log.info("Started Closing Waybill(#" + parcelBarCode + ") with OK status");
         WayBill wayBill = null;
         if (waybillId != null) {
-            wayBill = transporterWaybillRepository.findByIdAndStatusIdNot(waybillId, RsWaybillStatuses.CLOSED.getValue()).orElseThrow(() ->
+            wayBill = transporterWaybillRepository.findByIdAndStatusIdNot(waybillId.toString(), RsWaybillStatuses.CLOSED.getValue()).orElseThrow(() ->
                     new WaybillException("Can't find Waybill With This Barcode In Comment " + parcelBarCode));
         } else {
             wayBill = transporterWaybillRepository.findUnClosedByBarCodeInComment(parcelBarCode).orElseThrow(() ->
@@ -247,7 +247,7 @@ public class RsService {
 
         // OK statusianebis listi, mimdinare dgis
         log.info("Starting Rs Sync For OK status");
-        List<Parcel> parcelsBarCodesWithOkStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.OK1.getOkStatusIdes()));
+        List<Parcel> parcelsBarCodesWithOkStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<Integer>(StatusReasons.OK1.getOkStatusIdes()));
         for (Parcel p : parcelsBarCodesWithOkStatus) {
             try {
                 closeRsWaybill(barcodesFromWaybillComments.get(p.getBarCode()), null);
@@ -262,7 +262,7 @@ public class RsService {
     public void syncParcelsWithWCStatusesToRs(Map<String, Integer> barcodesFromWaybillComments) {
         log.info("Starting Rs Sync For WC status");
         // WC statusianebis listi komentaridan amoparsuli weibilebidan
-        List<Parcel> parcelsBarCodesWithWCStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.WC.getStatus().getId()));
+        List<Parcel> parcelsBarCodesWithWCStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<Integer>(Arrays.asList(StatusReasons.WC.getStatus().getId())));
         // for per parcel barcode gets car number from latest delivery detail record of this parcel
         //barcode - car_number pairs
         List<DeliveryDetailDTO> parcelsWCToSync =
@@ -302,9 +302,9 @@ public class RsService {
                     }
                 }
             } catch (ResourceNotFoundException e) {
-                log.error(e.getMessage(), e);
+                log.error("Syncing WC status to RS -" + p.getParcelBarCode() + " " + e.getMessage(), e);
             } catch (WaybillException e) {
-                log.error(e);
+                log.error("Syncing WC status to RS -" + p.getParcelBarCode(), e);
             } catch (DatatypeConfigurationException e) {
                 log.error("Calling send_waybill_transporter failed ", e);
             }
@@ -315,7 +315,7 @@ public class RsService {
     public void syncParcelsWithPUStatusesToRs(Map<String, Integer> barcodesFromWaybillComments) {
         log.info("Starting Rs Sync For PU status");
         // PU statusianebis listi, mimdinare dgis
-        List<Parcel> parcelsWithPUStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<>(StatusReasons.PU.getStatus().getId()));
+        List<Parcel> parcelsWithPUStatus = parcelRepo.findByBarCodeInAndDeletedAndStatusIdIn(barcodesFromWaybillComments.keySet(), 2, new HashSet<Integer>(Arrays.asList(StatusReasons.PU.getStatus().getId())));
         for (Parcel p : parcelsWithPUStatus) {
             try {
                 //getting courier who set status PU
@@ -324,7 +324,7 @@ public class RsService {
                 //getting couriers last car's number when going out
                 CourierCheckInOut courierCheckInOut = chekInOutRepo.findCouriersLastCheckoutRecord(psh.getOperUSer().getId()).orElseThrow(() ->
                         new ResourceNotFoundException("Can't find Couriers checkout operation to get car number for Rs sync, courier:  "
-                                + psh.getOperUSer().getName() + " " + psh.getOperUSer().getName() + " " + psh.getOperUSer().getPersonalNumber()));
+                                + psh.getOperUSer().getName() + " " + psh.getOperUSer().getLastName() + " " + psh.getOperUSer().getPersonalNumber()));
                 SaveWaybillTransporter saveWaybillTranspRequest = new SaveWaybillTransporter();
                 saveWaybillTranspRequest.setSp(rsPass);
                 saveWaybillTranspRequest.setSu(rsUser);
@@ -358,23 +358,23 @@ public class RsService {
                     }
                 }
             } catch (ResourceNotFoundException e) {
-                log.error(e.getMessage(), e);
+                log.error("Syncing PU status to RS - parcel:" + p.getBarCode() + e.getMessage(), e);
             } catch (WaybillException e) {
-                log.error(e);
+                log.error("Syncing PU status to RS - parcel:" + p.getBarCode(), e);
             } catch (DatatypeConfigurationException e) {
-                log.error("Calling send_waybill_transporter failed ", e);
+                log.error("Syncing PU status to RS - Calling send_waybill_transporter failed for parcel " + p.getBarCode(), e);
             }
         }
         log.info("Finished Rs Sync For PU status");
     }
 
     private String saveWaybillsReqToString(SaveWaybillTransporter req) {
-        return "{" +
+        return "{ " +
                 "wayBillId: " + req.getWaybillId() +
-                "carNumber: " + req.getCarNumber() +
-                "DriverPersNum: " + req.getDriverTin() +
-                "Driver: " + req.getDriverName() +
-                "}";
+                " carNumber: " + req.getCarNumber() +
+                " DriverPersNum: " + req.getDriverTin() +
+                " Driver: " + req.getDriverName() +
+                " }";
     }
 }
 

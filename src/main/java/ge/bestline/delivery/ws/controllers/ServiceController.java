@@ -67,7 +67,7 @@ public class ServiceController {
         Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").ascending());
         Page<Services> pageAuths = null;
         if (searchParams.getName() != null) {
-            pageAuths = repo.findByName(searchParams.getName(), paging);
+            pageAuths = repo.findByNameAndDeleted(searchParams.getName(), paging, 2);
         } else {
             pageAuths = repo.findAll(paging);
         }

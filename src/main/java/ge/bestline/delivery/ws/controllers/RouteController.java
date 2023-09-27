@@ -79,9 +79,9 @@ public class RouteController {
         Pageable paging = PageRequest.of(page, rowCount, Sort.by("id").descending());
         Page<Route> pageAuths = null;
         if (searchParams.getCity() != null) {
-            pageAuths = repo.findByCity_Id(searchParams.getCity().getId(), paging);
+            pageAuths = repo.findByCityIdAndDeleted(searchParams.getCity().getId(), paging, 2);
         } else if (searchParams.getName() != null) {
-            pageAuths = repo.findByNameContainingIgnoreCase(searchParams.getName(), paging);
+            pageAuths = repo.findByNameContainingIgnoreCaseAndDeleted(searchParams.getName(), paging, 2);
         } else {
             pageAuths = repo.findAll(paging);
         }
@@ -99,7 +99,7 @@ public class RouteController {
     @GetMapping(path = "/byCityId/{id}")
     public Iterable<Route> getRoutesByCityId(@PathVariable Integer id) {
         log.info("Getting Route With City ID: " + id);
-        return repo.findByCity_Id(id);
+        return repo.findByCityIdAndDeleted(id, 2);
     }
 
 }

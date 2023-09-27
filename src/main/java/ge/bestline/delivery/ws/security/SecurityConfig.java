@@ -23,7 +23,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String LOGIN_ENDPOINT = "/auth/login";
-    private static final String PARCEL_STATUS_CHECK_ENDPOINT = "/check/**";
+    private static final String PARCEL_STATUS_CHECK_ENDPOINT = "/unsec/**";
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean

@@ -81,7 +81,7 @@ public class WarehouseController {
     @GetMapping(path = "/byCityId/{id}")
     public Iterable<Warehouse> getRoutesByCityId(@PathVariable Integer id) {
         log.info("Getting Route With City ID: " + id);
-        return repo.findByCity_Id(id);
+        return repo.findByCityIdAndDeleted(id, 2);
     }
 
 }

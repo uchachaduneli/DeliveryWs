@@ -76,7 +76,7 @@ public class UserController {
                 contactRepo.save(contact);
                 // if customer have sent parcels before office create for him account
                 // then update old parcels author id to bind this user now
-                List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumber(user.getPersonalNumber());
+                List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumberAndDeleted(user.getPersonalNumber(), 2);
                 if (previouslySentParcels != null && !previouslySentParcels.isEmpty()) {
                     for (Parcel p : previouslySentParcels) {
                         p.setAuthor(res);

@@ -25,7 +25,7 @@ public class GlobalSiteUnAuthorizedController {
     @GetMapping(path = "/{barCode}")
     public ResponseEntity<ParcelStatusReason> getParcelStatusByBarCode(@PathVariable String barCode) {
         log.info("Checking Parcels Status By BarCode From Global Sites Login Page. BarCode:" + barCode);
-        Parcel parcel = repo.findByBarCode(barCode).orElseThrow(() -> new ResourceNotFoundException("Can't find Parcel Using This BarCode : " + barCode));
+        Parcel parcel = repo.findByBarCodeAndDeleted(barCode, 2).orElseThrow(() -> new ResourceNotFoundException("Can't find Parcel Using This BarCode : " + barCode));
         return ResponseEntity.ok(parcel.getStatus());
     }
 }

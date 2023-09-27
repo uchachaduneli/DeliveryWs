@@ -14,39 +14,30 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ParcelStatusReason {
+public class TwoFaCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String name;
+    @Column(unique = true)
     private String code;
-    @ManyToOne(cascade = CascadeType.DETACH)
-    private ParcelStatus status;
-    private String category;
-    private String parcelStatusOnChekpoint;
+    private String phone;
+    private boolean expired;
+    private boolean used;
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedTime;
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private Date createdTime;
-    @Column(columnDefinition = "boolean default false")
-    private Boolean showInMobail;
-    @Column(columnDefinition = "boolean default false")
-    private Boolean showInGlobal;
 
-    public ParcelStatusReason(Integer id) {
-        this.id = id;
-    }
-
-    public ParcelStatusReason(Integer id, ParcelStatus status, String name) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
+    public TwoFaCode(String code, String phone) {
+        this.code = code;
+        this.phone = phone;
     }
 
     @PrePersist
     protected void onCreate() {
         createdTime = new Date();
+        expired = false;
     }
 
     @PreUpdate

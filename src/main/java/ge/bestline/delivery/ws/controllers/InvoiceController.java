@@ -104,7 +104,7 @@ public class InvoiceController {
         Invoice obj = new Invoice(dtoObj);
         Double priceSum = 0.0;
         if (obj.getParcels() != null && !obj.getParcels().isEmpty()) {
-            List<Parcel> loadedParcels = parcelRepo.findByIdIn(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()));
+            List<Parcel> loadedParcels = parcelRepo.findByIdInAndDeleted(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()), 2);
             for (Parcel p : loadedParcels) {
                 if (p.getTotalPrice() == null) {
                     throw new RuntimeException("Price For Parcel:" + p.getBarCode() + " is not defined, you need to fix this");
@@ -240,7 +240,7 @@ public class InvoiceController {
                 "receiverName", "receiverIdentNumber", "senderCity", "receiverCity"));
         SimpleBeanPropertyFilter simpleBeanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept(fieldsToExclude);
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter("fieldsFilter", simpleBeanPropertyFilter);
-        Map<String, Object> response = parcelDao.findAll(page, rowCount, srchParams, true);
+        Map<String, Object> response = parcelDao.findAll(page, rowCount, srchParams, true, false);
         MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(response);
         mappingJacksonValue.setFilters(filterProvider);
         return mappingJacksonValue;

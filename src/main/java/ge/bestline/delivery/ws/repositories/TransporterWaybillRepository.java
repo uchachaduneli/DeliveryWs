@@ -16,5 +16,5 @@ public interface TransporterWaybillRepository extends JpaRepository<WayBill, Int
             "AND TRIM(REGEXP_SUBSTR(w.waybill_comment,'[0-9]+')) = ? AND w.status_id <> 2")
     Optional<WayBill> findUnClosedByBarCodeInComment(String parcelBarCode);
 
-    Optional<WayBill> findByIdAndStatusIdNot(Integer waybillId, Integer value);
+    Optional<WayBill> findByIdAndStatusIdNot(String waybillId, Integer value);
 }

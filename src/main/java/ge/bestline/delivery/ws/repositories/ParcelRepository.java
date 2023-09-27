@@ -10,13 +10,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface ParcelRepository extends JpaRepository<Parcel, Integer> {
-    List<Parcel> findByBarCodeIn(List<String> list);
+    List<Parcel> findByBarCodeInAndDeleted(List<String> list, Integer deleted);
 
-    List<Parcel> findByIdIn(List<Integer> ides);
+    List<Parcel> findByIdInAndDeleted(List<Integer> ides, Integer deleted);
 
-    Optional<Parcel> findByBarCode(String barCode);
+    Optional<Parcel> findByBarCodeAndDeleted(String barCode, Integer deleted);
 
-    List<Parcel> findBySenderIdentNumber(String personalNumber);
+    List<Parcel> findBySenderIdentNumberAndDeleted(String personalNumber, Integer deleted);
 
     Page<Parcel> findByPayerIdentNumberAndDeletedAndInvoiced(String identNumber, int i, boolean b, Pageable paging);
 

@@ -18,7 +18,7 @@ public class ParcelDao {
         this.em = em;
     }
 
-    public Map<String, Object> findAll(int page, int rowCount, ParcelDTO obj, boolean needTotalPriceSum) {
+    public Map<String, Object> findAll(int page, int rowCount, ParcelDTO obj, boolean needTotalPriceSum, boolean isFromGlobalSite) {
         Map<String, Object> response = new HashMap<>();
         StringBuilder q = new StringBuilder();
         q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where e.deleted=2 ");
@@ -219,7 +219,8 @@ public class ParcelDao {
             }
         }
 
-        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString() + " order by e.status.status.id asc, e.id desc", Parcel.class);
+        TypedQuery<Parcel> query = em.createQuery("SELECT e " + q.toString()
+                + (isFromGlobalSite ? " order by e.id desc" : " order by e.status.status.id asc, e.id desc"), Parcel.class);
         TypedQuery<Long> cntQr = em.createQuery("SELECT count(1) " + q.toString(), Long.class);
         response.put("items", query.setFirstResult(page * rowCount).setMaxResults(rowCount).getResultList());
         response.put("total_count", cntQr.getSingleResult());

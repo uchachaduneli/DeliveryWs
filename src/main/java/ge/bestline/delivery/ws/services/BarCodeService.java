@@ -21,7 +21,7 @@ public class BarCodeService {
     public List<String> getBarcodes(int count) {
         log.info("Generating Barcodes Started For Count: " + count);
         List<String> list = generateBarcodes(count);
-        List<Parcel> existingBarCodes = repo.findByBarCodeIn(list);
+        List<Parcel> existingBarCodes = repo.findByBarCodeInAndDeleted(list, 2);
         if (existingBarCodes.isEmpty()) {
             return list;
         } else {
@@ -42,5 +42,15 @@ public class BarCodeService {
             res.add(i + "");
         }
         return res;
+    }
+
+    public String generate2FaCode() {
+        List<String> res = new ArrayList<>();
+        int[] result = new Random().ints(10_000, 100_000)
+                .distinct().limit(1).toArray();
+        for (int i : result) {
+            res.add(i + "");
+        }
+        return res.get(0);
     }
 }

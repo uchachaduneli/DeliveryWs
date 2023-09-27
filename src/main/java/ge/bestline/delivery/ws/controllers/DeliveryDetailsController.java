@@ -72,7 +72,7 @@ public class DeliveryDetailsController {
 //            }
         }
         if (status != null) {
-            List<Parcel> loadedParcels = parcelRepo.findByIdIn(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()));
+            List<Parcel> loadedParcels = parcelRepo.findByIdInAndDeleted(obj.getParcels().stream().map(Parcel::getId).collect(Collectors.toList()), 2);
             List<ParcelStatusHistory> statusHistories = new ArrayList<>();
             for (Parcel p : loadedParcels) {
                 p.setStatus(status);

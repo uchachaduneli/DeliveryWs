@@ -12,6 +12,6 @@ public interface ParcelStatusHistoryRepo extends JpaRepository<ParcelStatusHisto
 
     List<ParcelStatusHistory> findByParcelIdOrderByStatusDateTimeAsc(Integer id);
 
-    @Query(nativeQuery = true, value = "select h.* from parcel_status_history h where h.parcel_id=? and h.code=? order by id desc limit 1")
+    @Query(nativeQuery = true, value = "select * from parcel_status_history where parcel_id=?1 and code=?2 order by id desc limit 1")
     Optional<ParcelStatusHistory> findTheLastWithParcelIdAndStatusCode(Integer id, String code);
 }

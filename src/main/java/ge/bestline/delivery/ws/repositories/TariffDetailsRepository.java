@@ -7,12 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TariffDetailsRepository extends JpaRepository<TariffDetail, Integer> {
-    Iterable<TariffDetail> findByTariff_Id(Integer id);
-
-//    List<TariffDetail> findByTariffIdAndZoneIdAndWeightGreaterThanOrderByWeightAsc(Integer tariffId, Integer zoneId, Double weight);
-//    List<TariffDetail> findByTariffIdAndZoneIdAndWeight(Integer tariffId, Integer zoneId, Double weight);
-
-//    Iterable<TariffDetail> findByTariff_IdAndService_Id(Integer id, Integer serviceId);
+    Iterable<TariffDetail> findByTariffIdAndDeleted(Integer id, Integer deleted);
 
     List<TariffDetail> findByDeletedAndService_IdAndTariff_IdAndZone_IdAndWeight(Integer i, Integer serviceId, Integer tariffId, Integer zoneId, Double weight);
 
