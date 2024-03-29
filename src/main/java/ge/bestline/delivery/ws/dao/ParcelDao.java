@@ -5,8 +5,8 @@ import ge.bestline.delivery.ws.entities.Parcel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,11 +48,11 @@ public class ParcelDao {
             q.append(" and e.senderName like '").append(obj.getSenderName().trim()).append("%'");
         }
         if (obj.getSearchingFromGlobal() != null && obj.getSearchingFromGlobal()) {
-            q.append(" and (e.author.id ='").append(obj.getAuthorId()).append("' ");
+            q.append(" and (e.author.id =").append(obj.getAuthorId()).append(" ");
             q.append(" or e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%')");
         } else {
             if (obj.getAuthorId() != null) {
-                q.append(" and e.author.id ='").append(obj.getAuthorId()).append("'");
+                q.append(" and e.author.id =").append(obj.getAuthorId()).append("");
             }
             if (StringUtils.isNotBlank(obj.getSenderIdentNumber())) {
                 q.append(" and e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%'");

@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User findByPersonalNumber(String identNumber);
 
     Optional<User> findByRouteIdAndDeleted(Integer id, int i);
+
+    User findByUserName(String username);
 }

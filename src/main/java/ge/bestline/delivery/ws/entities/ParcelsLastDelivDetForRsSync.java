@@ -2,7 +2,7 @@ package ge.bestline.delivery.ws.entities;
 
 import ge.bestline.delivery.ws.dto.DeliveryDetailDTO;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @NamedNativeQuery(

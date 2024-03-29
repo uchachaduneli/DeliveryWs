@@ -1,5 +1,6 @@
 package ge.bestline.delivery.ws.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

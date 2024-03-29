@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,15 +81,6 @@ public class UserDao {
     @Transactional
     public void removeUserExistingRoles(Integer userId) {
         em.createNativeQuery("DELETE FROM user_role where user_id='" + userId + "'").executeUpdate();
-    }
-
-    public User findByUserNameAndPassword(String username, String password) {
-        StringBuilder q = new StringBuilder()
-                .append("SELECT e From ").append(User.class.getSimpleName()).append(" e Where ")
-                .append(" e.userName='").append(username).append("'")
-                .append(" and e.password='").append(password).append("'");
-        TypedQuery<User> query = em.createQuery(q.toString(), User.class);
-        return query.getSingleResult();
     }
 
     public Map<String, Object> getCoutiersInOut(int page, int rowCount, CourierCheckInOutDTO srchRequest) {

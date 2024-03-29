@@ -16,11 +16,13 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.*;
 
 @Log4j2
@@ -33,19 +35,22 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final ContactRepository contactRepo;
     private final ParcelRepository parcelRepo;
+    private final PasswordEncoder passwordEncoder;
 
     public UserController(UserRepository userRepository,
                           UserStatusRepository userStatusRepository,
                           UserDao userDao,
                           JwtTokenProvider jwtTokenProvider,
                           ContactRepository contactRepo,
-                          ParcelRepository parcelRepo) {
+                          ParcelRepository parcelRepo,
+                          PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userStatusRepository = userStatusRepository;
         this.userDao = userDao;
         this.jwtTokenProvider = jwtTokenProvider;
         this.contactRepo = contactRepo;
         this.parcelRepo = parcelRepo;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -57,35 +62,45 @@ public class UserController {
     @Transactional
     public User addNewUser(@RequestBody User user,
                            HttpServletRequest req) {
-        log.info("Adding New User: " + user.toString());
-        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
-        //when customer are adding sub customer user
-        if (requester.getRole().size() == 1 && requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
-            user.setParentUserId(requester.getId());
-            Set<Role> roles = new HashSet<>();
-            roles.add(new Role(UserRoles.CUSTOMER.getValue()));
-            user.setRole(roles);
-        } else         // when office adds user for customer company
-            if (user.getRole().size() == 1 &&
-                    new ArrayList<>(user.getRole()).get(0).getName().equals(UserRoles.CUSTOMER.getValue())) {
-                User res = userRepository.save(user);
-                Contact contact = new Contact(user.getName() + " " + user.getLastName(),
-                        1, 1, 2, 1,
-                        user.getPersonalNumber(),
-                        res, new Tariff(1));
-                contactRepo.save(contact);
-                // if customer have sent parcels before office create for him account
-                // then update old parcels author id to bind this user now
-                List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumberAndDeleted(user.getPersonalNumber(), 2);
-                if (previouslySentParcels != null && !previouslySentParcels.isEmpty()) {
-                    for (Parcel p : previouslySentParcels) {
-                        p.setAuthor(res);
-                    }
-                    parcelRepo.saveAll(previouslySentParcels);
-                }
-            }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
+//    @PostMapping
+//    @Transactional
+//    public User addNewUser(@RequestBody User user,
+//                           HttpServletRequest req) {
+//        log.info("Adding New User: " + user.toString());
+//        TokenUser requester = jwtTokenProvider.getRequesterUserData(req);
+//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+//        //when customer are adding sub customer user
+//        if (requester.getRole().size() == 1 && requester.getRole().contains(UserRoles.CUSTOMER.getValue())) {
+//            user.setParentUserId(requester.getId());
+//            Set<Role> roles = new HashSet<>();
+//            roles.add(new Role(UserRoles.CUSTOMER.getValue()));
+//            user.setRole(roles);
+//        } else         // when office adds user for customer company
+//            if (user.getRole().size() == 1 &&
+//                    new ArrayList<>(user.getRole()).get(0).getName().equals(UserRoles.CUSTOMER.getValue())) {
+//                User res = userRepository.save(user);
+//                Contact contact = new Contact(user.getName() + " " + user.getLastName(),
+//                        1, 1, 2, 1,
+//                        user.getPersonalNumber(),
+//                        res, new Tariff(1));
+//                contactRepo.save(contact);
+//                // if customer have sent parcels before office create for him account
+//                // then update old parcels author id to bind this user now
+//                List<Parcel> previouslySentParcels = parcelRepo.findBySenderIdentNumberAndDeleted(user.getPersonalNumber(), 2);
+//                if (previouslySentParcels != null && !previouslySentParcels.isEmpty()) {
+//                    for (Parcel p : previouslySentParcels) {
+//                        p.setAuthor(res);
+//                    }
+//                    parcelRepo.saveAll(previouslySentParcels);
+//                }
+//            }
+//
+//        return userRepository.save(user);
+//    }
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAll(@RequestParam(required = false, defaultValue = "0") int page,

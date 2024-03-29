@@ -1,27 +1,23 @@
 package ge.bestline.delivery.ws.security.jwt;
 
 import ge.bestline.delivery.ws.dto.TokenUser;
+import ge.bestline.delivery.ws.entities.User;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.extern.slf4j.Slf4j;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -31,70 +27,58 @@ public class JwtTokenProvider {
     @Value("${jwt.token.expired}")
     private long validityInMilliseconds;
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-        return bCryptPasswordEncoder;
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
-    @PostConstruct
-    protected void init() {
-        secret = Base64.getEncoder().encodeToString(secret.getBytes());
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
-    public String createToken(TokenUser user) {
-        Claims claims = Jwts.claims().setSubject(user.getName() + "  " + user.getLastName());
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+
+    public String GenerateToken(TokenUser user) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, user);
+    }
+
+
+    private String createToken(Map<String, Object> claims, TokenUser user) {
         claims.put("user", user);
         claims.put("roles", user.getRole().stream().map((r) -> r.getName()).collect(Collectors.toList()));
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
-        return Jwts.builder().setClaims(claims)
-                .setIssuedAt(now).setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secret).compact();
+        return Jwts.builder()
+                .claims(claims)
+                .subject(user.getUserName())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + validityInMilliseconds))
+                .signWith(getSignKey())
+                .compact();
     }
 
-    public Authentication getAuthentication(String token) {
-        UserDetails userDetails = getUserDetailsFromToken(token);
-        log.info("Authentication - UserDetails: {} token {}", userDetails, token);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
-
-    private UserDetails getUserDetailsFromToken(String token) {
-        Claims body = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        List<String> roles = (ArrayList) body.get("roles");
-        for (String role : roles) {
-            authorities.add(new SimpleGrantedAuthority(role));
-        }
-
-        return new org.springframework.security.core.userdetails.User(body.getSubject(), "", authorities);
-    }
-
-    public String getClaim(String token, String claim) {
-        return (String) Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().get(claim);
-    }
-
-    public String getUsername(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
-    }
-
-    public TokenUser getRequesterUserData(HttpServletRequest req) {
-        String token = resolveToken(req);
-        Claims body = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        LinkedHashMap m = (LinkedHashMap) body.get("user");
-        TokenUser user = new TokenUser();
-        user.setId((Integer) m.get("id"));
-        user.setUserName((String) m.get("userName"));
-        user.setName((String) m.get("name"));
-        user.setLastName((String) m.get("lastName"));
-        if (m.get("warehouseId") != null) {
-            user.setWarehouseId((Integer) m.get("warehouseId"));
-        }
-        user.setRole(new HashSet((Collection) body.get("roles")));
-        user.setFromGlobalSite(req.getHeader("GL") != null);
-        return user;
+    private SecretKey getSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String resolveToken(HttpServletRequest req) {
@@ -105,13 +89,24 @@ public class JwtTokenProvider {
         return null;
     }
 
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException("JWT token is expired or invalid");
+    public TokenUser getRequesterUserData(HttpServletRequest req) {
+        String token = resolveToken(req);
+        Claims allClaims = Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        LinkedHashMap m = (LinkedHashMap) allClaims.get("user");
+        TokenUser user = new TokenUser();
+        user.setId((Integer) m.get("id"));
+        user.setUserName((String) m.get("userName"));
+        user.setName((String) m.get("name"));
+        user.setLastName((String) m.get("lastName"));
+        if (m.get("warehouseId") != null) {
+            user.setWarehouseId((Integer) m.get("warehouseId"));
         }
+        user.setRole(new HashSet((Collection) allClaims.get("roles")));
+        user.setFromGlobalSite(req.getHeader("GL") != null);
+        return user;
     }
 }

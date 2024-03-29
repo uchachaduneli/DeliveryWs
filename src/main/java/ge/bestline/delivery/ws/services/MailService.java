@@ -3,11 +3,11 @@ package ge.bestline.delivery.ws.services;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.*;
-import javax.mail.internet.*;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.*;
+import jakarta.mail.internet.*;
 import javax.naming.ConfigurationException;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class MailService {
         InternetAddress[] myBccList = InternetAddress.parse(Bcc);
 
         Session session = Session.getDefaultInstance(props,
-                new javax.mail.Authenticator() {
+                new jakarta.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(senderEmail, senderEmailPass);
                     }

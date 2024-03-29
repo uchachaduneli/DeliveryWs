@@ -5,8 +5,8 @@ import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.ContactAddress;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

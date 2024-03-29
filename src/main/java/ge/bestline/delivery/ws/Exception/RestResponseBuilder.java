@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.Exception;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,15 +36,15 @@ public class RestResponseBuilder {
     }
 
     public RestResponseBuilder exception(ResponseStatusException exception) {
-        HttpStatus status = exception.getStatus();
-        this.status = status.value();
+        HttpStatusCode statusCode = exception.getStatusCode();
+        this.status = statusCode.value();
 
         if (!Objects.requireNonNull(exception.getReason()).isBlank()) {
             this.message = exception.getReason();
         }
 
-        if (status.isError()) {
-            this.error = status.getReasonPhrase();
+        if (statusCode.isError()) {
+            this.error = exception.getReason();
         }
 
         return this;
