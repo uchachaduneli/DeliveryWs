@@ -1,6 +1,5 @@
 package ge.bestline.delivery.ws.security.jwt;
 
-import ge.bestline.delivery.ws.dao.UserDao;
 import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import lombok.extern.log4j.Log4j2;

@@ -9,6 +9,7 @@ import ge.bestline.delivery.ws.repositories.ParcelStatusReasonRepository;
 import ge.bestline.delivery.ws.repositories.TwoFaCodeRepository;
 import ge.bestline.delivery.ws.services.BarCodeService;
 import ge.bestline.delivery.ws.services.SMSService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;

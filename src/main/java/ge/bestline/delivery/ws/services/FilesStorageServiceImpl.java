@@ -2,6 +2,7 @@ package ge.bestline.delivery.ws.services;
 
 import ge.bestline.delivery.ws.entities.City;
 import ge.bestline.delivery.ws.entities.ExcelTmpParcel;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.*;
@@ -12,7 +13,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;

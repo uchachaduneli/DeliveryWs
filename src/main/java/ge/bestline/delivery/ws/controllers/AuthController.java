@@ -3,7 +3,6 @@ package ge.bestline.delivery.ws.controllers;
 import ge.bestline.delivery.ws.dto.JwtRequest;
 import ge.bestline.delivery.ws.dto.Token;
 import ge.bestline.delivery.ws.dto.TokenUser;
-import ge.bestline.delivery.ws.entities.User;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
 import lombok.extern.log4j.Log4j2;

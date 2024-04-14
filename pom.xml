@@ -178,7 +178,7 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
-<!--                    <exclude>**/application.properties</exclude>-->
+                    <exclude>**/application.properties</exclude>
                     <exclude>fonts/*</exclude><!--es fontebis excludi unda iyos ise ar ibildeba-->
                     <exclude>images/*</exclude><!--es unda iyos ise ar gaibildeba-->
                 </excludes>

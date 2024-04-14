@@ -1,12 +1,12 @@
 package ge.bestline.delivery.ws.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;

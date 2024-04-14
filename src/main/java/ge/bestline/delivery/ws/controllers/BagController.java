@@ -1,10 +1,7 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
-import ge.bestline.delivery.ws.dto.ParcelWithPackagesDTO;
 import ge.bestline.delivery.ws.entities.Bag;
-import ge.bestline.delivery.ws.entities.Parcel;
-import ge.bestline.delivery.ws.entities.ParcelStatusReason;
 import ge.bestline.delivery.ws.repositories.BagRepository;
 import ge.bestline.delivery.ws.repositories.ParcelStatusReasonRepository;
 import ge.bestline.delivery.ws.repositories.WarehouseRepository;
@@ -19,9 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Log4j2

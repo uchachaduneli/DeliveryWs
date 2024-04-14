@@ -1,11 +1,10 @@
 package ge.bestline.delivery.ws.entities;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import jakarta.persistence.*;
 
 @Data
 @Entity

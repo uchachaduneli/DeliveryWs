@@ -1,12 +1,11 @@
 package ge.bestline.delivery.ws.dao;
 
 import ge.bestline.delivery.ws.entities.City;
-import ge.bestline.delivery.ws.entities.Zone;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

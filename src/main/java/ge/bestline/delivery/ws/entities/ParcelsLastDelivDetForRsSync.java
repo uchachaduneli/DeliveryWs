@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.entities;
 
 import ge.bestline.delivery.ws.dto.DeliveryDetailDTO;
-
 import jakarta.persistence.*;
 
 @Entity

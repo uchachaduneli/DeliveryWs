@@ -1,13 +1,13 @@
 package ge.bestline.delivery.ws.entities;
 
 import ge.bestline.delivery.ws.dto.InvoiceDTO;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 

@@ -1,15 +1,15 @@
 package ge.bestline.delivery.ws.services;
 
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
-import javax.naming.ConfigurationException;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+import javax.naming.ConfigurationException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;

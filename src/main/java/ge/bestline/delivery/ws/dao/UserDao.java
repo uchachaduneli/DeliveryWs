@@ -3,12 +3,12 @@ package ge.bestline.delivery.ws.dao;
 import ge.bestline.delivery.ws.dto.CourierCheckInOutDTO;
 import ge.bestline.delivery.ws.entities.CourierCheckInOut;
 import ge.bestline.delivery.ws.entities.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.Map;
 

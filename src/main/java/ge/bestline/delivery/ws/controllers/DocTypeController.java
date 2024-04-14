@@ -1,7 +1,6 @@
 package ge.bestline.delivery.ws.controllers;
 
 import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
-import ge.bestline.delivery.ws.entities.Contact;
 import ge.bestline.delivery.ws.entities.DocType;
 import ge.bestline.delivery.ws.repositories.DocTypeRepository;
 import lombok.extern.log4j.Log4j2;

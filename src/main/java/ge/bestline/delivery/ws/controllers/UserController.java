@@ -4,13 +4,14 @@ import ge.bestline.delivery.ws.Exception.ResourceNotFoundException;
 import ge.bestline.delivery.ws.dao.UserDao;
 import ge.bestline.delivery.ws.dto.CourierCheckInOutDTO;
 import ge.bestline.delivery.ws.dto.TokenUser;
-import ge.bestline.delivery.ws.dto.UserRoles;
-import ge.bestline.delivery.ws.entities.*;
+import ge.bestline.delivery.ws.entities.User;
+import ge.bestline.delivery.ws.entities.UserStatus;
 import ge.bestline.delivery.ws.repositories.ContactRepository;
 import ge.bestline.delivery.ws.repositories.ParcelRepository;
 import ge.bestline.delivery.ws.repositories.UserRepository;
 import ge.bestline.delivery.ws.repositories.UserStatusRepository;
 import ge.bestline.delivery.ws.security.jwt.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Sort;
@@ -21,9 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Log4j2
 @RestController
