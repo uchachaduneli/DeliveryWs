@@ -28,11 +28,11 @@ public class ContactDao {
 //                .append(" c on e.mainAddress.id=c.id Where 1=1 ");
 
         if (srchRequest.getId() != null) {
-            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+            q.append(" and e.id =").append(srchRequest.getId());
         }
 
         if (srchRequest.getUser() != null) {
-            q.append(" and e.user.id ='").append(srchRequest.getUser().getId()).append("'");
+            q.append(" and e.user.id =").append(srchRequest.getUser().getId());
         }
 
         if (!StringUtils.isBlank(srchRequest.getName())) {
@@ -44,23 +44,23 @@ public class ContactDao {
         }
 
         if (srchRequest.getType() != null) {
-            q.append(" and e.type ='").append(srchRequest.getType()).append("'");
+            q.append(" and e.type =").append(srchRequest.getType());
         }
 
         if (srchRequest.getStatus() != null) {
-            q.append(" and e.status ='").append(srchRequest.getStatus()).append("'");
+            q.append(" and e.status =").append(srchRequest.getStatus());
         }
 
         if (srchRequest.getDeReGe() != null) {
-            q.append(" and e.deReGe ='").append(srchRequest.getDeReGe()).append("'");
+            q.append(" and e.deReGe =").append(srchRequest.getDeReGe());
         }
 
         if (srchRequest.getDeleted() != null) {
-            q.append(" and e.deleted ='").append(srchRequest.getDeleted()).append("'");
+            q.append(" and e.deleted =").append(srchRequest.getDeleted());
         }
 
         if (srchRequest.getHasContract() != null) {
-            q.append(" and e.hasContract ='").append(srchRequest.getHasContract()).append("'");
+            q.append(" and e.hasContract =").append(srchRequest.getHasContract());
         }
 
         if (!StringUtils.isBlank(srchRequest.getIdentNumber())) {

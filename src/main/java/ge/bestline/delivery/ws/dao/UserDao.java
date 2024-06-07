@@ -26,7 +26,7 @@ public class UserDao {
         q.append(" From ").append(User.class.getSimpleName()).append(" e JOIN e.role r Where e.deleted=2 ");
 
         if (srchRequest.getCity() != null && srchRequest.getCity().getId() != null) {
-            q.append(" and e.city.id ='").append(srchRequest.getCity().getId()).append("'");
+            q.append(" and e.city.id =").append(srchRequest.getCity().getId());
         }
 
         if (srchRequest.getName() != null) {
@@ -34,9 +34,9 @@ public class UserDao {
         }
 
         if (srchRequest.getParentUserId() != null) {
-            q.append(" and ( e.id ='").append(srchRequest.getParentUserId())
-                    .append("' or e.parentUserId='")
-                    .append(srchRequest.getParentUserId()).append("') ");
+            q.append(" and ( e.id =").append(srchRequest.getParentUserId())
+                    .append(" or e.parentUserId=")
+                    .append(srchRequest.getParentUserId()).append(") ");
         }
 
         if (srchRequest.getLastName() != null) {
@@ -52,7 +52,7 @@ public class UserDao {
         }
 
         if (srchRequest.getRoute() != null && srchRequest.getRoute().getId() != null) {
-            q.append(" and e.route.id ='").append(srchRequest.getRoute().getId()).append("'");
+            q.append(" and e.route.id =").append(srchRequest.getRoute().getId());
         }
 
         if (srchRequest.getSrchRoleName() != null && !srchRequest.getSrchRoleName().isEmpty()) {
@@ -80,7 +80,7 @@ public class UserDao {
 
     @Transactional
     public void removeUserExistingRoles(Integer userId) {
-        em.createNativeQuery("DELETE FROM user_role where user_id='" + userId + "'").executeUpdate();
+        em.createNativeQuery("DELETE FROM user_role where user_id=" + userId).executeUpdate();
     }
 
     public Map<String, Object> getCoutiersInOut(int page, int rowCount, CourierCheckInOutDTO srchRequest) {
@@ -91,7 +91,7 @@ public class UserDao {
             q.append(" and e.carNumber like '%").append(srchRequest.getCourier().getPersonalNumber()).append("%'");
         }
         if (srchRequest.isChekIn()) {
-            q.append(" and e.isChekIn ='").append(srchRequest.isChekIn()).append("' ");
+            q.append(" and e.isChekIn =").append(srchRequest.isChekIn());
         }
 
         if (srchRequest.getCourier() != null) {
@@ -111,7 +111,7 @@ public class UserDao {
             }
 
             if (srchRequest.getCourier().getRoute() != null && srchRequest.getCourier().getRoute().getId() != null) {
-                q.append(" and e.courier.route.id ='").append(srchRequest.getCourier().getRoute().getId()).append("'");
+                q.append(" and e.courier.route.id =").append(srchRequest.getCourier().getRoute().getId());
             }
 
             if (StringUtils.isNotBlank(srchRequest.getCourier().getUserName())) {

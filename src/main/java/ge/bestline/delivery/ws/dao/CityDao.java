@@ -24,10 +24,10 @@ public class CityDao {
         q.append(" From ").append(City.class.getSimpleName()).append(" e Where deleted=2 ");
 
         if (srchRequest.getId() != null) {
-            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+            q.append(" and e.id =").append(srchRequest.getId());
         }
         if (srchRequest.getZone() != null) {
-            q.append(" and e.zone.id ='").append(srchRequest.getZone().getId()).append("'");
+            q.append(" and e.zone.id =").append(srchRequest.getZone().getId());
         }
 
         if (StringUtils.isNotBlank(srchRequest.getName())) {

@@ -32,14 +32,14 @@ public class DeliveryDetailDao {
         }
 
         if (srchRequest.getUserId() != null) {
-            q.append(" and e.user_id ='").append(srchRequest.getUserId()).append("'");
+            q.append(" and e.user_id =").append(srchRequest.getUserId());
         }
 
         if (srchRequest.getRouteId() != null) {
-            q.append(" and e.route_id ='").append(srchRequest.getUserId()).append("'");
+            q.append(" and e.route_id =").append(srchRequest.getUserId());
         }
         if (srchRequest.getWarehouseId() != null) {
-            q.append(" and e.warehouse_id ='").append(srchRequest.getWarehouseId()).append("'");
+            q.append(" and e.warehouse_id =").append(srchRequest.getWarehouseId());
         }
 
         if (srchRequest.getCreatedTime() != null && srchRequest.getCreatedTimeTo() != null) {

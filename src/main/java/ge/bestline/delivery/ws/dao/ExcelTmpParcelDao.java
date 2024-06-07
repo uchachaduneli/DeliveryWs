@@ -26,13 +26,13 @@ public class ExcelTmpParcelDao {
             q.append(" and e.tmpIdForPerExcel ='").append(srchRequest.getTmpIdForPerExcel()).append("'");
         }
         if (srchRequest.getAuthor() != null) {
-            q.append(" and e.author.id ='").append(srchRequest.getAuthor().getId()).append("'");
+            q.append(" and e.author.id =").append(srchRequest.getAuthor().getId());
         }
         if (srchRequest.getSender() != null) {
-            q.append(" and e.sender.id ='").append(srchRequest.getSender().getId()).append("'");
+            q.append(" and e.sender.id =").append(srchRequest.getSender().getId());
         }
         if (srchRequest.getRoute() != null) {
-            q.append(" and e.route.id ='").append(srchRequest.getRoute().getId()).append("'");
+            q.append(" and e.route.id =").append(srchRequest.getRoute().getId());
         }
 
         TypedQuery<ExcelTmpParcel> query = em.createQuery("SELECT e FROM " + q.toString(), ExcelTmpParcel.class);

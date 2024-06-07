@@ -25,7 +25,7 @@ public class WaybillDao {
         q.append(" From ").append(WayBill.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
-            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+            q.append(" and e.id =").append(srchRequest.getId());
         }
 
         if (srchRequest.getRsCreateDate() != null && srchRequest.getRsCreateDateTo() != null) {

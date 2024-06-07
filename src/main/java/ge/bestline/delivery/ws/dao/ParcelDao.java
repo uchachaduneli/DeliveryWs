@@ -24,21 +24,21 @@ public class ParcelDao {
         q.append(" From ").append(Parcel.class.getSimpleName()).append(" e Where e.deleted=2 ");
 
         if (obj.getId() != null && obj.getId() > 0) {
-            q.append(" and e.id ='").append(obj.getId()).append("'");
+            q.append(" and e.id =").append(obj.getId());
         }
         if (obj.isPrePrinted()) {
             q.append(" and e.prePrinted ='").append(obj.isPrePrinted() ? 1 : 0).append("'");
         }
         if (obj.getSenderId() != null && obj.getSenderId() > 0) {
-            q.append(" and e.senderId ='").append(obj.getSenderId()).append("'");
+            q.append(" and e.senderId =").append(obj.getSenderId());
         }
 
         if (obj.getRouteId() != null) {
-            q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
+            q.append(" and e.route.id =").append(obj.getRouteId());
         }
 
         if (obj.getInvoiced() != null) {
-            q.append(" and e.invoiced ='").append(obj.getInvoiced().booleanValue()).append("'");
+            q.append(" and e.invoiced =").append(obj.getInvoiced().booleanValue());
         }
 
         if (StringUtils.isNotBlank(obj.getBarCode())) {
@@ -48,11 +48,11 @@ public class ParcelDao {
             q.append(" and e.senderName like '").append(obj.getSenderName().trim()).append("%'");
         }
         if (obj.getSearchingFromGlobal() != null && obj.getSearchingFromGlobal()) {
-            q.append(" and (e.author.id =").append(obj.getAuthorId()).append(" ");
+            q.append(" and (e.author.id =").append(obj.getAuthorId());
             q.append(" or e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%')");
         } else {
             if (obj.getAuthorId() != null) {
-                q.append(" and e.author.id =").append(obj.getAuthorId()).append("");
+                q.append(" and e.author.id =").append(obj.getAuthorId());
             }
             if (StringUtils.isNotBlank(obj.getSenderIdentNumber())) {
                 q.append(" and e.senderIdentNumber like '").append(obj.getSenderIdentNumber()).append("%'");
@@ -66,10 +66,10 @@ public class ParcelDao {
             q.append(" and e.senderAddress like '%").append(obj.getSenderAddress()).append("%'");
         }
         if (obj.getSenderCityId() != null) {
-            q.append(" and e.senderCity.id ='").append(obj.getSenderCityId()).append("'");
+            q.append(" and e.senderCity.id =").append(obj.getSenderCityId());
         }
         if (obj.getReceiverId() != null && obj.getReceiverId() > 0) {
-            q.append(" and e.receiverId ='").append(obj.getReceiverId()).append("'");
+            q.append(" and e.receiverId =").append(obj.getReceiverId());
         }
         if (StringUtils.isNotBlank(obj.getReceiverName())) {
             q.append(" and e.receiverName like '").append(obj.getReceiverName()).append("%'");
@@ -84,7 +84,7 @@ public class ParcelDao {
             q.append(" and e.receiverAddress like '%").append(obj.getReceiverAddress()).append("%'");
         }
         if (obj.getReceiverCityId() != null) {
-            q.append(" and e.receiverCity.id ='").append(obj.getReceiverCityId()).append("'");
+            q.append(" and e.receiverCity.id =").append(obj.getReceiverCityId());
         }
 
         if (StringUtils.isNotBlank(obj.getDeliveredToPers())) {
@@ -96,7 +96,7 @@ public class ParcelDao {
 
 
         if (obj.getPayerId() != null && obj.getPayerId() > 0) {
-            q.append(" and e.payerId ='").append(obj.getPayerId()).append("'");
+            q.append(" and e.payerId =").append(obj.getPayerId());
         }
 
         if (StringUtils.isNotBlank(obj.getPayerIdentNumber())) {
@@ -109,15 +109,15 @@ public class ParcelDao {
             q.append(" and e.payerAddress like '%").append(obj.getPayerAddress()).append("%'");
         }
         if (obj.getPayerCityId() != null) {
-            q.append(" and e.payerCity.id ='").append(obj.getPayerCityId()).append("'");
+            q.append(" and e.payerCity.id =").append(obj.getPayerCityId());
         }
         //if status reasonID is presented filter with it else use this heavy condition
         if (obj.getStatusId() != null && obj.getStatusId() > 0
                 && (obj.getStatusReasonId() == null || obj.getStatusReasonId() == 0)) {
-            q.append(" and e.status.status.id ='").append(obj.getStatusId()).append("'");
+            q.append(" and e.status.status.id =").append(obj.getStatusId());
         }
         if (obj.getStatusReasonId() != null && obj.getStatusReasonId() > 0) {
-            q.append(" and e.status.id ='").append(obj.getStatusReasonId()).append("'");
+            q.append(" and e.status.id =").append(obj.getStatusReasonId());
         }
 
         if (StringUtils.isNotBlank(obj.getStatusNote())) {
@@ -129,43 +129,43 @@ public class ParcelDao {
         }
 
         if (obj.getDeliveredConfirmation() != null && obj.getDeliveredConfirmation() > 0) {
-            q.append(" and e.deliveredConfirmation ='").append(obj.getDeliveredConfirmation()).append("'");
+            q.append(" and e.deliveredConfirmation =").append(obj.getDeliveredConfirmation());
         }
         if (obj.getCount() != null && obj.getCount() > 0) {
-            q.append(" and e.count ='").append(obj.getCount()).append("'");
+            q.append(" and e.count =").append(obj.getCount());
         }
         if (obj.getWeight() != null && obj.getWeight() > 0) {
-            q.append(" and e.weight ='").append(obj.getWeight()).append("'");
+            q.append(" and e.weight =").append(obj.getWeight());
         }
         if (obj.getTotalPrice() != null && obj.getTotalPrice() > 0) {
-            q.append(" and e.totalPrice ='").append(obj.getTotalPrice()).append("'");
+            q.append(" and e.totalPrice =").append(obj.getTotalPrice());
         }
         if (obj.getDeliveryType() != null && obj.getDeliveryType() > 0) {
-            q.append(" and e.deliveryType ='").append(obj.getDeliveryType()).append("'");
+            q.append(" and e.deliveryType =").append(obj.getDeliveryType());
         }
         if (obj.getPaymentType() != null && obj.getPaymentType() > 0) {
-            q.append(" and e.paymentType ='").append(obj.getPaymentType()).append("'");
+            q.append(" and e.paymentType =").append(obj.getPaymentType());
         }
         if (obj.getPackageType() != null && obj.getPackageType() > 0) {
-            q.append(" and e.packageType ='").append(obj.getPackageType()).append("'");
+            q.append(" and e.packageType =").append(obj.getPackageType());
         }
 
         if (obj.getServiceId() != null) {
-            q.append(" and e.service.id ='").append(obj.getServiceId()).append("'");
+            q.append(" and e.service.id =").append(obj.getServiceId());
         }
         if (obj.getRouteId() != null) {
-            q.append(" and e.route.id ='").append(obj.getRouteId()).append("'");
+            q.append(" and e.route.id =").append(obj.getRouteId());
         }
         if (obj.getAddedFromGlobal() != null) {
-            q.append(" and e.addedFromGlobal ='").append(obj.getAddedFromGlobal().booleanValue()).append("'");
+            q.append(" and e.addedFromGlobal =").append(obj.getAddedFromGlobal().booleanValue());
         }
 
         if (obj.getCourierId() != null) {
-            q.append(" and e.courier.id ='").append(obj.getCourierId()).append("'");
+            q.append(" and e.courier.id =").append(obj.getCourierId());
         }
 
         if (obj.getTariff() != null && obj.getTariff() > 0) {
-            q.append(" and e.tariff ='").append(obj.getTariff()).append("'");
+            q.append(" and e.tariff =").append(obj.getTariff());
         }
 
         if (StringUtils.isNotBlank(obj.getContent())) {

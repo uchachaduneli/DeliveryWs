@@ -56,11 +56,11 @@ public class InvoiceDao {
         q.append(" From ").append(Invoice.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
-            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+            q.append(" and e.id =").append(srchRequest.getId());
         }
 
         if (srchRequest.getAuthor() != null && srchRequest.getAuthor().getId() > 0) {
-            q.append(" and e.author.id ='").append(srchRequest.getAuthor().getId()).append("'");
+            q.append(" and e.author.id =").append(srchRequest.getAuthor().getId());
         }
 
         if (StringUtils.isNotBlank(srchRequest.getName())) {

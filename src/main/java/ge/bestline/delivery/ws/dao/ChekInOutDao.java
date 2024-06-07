@@ -25,7 +25,7 @@ public class ChekInOutDao {
         q.append(" From ").append(CourierCheckInOut.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
-            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+            q.append(" and e.id =").append(srchRequest.getId());
         }
 
         if (srchRequest.getCreatedTime() != null && srchRequest.getCreateTimeTo() != null) {
@@ -56,7 +56,7 @@ public class ChekInOutDao {
             q.append(" and e.carNumber ='").append(srchRequest.getCarNumber()).append("'");
         }
         if (srchRequest.getIsCheckinParam() != null) {
-            q.append(" and e.isChekIn ='").append(srchRequest.isChekIn()).append("'");
+            q.append(" and e.isChekIn =").append(srchRequest.isChekIn());
         }
 
         if (srchRequest.getOdometer() != null && srchRequest.getOdometerTo() != null) {

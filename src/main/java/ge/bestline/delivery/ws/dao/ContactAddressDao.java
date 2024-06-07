@@ -26,7 +26,7 @@ public class ContactAddressDao {
                 " left join " + Contact.class.getSimpleName() + " c on e.contact.id=c.id " +
                 " left join " + City.class.getSimpleName() + " s on e.city.id=s.id  Where 1=1 ");
         if (srchRequest.getContact() != null && srchRequest.getContact().getId() != null) {
-            q.append(" and e.contact.id ='").append(srchRequest.getContact().getId()).append("'");
+            q.append(" and e.contact.id =").append(srchRequest.getContact().getId());
         }
 
         if (srchRequest.getContactPerson() != null) {
@@ -46,7 +46,7 @@ public class ContactAddressDao {
         }
 
         if (srchRequest.getCity() != null && srchRequest.getCity().getId() != null) {
-            q.append(" and e.city.id ='").append(srchRequest.getCity().getId()).append("'");
+            q.append(" and e.city.id =").append(srchRequest.getCity().getId());
         }
 
         TypedQuery<ContactAddress> query = em.createQuery("Select e " + q.toString() + " order by e.isPayAddress asc, e.id desc", ContactAddress.class);

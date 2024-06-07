@@ -23,11 +23,11 @@ public class ZoneDao {
         q.append(" From ").append(Zone.class.getSimpleName()).append(" e Where 1=1 ");
 
         if (srchRequest.getId() != null) {
-            q.append(" and e.id ='").append(srchRequest.getId()).append("'");
+            q.append(" and e.id =").append(srchRequest.getId());
         }
 
         if (srchRequest.getDeleted() != null) {
-            q.append(" and e.deleted ='").append(srchRequest.getDeleted()).append("'");
+            q.append(" and e.deleted =").append(srchRequest.getDeleted());
         }
 
         if (srchRequest.getName() != null) {
